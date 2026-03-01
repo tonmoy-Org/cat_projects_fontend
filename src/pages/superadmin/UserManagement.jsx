@@ -345,7 +345,7 @@ export const UserManagement = () => {
     return (
         <Box>
             <Helmet>
-                <title>User management | Finance Dashboard</title>
+                <title>User management | FatherOfMeow</title>
                 <meta name="description" content="Super administrator user management dashboard" />
             </Helmet>
             <Box sx={{ display: { xs: '', lg: 'flex' } }} justifyContent="space-between" alignItems="center" mb={2}>

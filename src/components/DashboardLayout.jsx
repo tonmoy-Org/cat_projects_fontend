@@ -1,5 +1,5 @@
 import React from 'react';
-import { styled, useTheme, alpha, createTheme, ThemeProvider } from '@mui/material/styles';
+import { styled, alpha, createTheme, ThemeProvider } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -14,7 +14,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -38,13 +37,12 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Select from '@mui/material/Select';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
 
 const drawerWidth = 240;
 const closedDrawerWidth = 68;
 const mobileDrawerWidth = 240;
+const primaryColor = '#5C4D91';
+const sidebarColor = '#43376A';
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -53,8 +51,8 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: theme.palette.background.paper,
-  borderRight: `1px solid ${theme.palette.divider}`,
+  backgroundColor: sidebarColor,
+  borderRight: `1px solid ${alpha('#000000', 0.12)}`,
   '&::-webkit-scrollbar': {
     display: 'none',
   },
@@ -69,8 +67,8 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: theme.palette.background.paper,
-  borderRight: `1px solid ${theme.palette.divider}`,
+  backgroundColor: sidebarColor,
+  borderRight: `1px solid ${alpha('#000000', 0.12)}`,
   '&::-webkit-scrollbar': {
     display: 'none',
   },
@@ -85,6 +83,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 0.5),
   minHeight: 56,
   flexShrink: 0,
+  backgroundColor: sidebarColor,
 }));
 
 const AppBar = styled(MuiAppBar, {
@@ -92,6 +91,8 @@ const AppBar = styled(MuiAppBar, {
 })(({ theme, open }) => ({
   boxShadow: theme.shadows[1],
   borderBottom: `1px solid ${theme.palette.divider}`,
+  backgroundColor: '#ffffff',
+  color: '#333333',
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -147,38 +148,37 @@ export default function DashboardLayout({ children, title, menuItems }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width:600px)');
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const [open, setOpen] = React.useState(!isMobile);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [drawerAnchorEl, setDrawerAnchorEl] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [tabValue, setTabValue] = React.useState(0);
-  const [mode, setMode] = React.useState('system');
   const [expandedItems, setExpandedItems] = React.useState({});
 
-  const effectiveMode = mode === 'system' ? (prefersDarkMode ? 'dark' : 'light') : mode;
-
+  // Light theme only with primary color #5C4D91
   const theme = React.useMemo(
     () =>
       createTheme({
         palette: {
-          mode: effectiveMode,
+          mode: 'light',
           primary: {
-            main: '#3964FE',
+            main: primaryColor,
+            light: alpha(primaryColor, 0.8),
+            dark: alpha(primaryColor, 1.2),
           },
           background: {
-            default: effectiveMode === 'dark' ? '#121212' : '#f8fafc',
-            paper: effectiveMode === 'dark' ? '#1e1e1e' : '#ffffff',
+            default: '#f8fafc',
+            paper: '#ffffff',
           },
           text: {
-            primary: effectiveMode === 'dark' ? '#ffffff' : '#0F1115',
-            secondary: effectiveMode === 'dark' ? '#b0b0b0' : '#718096',
+            primary: '#0F1115',
+            secondary: '#718096',
           },
-          divider: effectiveMode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+          divider: 'rgba(0,0,0,0.08)',
         },
       }),
-    [effectiveMode]
+    []
   );
 
   const openMenu = Boolean(anchorEl);
@@ -236,15 +236,15 @@ export default function DashboardLayout({ children, title, menuItems }) {
 
     if (isActive) {
       return {
-        color: theme.palette.primary.main,
-        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-        borderLeft: `3px solid ${theme.palette.primary.main}`,
+        color: '#FFFFFF',
+        backgroundColor: alpha('#FFFFFF', 0.15),
+        borderLeft: `3px solid #FFFFFF`,
         '& .MuiListItemIcon-root': {
-          color: theme.palette.primary.main,
+          color: '#FFFFFF',
         },
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.1),
-          color: theme.palette.primary.main,
+          backgroundColor: alpha('#FFFFFF', 0.2),
+          color: '#FFFFFF',
         },
         borderRadius: '0 6px 6px 0',
         transition: 'all 0.15s ease',
@@ -254,16 +254,16 @@ export default function DashboardLayout({ children, title, menuItems }) {
     }
 
     return {
-      color: theme.palette.text.primary,
+      color: alpha('#FFFFFF', 0.9),
       backgroundColor: 'transparent',
       '& .MuiListItemIcon-root': {
-        color: theme.palette.text.secondary,
+        color: alpha('#FFFFFF', 0.7),
       },
       '&:hover': {
-        backgroundColor: alpha(theme.palette.action.hover, 0.1),
-        color: theme.palette.text.primary,
+        backgroundColor: alpha('#FFFFFF', 0.08),
+        color: '#FFFFFF',
         '& .MuiListItemIcon-root': {
-          color: theme.palette.text.primary,
+          color: '#FFFFFF',
         },
       },
       borderRadius: '0 6px 6px 0',
@@ -278,15 +278,15 @@ export default function DashboardLayout({ children, title, menuItems }) {
 
     if (isActive) {
       return {
-        color: theme.palette.primary.main,
-        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-        borderLeft: `2px solid ${theme.palette.primary.main}`,
+        color: '#FFFFFF',
+        backgroundColor: alpha('#FFFFFF', 0.15),
+        borderLeft: `2px solid #FFFFFF`,
         '& .MuiListItemIcon-root': {
-          color: theme.palette.primary.main,
+          color: '#FFFFFF',
         },
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.1),
-          color: theme.palette.primary.main,
+          backgroundColor: alpha('#FFFFFF', 0.2),
+          color: '#FFFFFF',
         },
         borderRadius: '0 6px 6px 0',
         transition: 'all 0.15s ease',
@@ -296,16 +296,16 @@ export default function DashboardLayout({ children, title, menuItems }) {
     }
 
     return {
-      color: theme.palette.text.primary,
+      color: alpha('#FFFFFF', 0.9),
       backgroundColor: 'transparent',
       '& .MuiListItemIcon-root': {
-        color: theme.palette.text.secondary,
+        color: alpha('#FFFFFF', 0.7),
       },
       '&:hover': {
-        backgroundColor: alpha(theme.palette.action.hover, 0.08),
-        color: theme.palette.text.primary,
+        backgroundColor: alpha('#FFFFFF', 0.08),
+        color: '#FFFFFF',
         '& .MuiListItemIcon-root': {
-          color: theme.palette.text.primary,
+          color: '#FFFFFF',
         },
       },
       borderRadius: '0 6px 6px 0',
@@ -318,15 +318,15 @@ export default function DashboardLayout({ children, title, menuItems }) {
   const getDialogTabActiveStyles = (isActive) => {
     if (isActive) {
       return {
-        color: theme.palette.primary.main,
-        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-        borderLeft: `3px solid ${theme.palette.primary.main}`,
+        color: primaryColor,
+        backgroundColor: alpha(primaryColor, 0.1),
+        borderLeft: `3px solid ${primaryColor}`,
         '& .MuiListItemIcon-root': {
-          color: theme.palette.primary.main,
+          color: primaryColor,
         },
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.1),
-          color: theme.palette.primary.main,
+          backgroundColor: alpha(primaryColor, 0.1),
+          color: primaryColor,
         },
         borderRadius: '0 6px 6px 0',
         transition: 'all 0.15s ease',
@@ -421,7 +421,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
             p: 0.75,
             borderRadius: 1,
             '&:hover': {
-              backgroundColor: alpha(theme.palette.action.hover, 0.1),
+              backgroundColor: alpha('#FFFFFF', 0.1),
             }
           }}
           onClick={() => {
@@ -432,11 +432,11 @@ export default function DashboardLayout({ children, title, menuItems }) {
             }
           }}
         >
-          <Box sx={{ color: theme.palette.primary.main }}>
+          <Box sx={{ color: '#FFFFFF' }}>
             {React.cloneElement(item.icon, { sx: { fontSize: 16 } })}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: theme.palette.text.primary, lineHeight: 1.2 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#FFFFFF', lineHeight: 1.2 }}>
               {item.text}
             </Typography>
           </Box>
@@ -446,7 +446,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
         {hasSubItems && (
           <Box sx={{
             mt: 0.5,
-            borderTop: `1px solid ${theme.palette.divider}`,
+            borderTop: `1px solid ${alpha('#FFFFFF', 0.12)}`,
             pt: 0.5
           }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -462,7 +462,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     borderRadius: 1,
                     cursor: 'pointer',
                     '&:hover': {
-                      backgroundColor: alpha(theme.palette.action.hover, 0.1),
+                      backgroundColor: alpha('#FFFFFF', 0.1),
                     }
                   }}
                   onClick={() => {
@@ -474,12 +474,12 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   }}
                 >
                   {subItem.icon && (
-                    <Box sx={{ color: theme.palette.text.secondary }}>
+                    <Box sx={{ color: alpha('#FFFFFF', 0.7) }}>
                       {React.cloneElement(subItem.icon, { sx: { fontSize: 14 } })}
                     </Box>
                   )}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontSize: '0.75rem', color: theme.palette.text.primary, lineHeight: 1.2, fontWeight: 500 }}>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#FFFFFF', lineHeight: 1.2, fontWeight: 500 }}>
                       {subItem.text}
                     </Typography>
                   </Box>
@@ -491,11 +491,11 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     px: 0.75,
                     py: 0.25,
                     borderRadius: 1,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                    backgroundColor: alpha('#FFFFFF', 0.15),
                     textAlign: 'center',
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.7rem', color: theme.palette.primary.main, lineHeight: 1.2 }}>
+                  <Typography sx={{ fontSize: '0.7rem', color: '#FFFFFF', lineHeight: 1.2 }}>
                     +{item.subItems.length - 5} more
                   </Typography>
                 </Box>
@@ -513,7 +513,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        color: theme.palette.text.primary,
+        color: '#FFFFFF',
+        backgroundColor: sidebarColor,
         '& .MuiListItemIcon-root': {
           color: 'inherit',
         },
@@ -521,7 +522,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
           color: 'inherit',
         },
         '& .MuiDivider-root': {
-          borderColor: theme.palette.divider,
+          borderColor: alpha('#FFFFFF', 0.12),
         },
       }}
     >
@@ -536,14 +537,27 @@ export default function DashboardLayout({ children, title, menuItems }) {
           }}
         >
           {open ? (
-            <img
-              src={logo}
-              alt="Logo"
-              style={{
-                width: '150px',
-                height: 'auto',
-              }}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <img
+                src={logo}
+                alt="Logo"
+                style={{
+                  width: '40px',
+                  height: 'auto',
+                  filter: 'brightness(0) invert(1)',
+                }}
+              />
+              <Typography
+                sx={{
+                  color: '#FFFFFF',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                FatherOfMeow
+              </Typography>
+            </Box>
           ) : (
             <Box
               sx={{
@@ -582,7 +596,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: theme.palette.text.secondary,
+                    color: alpha('#FFFFFF', 0.5),
                     fontSize: '0.65rem',
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -634,8 +648,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                         sx: {
                           fontSize: 16,
                           color: isRouteActive(item.path)
-                            ? theme.palette.primary.main
-                            : theme.palette.text.secondary,
+                            ? '#FFFFFF'
+                            : alpha('#FFFFFF', 0.7),
                         },
                       })}
                     </ListItemIcon>
@@ -686,24 +700,23 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     componentsProps={{
                       tooltip: {
                         sx: {
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          backdropFilter: 'blur(5px)',
+                          backgroundColor: sidebarColor,
                           boxShadow: 0.5,
                           transition: 'all 0.3s ease',
                           fontSize: '0.7rem',
                           padding: '8px',
                           borderRadius: '8px',
-                          color: theme.palette.text.primary,
-                          border: `1px solid ${theme.palette.divider}`,
+                          color: '#FFFFFF',
+                          border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
                           maxWidth: 240,
                           cursor: 'default',
                         },
                       },
                       arrow: {
                         sx: {
-                          color: theme.palette.background.paper,
+                          color: sidebarColor,
                           '&:before': {
-                            border: `1px solid ${theme.palette.divider}`,
+                            border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
                           },
                         },
                       },
@@ -783,13 +796,13 @@ export default function DashboardLayout({ children, title, menuItems }) {
                                   <ListItemIcon
                                     sx={{
                                       minWidth: 26,
-                                      color: theme.palette.primary.main,
+                                      color: '#FFFFFF',
                                       opacity: 0.8,
                                       mt: 0.25,
                                     }}
                                   >
                                     {React.cloneElement(subItem.icon, {
-                                      sx: { fontSize: 14, color: theme.palette.primary.main, },
+                                      sx: { fontSize: 14, color: '#FFFFFF' },
                                     })}
                                   </ListItemIcon>
                                 )}
@@ -826,6 +839,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
         sx={{
           p: 1,
           flexShrink: 0,
+          borderTop: `1px solid ${alpha('#FFFFFF', 0.12)}`,
         }}
       >
         {open ? (
@@ -845,8 +859,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   sx={{
                     width: 26,
                     height: 26,
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText,
+                    bgcolor: alpha('#FFFFFF', 0.2),
+                    color: '#FFFFFF',
                     fontWeight: 600,
                     fontSize: '0.75rem',
                   }}
@@ -858,7 +872,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     sx={{
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      color: theme.palette.text.primary,
+                      color: '#FFFFFF',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -869,7 +883,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   <Typography
                     sx={{
                       fontSize: '0.65rem',
-                      color: theme.palette.text.secondary,
+                      color: alpha('#FFFFFF', 0.7),
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -883,12 +897,12 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 size="small"
                 onClick={handleDrawerMenuClick}
                 sx={{
-                  color: theme.palette.text.secondary,
+                  color: alpha('#FFFFFF', 0.7),
                   width: 26,
                   height: 26,
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.action.hover, 0.1),
-                    color: theme.palette.text.primary,
+                    backgroundColor: alpha('#FFFFFF', 0.1),
+                    color: '#FFFFFF',
                   },
                 }}
               >
@@ -912,19 +926,20 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   mt: 1,
                   ml: -1,
                   minWidth: 150,
-                  backgroundColor: theme.palette.background.paper,
-                  color: theme.palette.text.primary,
-                  border: `1px solid ${theme.palette.divider}`,
+                  backgroundColor: sidebarColor,
+                  color: '#FFFFFF',
+                  border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
                   '& .MuiMenuItem-root': {
                     fontSize: '0.75rem',
                     py: 0.5,
                     minHeight: 32,
+                    color: '#FFFFFF',
                     '&:hover': {
-                      backgroundColor: alpha(theme.palette.action.hover, 0.1),
+                      backgroundColor: alpha('#FFFFFF', 0.1),
                     },
                     '& .MuiSvgIcon-root': {
                       fontSize: 16,
-                      color: theme.palette.text.secondary,
+                      color: alpha('#FFFFFF', 0.7),
                       mr: 1,
                     },
                   },
@@ -939,8 +954,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 <SettingsIcon />
                 Settings
               </MenuItem>
-              <Divider sx={{ borderColor: theme.palette.divider, my: 0.5 }} />
-              <MenuItem onClick={handleLogout} sx={{ color: '#e53e3e' }}>
+              <Divider sx={{ borderColor: alpha('#FFFFFF', 0.12), my: 0.5 }} />
+              <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
                 <LogoutIcon />
                 Logout
               </MenuItem>
@@ -952,10 +967,10 @@ export default function DashboardLayout({ children, title, menuItems }) {
             <Tooltip
               title={
                 <Box sx={{ py: 0.5, minWidth: 150 }}>
-                  <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: theme.palette.text.primary, mb: 0.25, lineHeight: 1.2 }}>
+                  <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#FFFFFF', mb: 0.25, lineHeight: 1.2 }}>
                     {user?.name || 'User'}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: theme.palette.text.secondary, lineHeight: 1.2 }}>
+                  <Typography sx={{ fontSize: '0.7rem', color: alpha('#FFFFFF', 0.7), lineHeight: 1.2 }}>
                     {user?.email || user?.role || 'User'}
                   </Typography>
                 </Box>
@@ -967,20 +982,20 @@ export default function DashboardLayout({ children, title, menuItems }) {
               componentsProps={{
                 tooltip: {
                   sx: {
-                    backgroundColor: theme.palette.background.paper,
+                    backgroundColor: sidebarColor,
                     fontSize: '0.7rem',
                     padding: '6px 8px',
                     borderRadius: '6px',
-                    color: theme.palette.text.primary,
-                    border: `1px solid ${theme.palette.divider}`,
-                    boxShadow: theme.shadows[3],
+                    color: '#FFFFFF',
+                    border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+                    boxShadow: 3,
                   },
                 },
                 arrow: {
                   sx: {
-                    color: theme.palette.background.paper,
+                    color: sidebarColor,
                     '&:before': {
-                      border: `1px solid ${theme.palette.divider}`,
+                      border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
                     },
                   },
                 },
@@ -993,7 +1008,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   height: 36,
                   p: 0,
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.action.hover, 0.1),
+                    backgroundColor: alpha('#FFFFFF', 0.1),
                   },
                 }}
               >
@@ -1001,8 +1016,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   sx={{
                     width: 30,
                     height: 30,
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText,
+                    bgcolor: alpha('#FFFFFF', 0.2),
+                    color: '#FFFFFF',
                     fontWeight: 600,
                     fontSize: '0.75rem',
                   }}
@@ -1028,30 +1043,31 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   mt: 0,
                   ml: 1,
                   minWidth: 150,
-                  backgroundColor: theme.palette.background.paper,
-                  color: theme.palette.text.primary,
-                  border: `1px solid ${theme.palette.divider}`,
+                  backgroundColor: sidebarColor,
+                  color: '#FFFFFF',
+                  border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
                   '& .MuiMenuItem-root': {
                     fontSize: '0.75rem',
                     py: 0.5,
                     minHeight: 32,
+                    color: '#FFFFFF',
                     '&:hover': {
-                      backgroundColor: alpha(theme.palette.action.hover, 0.1),
+                      backgroundColor: alpha('#FFFFFF', 0.1),
                     },
                     '& .MuiSvgIcon-root': {
                       fontSize: 16,
-                      color: theme.palette.text.secondary,
+                      color: alpha('#FFFFFF', 0.7),
                       mr: 1,
                     },
                   },
                 },
               }}
             >
-              <Box sx={{ px: 1, py: 0.75, borderBottom: `1px solid ${theme.palette.divider}` }}>
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: theme.palette.text.primary, lineHeight: 1.2 }}>
+              <Box sx={{ px: 1, py: 0.75, borderBottom: `1px solid ${alpha('#FFFFFF', 0.12)}` }}>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.2 }}>
                   {user?.name || 'User'}
                 </Typography>
-                <Typography sx={{ fontSize: '0.65rem', color: theme.palette.text.secondary, lineHeight: 1.2 }}>
+                <Typography sx={{ fontSize: '0.65rem', color: alpha('#FFFFFF', 0.7), lineHeight: 1.2 }}>
                   {user?.email || user?.role || 'User'}
                 </Typography>
               </Box>
@@ -1063,8 +1079,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 <SettingsIcon />
                 Settings
               </MenuItem>
-              <Divider sx={{ borderColor: theme.palette.divider, my: 0.5 }} />
-              <MenuItem onClick={handleLogout} sx={{ color: '#e53e3e' }}>
+              <Divider sx={{ borderColor: alpha('#FFFFFF', 0.12), my: 0.5 }} />
+              <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
                 <LogoutIcon />
                 Logout
               </MenuItem>
@@ -1111,29 +1127,9 @@ export default function DashboardLayout({ children, title, menuItems }) {
       icon: <SettingsIcon />,
       content: (
         <Box>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel sx={{ color: theme.palette.text.primary, fontSize: '0.9rem' }}>Theme Mode</InputLabel>
-            <Select
-              size='small'
-              value={mode}
-              label="Theme Mode"
-              onChange={(e) => setMode(e.target.value)}
-              sx={{
-                color: theme.palette.text.primary,
-                fontSize: '0.9rem',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: theme.palette.divider,
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: theme.palette.primary.main,
-                },
-              }}
-            >
-              <MenuItem value="light" sx={{ color: theme.palette.text.primary, fontSize: '0.9rem' }}>Light</MenuItem>
-              <MenuItem value="dark" sx={{ color: theme.palette.text.primary, fontSize: '0.9rem' }}>Dark</MenuItem>
-              <MenuItem value="system" sx={{ color: theme.palette.text.primary, fontSize: '0.9rem' }}>System</MenuItem>
-            </Select>
-          </FormControl>
+          <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.9rem' }}>
+            Settings options will be available soon.
+          </Typography>
         </Box>
       ),
     },
@@ -1155,13 +1151,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
         <AppBar
           position="fixed"
           open={open && !isMobile}
-          sx={{
-            zIndex: theme.zIndex.drawer + 1,
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: 0.5,
-            transition: 'all 0.3s ease',
-          }}
         >
           <Toolbar
             sx={{
@@ -1178,10 +1167,10 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   marginRight: 1.5,
                   width: 32,
                   height: 32,
-                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-                  color: theme.palette.primary.contrastText,
+                  background: primaryColor,
+                  color: '#FFFFFF',
                   '&:hover': {
-                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                    background: alpha(primaryColor, 0.9),
                   },
                 }}
               >
@@ -1199,7 +1188,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 edge="start"
                 sx={{
                   mr: 1.5,
-                  color: theme.palette.primary.main,
+                  color: primaryColor,
                 }}
               >
                 <MenuIcon />
@@ -1218,7 +1207,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   letterSpacing: '-0.01em',
                 }}
               >
-                Finance Dashboard
+                FatherOfMeow
               </Typography>
               <Typography
                 variant="body2"
@@ -1241,8 +1230,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                       width: 26,
                       height: 26,
                       fontSize: '0.7rem',
-                      bgcolor: theme.palette.primary.main,
-                      color: theme.palette.primary.contrastText,
+                      bgcolor: primaryColor,
+                      color: '#FFFFFF',
                       fontWeight: 600,
                     }}
                   >
@@ -1253,8 +1242,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 variant="outlined"
                 onClick={handleMenuClick}
                 sx={{
-                  borderColor: alpha(theme.palette.primary.main, 0.2),
-                  backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                  borderColor: alpha(primaryColor, 0.2),
+                  backgroundColor: alpha(primaryColor, 0.04),
                   color: theme.palette.text.primary,
                   height: 34,
                   cursor: 'pointer',
@@ -1265,8 +1254,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     py: 0.5,
                   },
                   '&:hover': {
-                    borderColor: theme.palette.primary.main,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                    borderColor: primaryColor,
+                    backgroundColor: alpha(primaryColor, 0.08),
                   },
                   display: { xs: 'none', sm: 'flex' },
                 }}
@@ -1278,8 +1267,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   display: { xs: 'flex', sm: 'none' },
                   color: theme.palette.text.secondary,
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                    color: theme.palette.primary.main,
+                    backgroundColor: alpha(primaryColor, 0.08),
+                    color: primaryColor,
                   },
                   width: 34,
                   height: 34,
@@ -1290,8 +1279,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     width: 26,
                     height: 26,
                     fontSize: '0.7rem',
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText,
+                    bgcolor: primaryColor,
+                    color: '#FFFFFF',
                     fontWeight: 600,
                   }}
                 >
@@ -1360,8 +1349,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
             sx={{
               '& .MuiDrawer-paper': {
                 width: mobileDrawerWidth,
-                backgroundColor: theme.palette.background.paper,
-                borderRight: `1px solid ${theme.palette.divider}`,
+                backgroundColor: sidebarColor,
+                borderRight: `1px solid ${alpha('#000000', 0.12)}`,
                 '&::-webkit-scrollbar': {
                   display: 'none',
                 },
@@ -1487,7 +1476,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
             }}
           >
             <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '1.1rem' }}>
-              Settings
+              {dialogTabs[tabValue].label}
             </Typography>
             <IconButton
               onClick={() => setModalOpen(false)}
@@ -1540,7 +1529,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                           {React.cloneElement(tab.icon, {
                             sx: {
                               fontSize: 19,
-                              color: theme.palette.primary.main,
+                              color: primaryColor,
                             },
                           })}
                         </ListItemIcon>
@@ -1553,7 +1542,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             letterSpacing: '0.01em',
-                            color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+                            color: isActive ? primaryColor : theme.palette.text.primary,
                           }}
                         >
                           {tab.label}

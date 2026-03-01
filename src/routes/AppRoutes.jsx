@@ -14,22 +14,18 @@ import { SuperAdminDashboard } from '../pages/superadmin/SuperAdminDashboard';
 import { SuperAdminProfile } from '../pages/superadmin/Profile';
 import { UserManagement } from '../pages/superadmin/UserManagement';
 
-
 import { MemberDashboard } from '../pages/member/MemberDashboard';
 import { MemberProfile } from '../pages/member/Profile';
 import RMEReports from '../pages/member/HMIS/RMEReports';
 import RSSReports from '../pages/member/HMIS/RSSReports';
 import TOSReports from '../pages/member/HMIS/TOSReports';
 
-
 import { ClientDashboard } from '../pages/client/ClientDashboard';
 import { ClientProfile } from '../pages/client/Profile';
 import ForgotPassword from '../pages/forgot-password/ForgotPassword';
 import ResetPassword from '../pages/reset-password/ResetPassword';
 
-
-
-
+import { PublicLayout } from '../layouts/PublicLayout';
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -37,17 +33,73 @@ export const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Public Routes with Layout */}
+        <Route
+          path="/"
+          element={
+            <PublicLayout title="Home" description="Professional FatherOfMeow system for tracking and managing your financial operations">
+              <Home />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicLayout title="Login" description="Sign in to your FatherOfMeow account">
+              <Login />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicLayout title="Forgot Password" description="Reset your FatherOfMeow account password">
+              <ForgotPassword />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicLayout title="Reset Password" description="Create a new password for your FatherOfMeow account">
+              <ResetPassword />
+            </PublicLayout>
+          }
+        />
 
-        {/* Error Routes */}
-        <Route path="/error" element={<ErrorPage />} />
-        <Route path="/unauthorized" element={<ErrorPage type="unauthorized" />} />
-        <Route path="/not-found" element={<ErrorPage type="not-found" />} />
-        <Route path="/server-error" element={<ErrorPage type="server-error" />} />
+        {/* Error Routes with Layout */}
+        <Route
+          path="/error"
+          element={
+            <PublicLayout title="Error" description="An error occurred">
+              <ErrorPage />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/unauthorized"
+          element={
+            <PublicLayout title="Unauthorized" description="You don't have permission to access this page">
+              <ErrorPage type="unauthorized" />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/not-found"
+          element={
+            <PublicLayout title="Page Not Found" description="The page you're looking for doesn't exist">
+              <ErrorPage type="not-found" />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/server-error"
+          element={
+            <PublicLayout title="Server Error" description="Something went wrong on our end">
+              <ErrorPage type="server-error" />
+            </PublicLayout>
+          }
+        />
 
         {/* Dashboard Redirect */}
         <Route
@@ -107,7 +159,14 @@ export const AppRoutes = () => {
         </Route>
 
         {/* Catch-all 404 Route */}
-        <Route path="*" element={<ErrorPage type="not-found" />} />
+        <Route
+          path="*"
+          element={
+            <PublicLayout title="Page Not Found" description="The page you're looking for doesn't exist">
+              <ErrorPage type="not-found" />
+            </PublicLayout>
+          }
+        />
       </Routes>
     </Router>
   );

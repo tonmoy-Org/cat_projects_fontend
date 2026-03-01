@@ -22,9 +22,9 @@ export const ErrorPage = () => {
     const theme = useTheme();
     const navigate = useNavigate();
 
-    // Use theme colors
-    const BLUE_COLOR = theme.palette.primary.main;
-    const BLUE_DARK = theme.palette.primary.dark || theme.palette.primary.main;
+    // Use purple color scheme
+    const PRIMARY_COLOR = '#5C4D91';
+    const PRIMARY_DARK = '#4A3D75';
     const TEXT_PRIMARY = theme.palette.text.primary;
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -68,7 +68,7 @@ export const ErrorPage = () => {
                             sx={{
                                 fontSize: '5.5rem',
                                 fontWeight: 400,
-                                background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${BLUE_COLOR} 100%)`,
+                                background: `linear-gradient(135deg, ${PRIMARY_DARK} 0%, ${PRIMARY_COLOR} 100%)`,
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
                                 lineHeight: 1,
@@ -125,7 +125,7 @@ export const ErrorPage = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <SearchIcon sx={{ color: BLUE_COLOR }} />
+                                            <SearchIcon sx={{ color: PRIMARY_COLOR }} />
                                         </InputAdornment>
                                     ),
                                     endAdornment: (
@@ -135,11 +135,7 @@ export const ErrorPage = () => {
                                                 variant="contained"
                                                 sx={{
                                                     borderRadius: '30px',
-                                                    px: 2,
-                                                    background: `linear-gradient(135deg, ${BLUE_COLOR} 0%, ${BLUE_DARK} 100%)`,
-                                                    color: 'white',
-                                                    fontWeight: 600,
-                                                    textTransform: 'none',
+                                                    px: 2
                                                 }}
                                             >
                                                 Search
@@ -161,12 +157,12 @@ export const ErrorPage = () => {
                         sx={{
                             borderRadius: '30px',
                             textTransform: 'none',
-                            borderColor: BLUE_COLOR,
-                            color: BLUE_COLOR,
+                            borderColor: PRIMARY_COLOR,
+                            color: PRIMARY_COLOR,
                             px: 2.5,
                             '&:hover': {
-                                borderColor: BLUE_DARK,
-                                backgroundColor: alpha(BLUE_COLOR, 0.04),
+                                borderColor: PRIMARY_DARK,
+                                backgroundColor: alpha(PRIMARY_COLOR, 0.04),
                             },
                         }}
                     >
@@ -178,12 +174,6 @@ export const ErrorPage = () => {
                         onClick={handleGoHome}
                         sx={{
                             borderRadius: '30px',
-                            textTransform: 'none',
-                            background: `linear-gradient(135deg, ${BLUE_COLOR} 0%, ${BLUE_DARK} 100%)`,
-                            px: 2.5,
-                            '&:hover': {
-                                background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${theme.palette.primary.dark || BLUE_DARK} 100%)`,
-                            },
                         }}
                     >
                         Go to Dashboard

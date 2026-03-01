@@ -1,20 +1,19 @@
 import { Button, styled } from '@mui/material';
 
 const GradientButton = styled(Button)(({ theme }) => ({
-    background: 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)',
+    background: 'linear-gradient(135deg, #5C4D91 0%, #6B5CA3 100%)',
     color: 'white',
     borderRadius: '5px',
     padding: '6px 16px',
     fontWeight: 500,
     fontSize: '0.85rem',
     textTransform: 'none',
-    boxShadow: '0 2px 8px rgba(21, 101, 192, 0.25)',
+    boxShadow: '0 2px 8px rgba(92, 77, 145, 0.25)',
     transition: 'all 0.3s ease',
 
     '&:hover': {
-        background: 'linear-gradient(135deg, #0D47A1 0%, #1565C0 100%)',
-        boxShadow: '0 6px 14px rgba(21, 101, 192, 0.35)',
-        transform: 'translateY(-1px)',
+        background: 'linear-gradient(135deg, #4A3D75 0%, #5C4D91 100%)',
+        boxShadow: '0 6px 14px rgba(92, 77, 145, 0.35)',
     },
 
     '&:disabled': {

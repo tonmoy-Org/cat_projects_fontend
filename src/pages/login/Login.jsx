@@ -101,14 +101,10 @@ export const Login = () => {
               sx={{
                 fontWeight: 'bold',
                 mb: 0.5,
-                background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${BLUE_COLOR} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
                 fontSize: '1.5rem',
               }}
             >
-              Finance Management
+              Father Of Meow
             </Typography>
             <Typography sx={{ color: TEXT_PRIMARY, fontSize: '0.9rem' }}>
               Sign in to your account
