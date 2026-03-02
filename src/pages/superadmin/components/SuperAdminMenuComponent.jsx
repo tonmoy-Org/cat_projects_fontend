@@ -75,9 +75,9 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
                     ]
                 },
                 {
-                    text: 'Forms',
+                    text: 'Home Carousel',
                     icon: <FormIcon />,
-                    path: '/superadmin-dashboard/forms'
+                    path: '/superadmin-dashboard/carousel-management'
                 },
             ]
         },

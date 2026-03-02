@@ -26,6 +26,8 @@ import ForgotPassword from '../pages/forgot-password/ForgotPassword';
 import ResetPassword from '../pages/reset-password/ResetPassword';
 
 import { PublicLayout } from '../layouts/PublicLayout';
+import { HomeCarousel } from '../pages/superadmin/HomeCarousel';
+
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -125,6 +127,11 @@ export const AppRoutes = () => {
           <Route index element={<SuperAdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="profile" element={<SuperAdminProfile />} />
+          <Route path="carousel-management" element={<HomeCarousel />} />
+          {/* Health Department Reports */}
+          <Route path="health-department-reports/rme" element={<RMEReports />} />
+          <Route path="health-department-reports/rss" element={<RSSReports />} />
+          <Route path="health-department-reports/tos" element={<TOSReports />} />
         </Route>
 
         {/* Member Routes */}
