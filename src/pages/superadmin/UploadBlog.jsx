@@ -118,7 +118,7 @@ const formats = [
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export default function BlogManagement() {
+export default function UploadBlog() {
   const theme = useTheme();
   const queryClient = useQueryClient();
 
