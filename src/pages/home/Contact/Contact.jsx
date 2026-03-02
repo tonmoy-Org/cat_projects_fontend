@@ -242,6 +242,7 @@ const Contact = () => {
                   <TimeValue>9.00 am - 6.00 pm</TimeValue>
                 </WorkTimeItem>
 
+
                 <WorkTimeItem>
                   <DayTitle>Sunday</DayTitle>
                   <Dots />
