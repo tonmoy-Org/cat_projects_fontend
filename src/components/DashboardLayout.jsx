@@ -574,6 +574,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 style={{
                   width: '30px',
                   height: 'auto',
+                  filter: 'brightness(0) invert(1)',
+
                 }}
               />
             </Box>
