@@ -27,6 +27,8 @@ import ResetPassword from '../pages/reset-password/ResetPassword';
 
 import { PublicLayout } from '../layouts/PublicLayout';
 import { HomeCarousel } from '../pages/superadmin/HomeCarousel';
+import Blog from '../pages/home/Blog/Blog';
+import Contact from '../pages/home/Contact/Contact';
 
 
 export const AppRoutes = () => {
@@ -99,6 +101,22 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Server Error" description="Something went wrong on our end">
               <ErrorPage type="server-error" />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <PublicLayout title="Blog" description="Latest updates and news about pets">
+              <Blog type="blog"/>
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <PublicLayout title="Contact Us" description="Get in touch with us for any inquiries or support">
+              <Contact />
             </PublicLayout>
           }
         />
