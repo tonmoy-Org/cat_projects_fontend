@@ -51,33 +51,14 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
             sectionName: 'System & Configuration',
             items: [
                 {
-                    text: 'Health Department Report Tracking',
-                    icon: <HealthIcon />,
-                    path: '#',
-                    isExpandable: true,
-                    sectionId: 'health-reports',
-                    subItems: [
-                        {
-                            text: 'RME Reports',
-                            icon: <RMEReportIcon />,
-                            path: '/superadmin-dashboard/health-department-report-tracking/rme'
-                        },
-                        {
-                            text: 'RSS Reports',
-                            icon: <RSSReportIcon />,
-                            path: '/superadmin-dashboard/health-department-report-tracking/rss'
-                        },
-                        {
-                            text: 'TOS Reports',
-                            icon: <TOSReportIcon />,
-                            path: '/superadmin-dashboard/health-department-report-tracking/tos'
-                        }
-                    ]
-                },
-                {
                     text: 'Home Carousel',
                     icon: <FormIcon />,
                     path: '/superadmin-dashboard/carousel-management'
+                },
+                {
+                    text: 'Blogs',
+                    icon: <FormIcon />,
+                    path: '/superadmin-dashboard/blog-upload'
                 },
             ]
         },

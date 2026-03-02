@@ -27,6 +27,7 @@ import ResetPassword from '../pages/reset-password/ResetPassword';
 
 import { PublicLayout } from '../layouts/PublicLayout';
 import { HomeCarousel } from '../pages/superadmin/HomeCarousel';
+import UploadBlog from '../pages/superadmin/UploadBlog';
 
 
 export const AppRoutes = () => {
@@ -128,6 +129,7 @@ export const AppRoutes = () => {
           <Route path="users" element={<UserManagement />} />
           <Route path="profile" element={<SuperAdminProfile />} />
           <Route path="carousel-management" element={<HomeCarousel />} />
+          <Route path="blog-upload" element={<UploadBlog />} />
           {/* Health Department Reports */}
           <Route path="health-department-reports/rme" element={<RMEReports />} />
           <Route path="health-department-reports/rss" element={<RSSReports />} />
