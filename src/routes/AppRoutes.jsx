@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from '../pages/login/Login';
-import { Home } from '../pages/home/Home';
+
 import { useAuth } from '../auth/AuthProvider';
 import { PrivateRoute } from '../auth/PrivateRoute';
 import { ErrorPage } from '../pages/error/ErrorPage';
@@ -29,6 +29,8 @@ import { PublicLayout } from '../layouts/PublicLayout';
 import { HomeCarousel } from '../pages/superadmin/HomeCarousel';
 import Blog from '../pages/home/Blog/Blog';
 import Contact from '../pages/home/Contact/Contact';
+import About from '../pages/home/About/About';
+import Home from '../pages/home/Home';
 
 
 export const AppRoutes = () => {
@@ -109,6 +111,14 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Blog" description="Latest updates and news about pets">
               <Blog type="blog"/>
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PublicLayout title="About Us" description="Learn more about our company and mission">
+              <About />
             </PublicLayout>
           }
         />
