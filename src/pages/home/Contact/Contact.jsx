@@ -1,5 +1,4 @@
-// Contact.jsx
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import {
   Container,
   Grid,
@@ -7,11 +6,9 @@ import {
   Typography,
   TextField,
   MenuItem,
-  Button,
   Checkbox,
   FormControlLabel,
   styled,
-  Paper,
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';

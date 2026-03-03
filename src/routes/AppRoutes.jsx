@@ -1,37 +1,42 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Login } from '../pages/login/Login';
-import { Home } from '../pages/home/Home';
-import { useAuth } from '../auth/AuthProvider';
-import { PrivateRoute } from '../auth/PrivateRoute';
-import { ErrorPage } from '../pages/error/ErrorPage';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Login } from "../pages/login/Login";
+import { Home } from "../pages/home/Home";
+import { useAuth } from "../auth/AuthProvider";
+import { PrivateRoute } from "../auth/PrivateRoute";
+import { ErrorPage } from "../pages/error/ErrorPage";
 
-import { SuperAdminLayout } from '../pages/superadmin/components/SuperAdminLayout';
-import { MemberLayout } from '../pages/member/components/MemberLayout';
-import { ClientLayout } from '../pages/client/components/ClientLayout';
+import { SuperAdminLayout } from "../pages/superadmin/components/SuperAdminLayout";
+import { MemberLayout } from "../pages/member/components/MemberLayout";
+import { ClientLayout } from "../pages/client/components/ClientLayout";
 
-import { SuperAdminDashboard } from '../pages/superadmin/SuperAdminDashboard';
-import { SuperAdminProfile } from '../pages/superadmin/Profile';
-import { UserManagement } from '../pages/superadmin/UserManagement';
+import { SuperAdminDashboard } from "../pages/superadmin/SuperAdminDashboard";
+import { SuperAdminProfile } from "../pages/superadmin/Profile";
+import { UserManagement } from "../pages/superadmin/UserManagement";
 
-import { MemberDashboard } from '../pages/member/MemberDashboard';
-import { MemberProfile } from '../pages/member/Profile';
-import RMEReports from '../pages/member/HMIS/RMEReports';
-import RSSReports from '../pages/member/HMIS/RSSReports';
-import TOSReports from '../pages/member/HMIS/TOSReports';
+import { MemberDashboard } from "../pages/member/MemberDashboard";
+import { MemberProfile } from "../pages/member/Profile";
+import RMEReports from "../pages/member/HMIS/RMEReports";
+import RSSReports from "../pages/member/HMIS/RSSReports";
+import TOSReports from "../pages/member/HMIS/TOSReports";
 
-import { ClientDashboard } from '../pages/client/ClientDashboard';
-import { ClientProfile } from '../pages/client/Profile';
-import ForgotPassword from '../pages/forgot-password/ForgotPassword';
-import ResetPassword from '../pages/reset-password/ResetPassword';
+import { ClientDashboard } from "../pages/client/ClientDashboard";
+import { ClientProfile } from "../pages/client/Profile";
+import ForgotPassword from "../pages/forgot-password/ForgotPassword";
+import ResetPassword from "../pages/reset-password/ResetPassword";
 
-import { PublicLayout } from '../layouts/PublicLayout';
-import { HomeCarousel } from '../pages/superadmin/HomeCarousel';
-import Blog from '../pages/home/Blog/Blog';
-import Contact from '../pages/home/Contact/Contact';
-import UploadBlog from '../pages/superadmin/UploadBlog';
-import VideoUpload from '../pages/superadmin/VideoUpload';
-
+import { PublicLayout } from "../layouts/PublicLayout";
+import { HomeCarousel } from "../pages/superadmin/HomeCarousel";
+import Blog from "../pages/home/Blog/Blog";
+import Contact from "../pages/home/Contact/Contact";
+import UploadBlog from "../pages/superadmin/UploadBlog";
+import VideoUpload from "../pages/superadmin/VideoUpload";
+import Video from "../pages/home/Video/Video";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -43,7 +48,10 @@ export const AppRoutes = () => {
         <Route
           path="/"
           element={
-            <PublicLayout title="Home" description="Professional FatherOfMeow system for tracking and managing your financial operations">
+            <PublicLayout
+              title="Home"
+              description="Professional FatherOfMeow system for tracking and managing your financial operations"
+            >
               <Home />
             </PublicLayout>
           }
@@ -51,7 +59,10 @@ export const AppRoutes = () => {
         <Route
           path="/login"
           element={
-            <PublicLayout title="Login" description="Sign in to your FatherOfMeow account">
+            <PublicLayout
+              title="Login"
+              description="Sign in to your FatherOfMeow account"
+            >
               <Login />
             </PublicLayout>
           }
@@ -59,7 +70,10 @@ export const AppRoutes = () => {
         <Route
           path="/forgot-password"
           element={
-            <PublicLayout title="Forgot Password" description="Reset your FatherOfMeow account password">
+            <PublicLayout
+              title="Forgot Password"
+              description="Reset your FatherOfMeow account password"
+            >
               <ForgotPassword />
             </PublicLayout>
           }
@@ -67,7 +81,10 @@ export const AppRoutes = () => {
         <Route
           path="/reset-password"
           element={
-            <PublicLayout title="Reset Password" description="Create a new password for your FatherOfMeow account">
+            <PublicLayout
+              title="Reset Password"
+              description="Create a new password for your FatherOfMeow account"
+            >
               <ResetPassword />
             </PublicLayout>
           }
@@ -85,7 +102,10 @@ export const AppRoutes = () => {
         <Route
           path="/unauthorized"
           element={
-            <PublicLayout title="Unauthorized" description="You don't have permission to access this page">
+            <PublicLayout
+              title="Unauthorized"
+              description="You don't have permission to access this page"
+            >
               <ErrorPage type="unauthorized" />
             </PublicLayout>
           }
@@ -93,7 +113,10 @@ export const AppRoutes = () => {
         <Route
           path="/not-found"
           element={
-            <PublicLayout title="Page Not Found" description="The page you're looking for doesn't exist">
+            <PublicLayout
+              title="Page Not Found"
+              description="The page you're looking for doesn't exist"
+            >
               <ErrorPage type="not-found" />
             </PublicLayout>
           }
@@ -101,7 +124,10 @@ export const AppRoutes = () => {
         <Route
           path="/server-error"
           element={
-            <PublicLayout title="Server Error" description="Something went wrong on our end">
+            <PublicLayout
+              title="Server Error"
+              description="Something went wrong on our end"
+            >
               <ErrorPage type="server-error" />
             </PublicLayout>
           }
@@ -109,16 +135,30 @@ export const AppRoutes = () => {
         <Route
           path="/blog"
           element={
-            <PublicLayout title="Blog" description="Latest updates and news about pets">
-              <Blog type="blog"/>
+            <PublicLayout
+              title="Blog"
+              description="Latest updates and news about pets"
+            >
+              <Blog type="blog" />
             </PublicLayout>
           }
         />
         <Route
           path="/contact"
           element={
-            <PublicLayout title="Contact Us" description="Get in touch with us for any inquiries or support">
+            <PublicLayout
+              title="Contact Us"
+              description="Get in touch with us for any inquiries or support"
+            >
               <Contact />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/videos"
+          element={
+            <PublicLayout title="Videos" description="Latest videos about pets">
+              <Video />
             </PublicLayout>
           }
         />
@@ -128,9 +168,15 @@ export const AppRoutes = () => {
           path="/dashboard"
           element={
             <PrivateRoute>
-              {user?.role === 'superadmin' && <Navigate to="/superadmin-dashboard" replace />}
-              {user?.role === 'member' && <Navigate to="/member-dashboard" replace />}
-              {user?.role === 'client' && <Navigate to="/client-dashboard" replace />}
+              {user?.role === "superadmin" && (
+                <Navigate to="/superadmin-dashboard" replace />
+              )}
+              {user?.role === "member" && (
+                <Navigate to="/member-dashboard" replace />
+              )}
+              {user?.role === "client" && (
+                <Navigate to="/client-dashboard" replace />
+              )}
             </PrivateRoute>
           }
         />
@@ -139,7 +185,7 @@ export const AppRoutes = () => {
         <Route
           path="/superadmin-dashboard"
           element={
-            <PrivateRoute requiredRoles={['superadmin']}>
+            <PrivateRoute requiredRoles={["superadmin"]}>
               <SuperAdminLayout />
             </PrivateRoute>
           }
@@ -156,7 +202,7 @@ export const AppRoutes = () => {
         <Route
           path="/member-dashboard"
           element={
-            <PrivateRoute requiredRoles={['member']}>
+            <PrivateRoute requiredRoles={["member"]}>
               <MemberLayout />
             </PrivateRoute>
           }
@@ -165,16 +211,25 @@ export const AppRoutes = () => {
           <Route path="profile" element={<MemberProfile />} />
 
           {/* Health Department Reports */}
-          <Route path="health-department-reports/rme" element={<RMEReports />} />
-          <Route path="health-department-reports/rss" element={<RSSReports />} />
-          <Route path="health-department-reports/tos" element={<TOSReports />} />
+          <Route
+            path="health-department-reports/rme"
+            element={<RMEReports />}
+          />
+          <Route
+            path="health-department-reports/rss"
+            element={<RSSReports />}
+          />
+          <Route
+            path="health-department-reports/tos"
+            element={<TOSReports />}
+          />
         </Route>
 
         {/* Tech Routes */}
         <Route
           path="/client-dashboard"
           element={
-            <PrivateRoute requiredRoles={['client']}>
+            <PrivateRoute requiredRoles={["client"]}>
               <ClientLayout />
             </PrivateRoute>
           }
@@ -187,7 +242,10 @@ export const AppRoutes = () => {
         <Route
           path="*"
           element={
-            <PublicLayout title="Page Not Found" description="The page you're looking for doesn't exist">
+            <PublicLayout
+              title="Page Not Found"
+              description="The page you're looking for doesn't exist"
+            >
               <ErrorPage type="not-found" />
             </PublicLayout>
           }

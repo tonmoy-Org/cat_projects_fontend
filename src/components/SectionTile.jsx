@@ -1,0 +1,102 @@
+import React from "react";
+import { Box, Container, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
+
+const BannerHeader = styled(Box)(({ theme, bgimage }) => ({
+  position: "relative",
+  padding: "120px 0",
+  backgroundImage: `url(${bgimage})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  width: "100%",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    zIndex: 1,
+  },
+}));
+
+const ContentWrapper = styled(Box)({
+  position: "relative",
+  zIndex: 2,
+  display: "flex",
+  alignItems: "center",
+  minHeight: "150px",
+});
+
+const IconWrapper = styled(Box)(({ theme }) => ({
+  display: "inline-flex",
+  marginRight: "10px",
+  "& i": {
+    fontSize: "24px",
+    color: theme.palette.primary.main,
+  },
+}));
+
+const SubtitleWrapper = styled(Box)({
+  display: "flex",
+  alignItems: "center",
+  marginBottom: "5px",
+});
+
+const Subtitle = styled(Typography)(({ theme }) => ({
+  color: "#fff",
+  fontSize: "16px",
+  fontWeight: 500,
+  textTransform: "uppercase",
+  letterSpacing: "2px",
+  display: "flex",
+  alignItems: "center",
+}));
+
+const Title = styled(Typography)({
+  color: "#fff",
+  fontSize: "40px",
+  fontWeight: 700,
+  lineHeight: 1.2,
+  textAlign: "left",
+  "@media (max-width: 768px)": {
+    fontSize: "36px",
+  },
+});
+
+export default function SectionTile({
+  bgImage = "https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg",
+  subtitle = "Who are we",
+  title = "About Pepito",
+  icon = true,
+  iconClass = "flaticon-prize-badge-with-paw-print",
+}) {
+  return (
+    <Box className="elementor-widget-container">
+      <BannerHeader bgimage={bgImage} data-overlay-dark="3">
+        <ContentWrapper className="v-middle">
+          <Container maxWidth="lg">
+            <Box className="row">
+              <Box className="col-md-12" sx={{ textAlign: "left" }}>
+                {subtitle && (
+                  <SubtitleWrapper>
+                    <Subtitle variant="h6">
+                      {icon && (
+                        <IconWrapper>
+                          <i className={iconClass}></i>
+                        </IconWrapper>
+                      )}
+                      {subtitle}
+                    </Subtitle>
+                  </SubtitleWrapper>
+                )}
+                <Title variant="h1">{title}</Title>
+              </Box>
+            </Box>
+          </Container>
+        </ContentWrapper>
+      </BannerHeader>
+    </Box>
+  );
+}
