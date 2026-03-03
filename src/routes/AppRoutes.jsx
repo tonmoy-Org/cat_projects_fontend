@@ -31,6 +31,7 @@ import Blog from '../pages/home/Blog/Blog';
 import Contact from '../pages/home/Contact/Contact';
 import About from '../pages/home/About/About';
 import Home from '../pages/home/Home';
+import BlogDetail from '../pages/home/Blog/BlogDetail';
 
 
 export const AppRoutes = () => {
@@ -110,7 +111,16 @@ export const AppRoutes = () => {
           path="/blog"
           element={
             <PublicLayout title="Blog" description="Latest updates and news about pets">
-              <Blog type="blog"/>
+              <Blog type="blog" />
+            </PublicLayout>
+          }
+        />
+
+        <Route
+          path="/blog/:slug"
+          element={
+            <PublicLayout title="Blog Detail" description="Read full article about pet care">
+              <BlogDetail />
             </PublicLayout>
           }
         />
