@@ -30,6 +30,7 @@ import { HomeCarousel } from '../pages/superadmin/HomeCarousel';
 import Blog from '../pages/home/Blog/Blog';
 import Contact from '../pages/home/Contact/Contact';
 import UploadBlog from '../pages/superadmin/UploadBlog';
+import VideoUpload from '../pages/superadmin/VideoUpload';
 
 
 export const AppRoutes = () => {
@@ -148,10 +149,7 @@ export const AppRoutes = () => {
           <Route path="profile" element={<SuperAdminProfile />} />
           <Route path="carousel-management" element={<HomeCarousel />} />
           <Route path="blog-upload" element={<UploadBlog />} />
-          {/* Health Department Reports */}
-          <Route path="health-department-reports/rme" element={<RMEReports />} />
-          <Route path="health-department-reports/rss" element={<RSSReports />} />
-          <Route path="health-department-reports/tos" element={<TOSReports />} />
+          <Route path="video-upload" element={<VideoUpload />} />
         </Route>
 
         {/* Member Routes */}

@@ -35,6 +35,7 @@ import {
   DialogActions,
   TablePagination,
   alpha,
+  CircularProgress,
 } from "@mui/material";
 import {
   Delete,
@@ -43,6 +44,7 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Visibility as VisibilityIcon,
+  Image as ImageIcon,
 } from "@mui/icons-material";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -131,7 +133,9 @@ export default function UploadBlog() {
   // Modal state
   const [openModal, setOpenModal] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState(null);
-  const [modalMode, setModalMode] = useState("create"); // 'create', 'edit', 'view'
+  const [modalMode, setModalMode] = useState("create");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [blogToDelete, setBlogToDelete] = useState(null);
 
   // Pagination state
   const [page, setPage] = useState(0);
@@ -179,7 +183,7 @@ export default function UploadBlog() {
   // Pagination logic
   const paginatedBlogs = blogs.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   const handleChangePage = (event, newPage) => {
@@ -285,13 +289,6 @@ export default function UploadBlog() {
     }
   };
 
-  const generateSlug = (title) => {
-    return title
-      .toLowerCase()
-      .replace(/[^\w\s]/gi, "")
-      .replace(/\s+/g, "-");
-  };
-
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
       setTags([...tags, tagInput.trim()]);
@@ -339,6 +336,22 @@ export default function UploadBlog() {
     setOpenModal(false);
     setSelectedBlog(null);
     resetForm();
+  };
+
+  const handleDeleteClick = (blog) => {
+    setBlogToDelete(blog);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (blogToDelete) {
+      deleteBlogMutation.mutate(blogToDelete._id);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setBlogToDelete(null);
   };
 
   const createBlogMutation = useMutation({
@@ -389,6 +402,8 @@ export default function UploadBlog() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
       addAlert("success", "Blog post deleted successfully!");
+      setDeleteDialogOpen(false);
+      setBlogToDelete(null);
     },
     onError: (error) => {
       console.error("Delete error:", error);
@@ -397,14 +412,14 @@ export default function UploadBlog() {
         error.response?.data?.message ||
           "Failed to delete blog. Please try again.",
       );
+      setDeleteDialogOpen(false);
+      setBlogToDelete(null);
     },
   });
 
   const onSubmit = async (data) => {
-    // Clear previous alerts
     setAlerts([]);
 
-    // Validate content
     if (!content || content === "<p><br></p>") {
       setContentError(true);
       addAlert("error", "Blog content is required.");
@@ -413,7 +428,6 @@ export default function UploadBlog() {
       setContentError(false);
     }
 
-    // Validate category
     if (!category) {
       setCategoryError(true);
       addAlert("error", "Please select a category.");
@@ -422,7 +436,6 @@ export default function UploadBlog() {
       setCategoryError(false);
     }
 
-    // Validate pet type
     if (!petType) {
       setPetTypeError(true);
       addAlert("error", "Please select a pet type.");
@@ -431,7 +444,6 @@ export default function UploadBlog() {
       setPetTypeError(false);
     }
 
-    // Validate image for new blogs
     if (modalMode === "create" && !imageFile) {
       addAlert("error", "Please select a featured image.");
       return;
@@ -439,29 +451,25 @@ export default function UploadBlog() {
 
     try {
       let imageUrl = selectedBlog?.imageUrl || "";
-      
-      // Upload image if new file is selected
+
       if (imageFile) {
         const uploadedUrl = await uploadToCloudinary();
         if (!uploadedUrl) return;
         imageUrl = uploadedUrl;
       }
 
-      const titleSlug = generateSlug(data.title);
-
       const blogData = {
         title: data.title,
         excerpt:
           data.excerpt || content.substring(0, 160).replace(/<[^>]*>/g, ""),
-        slug: titleSlug,
         content,
         imageUrl,
         category,
         petType,
         isFeatured,
         tags,
-        status: "published",
-        publishedAt: new Date().toISOString(),
+        author: "Admin", // You might want to get this from user context
+        type: "article",
       };
 
       if (modalMode === "edit" && selectedBlog) {
@@ -472,12 +480,6 @@ export default function UploadBlog() {
     } catch (error) {
       console.error("Submission error:", error);
       addAlert("error", "Failed to publish blog. Please try again.");
-    }
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this blog post?")) {
-      deleteBlogMutation.mutate(id);
     }
   };
 
@@ -511,10 +513,7 @@ export default function UploadBlog() {
     <Box>
       <Helmet>
         <title>Blog Management - PetCare</title>
-        <meta
-          name="description"
-          content="Manage your pet blog posts"
-        />
+        <meta name="description" content="Manage your pet blog posts" />
       </Helmet>
 
       {/* Alerts */}
@@ -540,8 +539,76 @@ export default function UploadBlog() {
         </Snackbar>
       ))}
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            backgroundColor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            color: TEXT_PRIMARY,
+            fontWeight: 600,
+            fontSize: "0.95rem",
+            py: 1.5,
+            px: 2,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          Confirm Delete
+        </DialogTitle>
+        <DialogContent sx={{ px: 2, py: 2 }}>
+          <Typography variant="body2" sx={{ color: TEXT_PRIMARY }}>
+            Are you sure you want to delete "{blogToDelete?.title}"? This action
+            cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            px: 2,
+            py: 1.5,
+            borderTop: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <OutlineButton
+            onClick={handleDeleteCancel}
+            size="small"
+            sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
+            disabled={deleteBlogMutation.isPending}
+          >
+            Cancel
+          </OutlineButton>
+          <Button
+            onClick={handleDeleteConfirm}
+            size="small"
+            variant="contained"
+            color="error"
+            sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
+            disabled={deleteBlogMutation.isPending}
+          >
+            {deleteBlogMutation.isPending ? (
+              <CircularProgress size={16} sx={{ color: "white" }} />
+            ) : (
+              "Delete"
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Header */}
-      <Box sx={{ display: { xs: "", lg: "flex" } }} justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        sx={{ display: { xs: "", lg: "flex" } }}
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Box mb={1}>
           <Typography
             sx={{
@@ -587,63 +654,90 @@ export default function UploadBlog() {
       >
         <Table size="small">
           <TableHead>
-            <TableRow sx={{
-              backgroundColor: theme.palette.mode === "dark"
-                ? alpha(BLUE_COLOR, 0.1)
-                : alpha(BLUE_COLOR, 0.05),
-            }}>
-              <TableCell sx={{
-                fontWeight: 600,
-                color: TEXT_PRIMARY,
-                borderBottom: `2px solid ${BLUE_COLOR}`,
-                fontSize: "0.8rem",
-                py: 1,
-              }}>
+            <TableRow
+              sx={{
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? alpha(BLUE_COLOR, 0.1)
+                    : alpha(BLUE_COLOR, 0.05),
+              }}
+            >
+              <TableCell
+                sx={{
+                  fontWeight: 600,
+                  color: TEXT_PRIMARY,
+                  borderBottom: `2px solid ${BLUE_COLOR}`,
+                  fontSize: "0.8rem",
+                  py: 1,
+                }}
+              >
+                Image
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 600,
+                  color: TEXT_PRIMARY,
+                  borderBottom: `2px solid ${BLUE_COLOR}`,
+                  fontSize: "0.8rem",
+                  py: 1,
+                }}
+              >
                 Title
               </TableCell>
-              <TableCell sx={{
-                fontWeight: 600,
-                color: TEXT_PRIMARY,
-                borderBottom: `2px solid ${BLUE_COLOR}`,
-                fontSize: "0.8rem",
-                py: 1,
-              }}>
+              <TableCell
+                sx={{
+                  fontWeight: 600,
+                  color: TEXT_PRIMARY,
+                  borderBottom: `2px solid ${BLUE_COLOR}`,
+                  fontSize: "0.8rem",
+                  py: 1,
+                }}
+              >
                 Category
               </TableCell>
-              <TableCell sx={{
-                fontWeight: 600,
-                color: TEXT_PRIMARY,
-                borderBottom: `2px solid ${BLUE_COLOR}`,
-                fontSize: "0.8rem",
-                py: 1,
-              }}>
+              <TableCell
+                sx={{
+                  fontWeight: 600,
+                  color: TEXT_PRIMARY,
+                  borderBottom: `2px solid ${BLUE_COLOR}`,
+                  fontSize: "0.8rem",
+                  py: 1,
+                }}
+              >
                 Pet Type
               </TableCell>
-              <TableCell sx={{
-                fontWeight: 600,
-                color: TEXT_PRIMARY,
-                borderBottom: `2px solid ${BLUE_COLOR}`,
-                fontSize: "0.8rem",
-                py: 1,
-              }}>
+              <TableCell
+                sx={{
+                  fontWeight: 600,
+                  color: TEXT_PRIMARY,
+                  borderBottom: `2px solid ${BLUE_COLOR}`,
+                  fontSize: "0.8rem",
+                  py: 1,
+                }}
+              >
                 Featured
               </TableCell>
-              <TableCell sx={{
-                fontWeight: 600,
-                color: TEXT_PRIMARY,
-                borderBottom: `2px solid ${BLUE_COLOR}`,
-                fontSize: "0.8rem",
-                py: 1,
-              }}>
+              <TableCell
+                sx={{
+                  fontWeight: 600,
+                  color: TEXT_PRIMARY,
+                  borderBottom: `2px solid ${BLUE_COLOR}`,
+                  fontSize: "0.8rem",
+                  py: 1,
+                }}
+              >
                 Tags
               </TableCell>
-              <TableCell align="right" sx={{
-                fontWeight: 600,
-                color: TEXT_PRIMARY,
-                borderBottom: `2px solid ${BLUE_COLOR}`,
-                fontSize: "0.8rem",
-                py: 1,
-              }}>
+              <TableCell
+                align="right"
+                sx={{
+                  fontWeight: 600,
+                  color: TEXT_PRIMARY,
+                  borderBottom: `2px solid ${BLUE_COLOR}`,
+                  fontSize: "0.8rem",
+                  py: 1,
+                }}
+              >
                 Actions
               </TableCell>
             </TableRow>
@@ -651,16 +745,25 @@ export default function UploadBlog() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                  <LinearProgress sx={{ maxWidth: 200, mx: "auto" }} />
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <CircularProgress size={24} sx={{ color: BLUE_COLOR }} />
                 </TableCell>
               </TableRow>
             ) : paginatedBlogs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                   <Box py={2}>
-                    <PetsIcon sx={{ fontSize: 32, color: alpha(TEXT_PRIMARY, 0.2), mb: 1.5 }} />
-                    <Typography variant="caption" sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}>
+                    <PetsIcon
+                      sx={{
+                        fontSize: 32,
+                        color: alpha(TEXT_PRIMARY, 0.2),
+                        mb: 1.5,
+                      }}
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}
+                    >
                       No blog posts found. Create one to get started.
                     </Typography>
                   </Box>
@@ -673,9 +776,10 @@ export default function UploadBlog() {
                   hover
                   sx={{
                     "&:hover": {
-                      backgroundColor: theme.palette.mode === "dark"
-                        ? alpha(BLUE_COLOR, 0.05)
-                        : alpha(BLUE_COLOR, 0.03),
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? alpha(BLUE_COLOR, 0.05)
+                          : alpha(BLUE_COLOR, 0.03),
                     },
                     "&:last-child td": {
                       borderBottom: 0,
@@ -683,11 +787,65 @@ export default function UploadBlog() {
                   }}
                 >
                   <TableCell sx={{ py: 1 }}>
-                    <Typography variant="caption" fontWeight={500} sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}>
+                    {blog.imageUrl ? (
+                      <Box
+                        component="img"
+                        src={blog.imageUrl}
+                        alt={blog.title}
+                        sx={{
+                          width: 60,
+                          height: 60,
+                          objectFit: "cover",
+                          borderRadius: 1,
+                          border: `1px solid ${theme.palette.divider}`,
+                          cursor: "pointer",
+                          transition: "opacity 0.2s",
+                          "&:hover": {
+                            opacity: 0.8,
+                          },
+                        }}
+                        onClick={() => handleOpenModal("view", blog)}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 60,
+                          height: 60,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: alpha(BLUE_COLOR, 0.05),
+                          borderRadius: 1,
+                          border: `1px dashed ${theme.palette.divider}`,
+                        }}
+                      >
+                        <ImageIcon
+                          sx={{
+                            fontSize: 24,
+                            color: alpha(TEXT_PRIMARY, 0.3),
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </TableCell>
+                  <TableCell sx={{ py: 1 }}>
+                    <Typography
+                      variant="caption"
+                      fontWeight={500}
+                      sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}
+                    >
                       {blog.title}
                     </Typography>
                     {blog.excerpt && (
-                      <Typography variant="caption" sx={{ fontSize: "0.7rem", display: "block", color: TEXT_PRIMARY, opacity: 0.7 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "0.7rem",
+                          display: "block",
+                          color: TEXT_PRIMARY,
+                          opacity: 0.7,
+                        }}
+                      >
                         {blog.excerpt.substring(0, 50)}...
                       </Typography>
                     )}
@@ -734,7 +892,14 @@ export default function UploadBlog() {
                         }}
                       />
                     ) : (
-                      <Typography variant="caption" sx={{ fontSize: "0.7rem", color: TEXT_PRIMARY, opacity: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "0.7rem",
+                          color: TEXT_PRIMARY,
+                          opacity: 0.5,
+                        }}
+                      >
                         No
                       </Typography>
                     )}
@@ -753,7 +918,10 @@ export default function UploadBlog() {
                         />
                       ))}
                       {blog.tags?.length > 2 && (
-                        <Typography variant="caption" sx={{ fontSize: "0.6rem", color: TEXT_PRIMARY }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontSize: "0.6rem", color: TEXT_PRIMARY }}
+                        >
                           +{blog.tags.length - 2}
                         </Typography>
                       )}
@@ -770,6 +938,7 @@ export default function UploadBlog() {
                           backgroundColor: alpha(BLUE_COLOR, 0.1),
                         },
                       }}
+                      title="View Blog"
                     >
                       <VisibilityIcon fontSize="inherit" />
                     </IconButton>
@@ -783,12 +952,13 @@ export default function UploadBlog() {
                           backgroundColor: alpha(BLUE_COLOR, 0.1),
                         },
                       }}
+                      title="Edit Blog"
                     >
                       <EditIcon fontSize="inherit" />
                     </IconButton>
                     <IconButton
                       size="small"
-                      onClick={() => handleDelete(blog._id)}
+                      onClick={() => handleDeleteClick(blog)}
                       sx={{
                         color: RED_COLOR,
                         fontSize: "0.8rem",
@@ -796,6 +966,7 @@ export default function UploadBlog() {
                           backgroundColor: alpha(RED_COLOR, 0.1),
                         },
                       }}
+                      title="Delete Blog"
                     >
                       <Delete fontSize="inherit" />
                     </IconButton>
@@ -817,10 +988,11 @@ export default function UploadBlog() {
           onRowsPerPageChange={handleChangeRowsPerPage}
           sx={{
             borderTop: `1px solid ${theme.palette.divider}`,
-            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-              fontSize: "0.75rem",
-              color: TEXT_PRIMARY,
-            },
+            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+              {
+                fontSize: "0.75rem",
+                color: TEXT_PRIMARY,
+              },
             "& .MuiSelect-select": {
               fontSize: "0.8rem",
               padding: "4px 32px 4px 12px",
@@ -841,17 +1013,19 @@ export default function UploadBlog() {
           sx: {
             borderRadius: 2,
             backgroundColor: theme.palette.background.paper,
-          }
+          },
         }}
       >
-        <DialogTitle sx={{
-          color: TEXT_PRIMARY,
-          fontWeight: 600,
-          fontSize: "0.95rem",
-          py: 1.5,
-          px: 2,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-        }}>
+        <DialogTitle
+          sx={{
+            color: TEXT_PRIMARY,
+            fontWeight: 600,
+            fontSize: "0.95rem",
+            py: 1.5,
+            px: 2,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
           {modalMode === "create" && "Create New Blog Post"}
           {modalMode === "edit" && "Edit Blog Post"}
           {modalMode === "view" && "View Blog Post"}
@@ -919,7 +1093,11 @@ export default function UploadBlog() {
                   >
                     Content
                     {contentError && modalMode !== "view" && (
-                      <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ ml: 1 }}
+                      >
                         (required)
                       </Typography>
                     )}
@@ -1129,7 +1307,8 @@ export default function UploadBlog() {
                   {/* Category Selection */}
                   <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                     <InputLabel error={categoryError}>
-                      Category {categoryError && modalMode !== "view" && "(required)"}
+                      Category{" "}
+                      {categoryError && modalMode !== "view" && "(required)"}
                     </InputLabel>
                     <Select
                       value={category}
@@ -1157,7 +1336,8 @@ export default function UploadBlog() {
                   {/* Pet Type Selection */}
                   <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                     <InputLabel error={petTypeError}>
-                      Pet Type {petTypeError && modalMode !== "view" && "(required)"}
+                      Pet Type{" "}
+                      {petTypeError && modalMode !== "view" && "(required)"}
                     </InputLabel>
                     <Select
                       value={petType}
@@ -1198,7 +1378,7 @@ export default function UploadBlog() {
                   >
                     Tags
                   </Typography>
-                  
+
                   {modalMode !== "view" ? (
                     <>
                       <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
@@ -1208,7 +1388,9 @@ export default function UploadBlog() {
                           fullWidth
                           value={tagInput}
                           onChange={(e) => setTagInput(e.target.value)}
-                          onKeyPress={(e) => e.key === "Enter" && handleAddTag()}
+                          onKeyPress={(e) =>
+                            e.key === "Enter" && handleAddTag()
+                          }
                         />
                         <OutlineButton
                           onClick={handleAddTag}
@@ -1219,7 +1401,12 @@ export default function UploadBlog() {
                         </OutlineButton>
                       </Box>
                       <Box
-                        sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 2 }}
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 0.5,
+                          mb: 2,
+                        }}
                       >
                         {tags.map((tag) => (
                           <Chip
@@ -1235,7 +1422,12 @@ export default function UploadBlog() {
                     </>
                   ) : (
                     <Box
-                      sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 2 }}
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                        mb: 2,
+                      }}
                     >
                       {tags.map((tag) => (
                         <Chip
@@ -1273,7 +1465,13 @@ export default function UploadBlog() {
             </Grid>
           </DialogContent>
 
-          <DialogActions sx={{ px: 2, py: 1.5, borderTop: `1px solid ${theme.palette.divider}` }}>
+          <DialogActions
+            sx={{
+              px: 2,
+              py: 1.5,
+              borderTop: `1px solid ${theme.palette.divider}`,
+            }}
+          >
             <OutlineButton
               onClick={handleCloseModal}
               size="small"
@@ -1281,7 +1479,7 @@ export default function UploadBlog() {
             >
               {modalMode === "view" ? "Close" : "Cancel"}
             </OutlineButton>
-            
+
             {modalMode !== "view" && (
               <GradientButton
                 type="submit"
@@ -1299,9 +1497,15 @@ export default function UploadBlog() {
                 }
                 sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
               >
-                {isUploading || createBlogMutation.isPending || updateBlogMutation.isPending
-                  ? "Saving..."
-                  : modalMode === "create" ? "Create Post" : "Update Post"}
+                {isUploading ||
+                createBlogMutation.isPending ||
+                updateBlogMutation.isPending ? (
+                  <CircularProgress size={16} sx={{ color: "white" }} />
+                ) : modalMode === "create" ? (
+                  "Create Post"
+                ) : (
+                  "Update Post"
+                )}
               </GradientButton>
             )}
           </DialogActions>
