@@ -38,6 +38,7 @@ import Video from "../pages/home/Video/Video";
 import UploadBlog from "../pages/superadmin/UploadBlog";
 import VideoUpload from "../pages/superadmin/VideoUpload";
 import About from "../pages/home/About/About";
+import BlogDetail from "../pages/home/Blog/BlogDetail";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -133,6 +134,8 @@ export const AppRoutes = () => {
             </PublicLayout>
           }
         />
+
+        {/* Blog Routes - Fixed the syntax error */}
         <Route
           path="/blog"
           element={
@@ -140,10 +143,22 @@ export const AppRoutes = () => {
               title="Blog"
               description="Latest updates and news about pets"
             >
-              <Blog type="blog" />
+              <Blog />
             </PublicLayout>
           }
         />
+        <Route
+          path="/blog/:title_id"
+          element={
+            <PublicLayout
+              title="Blog Details"
+              description="Read our latest blog posts about pets"
+            >
+              <BlogDetail />
+            </PublicLayout>
+          }
+        />
+
         <Route
           path="/contact"
           element={

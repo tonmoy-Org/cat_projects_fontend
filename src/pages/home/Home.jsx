@@ -1,22 +1,19 @@
 // Home.jsx
 import React from 'react';
-import Services from './Services'; // Adjust path as needed
+import Services from './Services';
 import HeroServiceSection from '../../components/shared/HeroServiceSection';
 import WhyChooseSectionComponent from '../../components/shared/WhyChooseSectionComponent';
-import TeamSectionComponent from '../../components/shared/TeamSectionComponent';
 import Adoption from './Adoption';
-import Testimonials from './Testimonials';
+import Banner from './Banner';
 
 const Home = () => {
     return (
         <>
+            <Banner />
             <HeroServiceSection />
             <Services />
             <WhyChooseSectionComponent />
             <Adoption />
-            <TeamSectionComponent />
-            <Testimonials />
-
         </>
     );
 };

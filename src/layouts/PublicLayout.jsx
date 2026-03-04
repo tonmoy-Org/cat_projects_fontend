@@ -41,6 +41,7 @@ import GradientButton from "../components/ui/GradientButton";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "../auth/AuthProvider";
 import logo from "../public/logo.png";
+import Footer from "./Footer";
 
 // HideOnScroll component for hiding AppBar on scroll
 function HideOnScroll(props) {
@@ -143,11 +144,6 @@ export const PublicLayout = ({ children, title, description }) => {
       icon: <PersonIcon fontSize="small" />,
     },
     {
-      label: "Settings",
-      path: "/settings",
-      icon: <SettingsIcon fontSize="small" />,
-    },
-    {
       label: "Logout",
       action: handleLogout,
       icon: <LogoutIcon fontSize="small" />,
@@ -198,7 +194,7 @@ export const PublicLayout = ({ children, title, description }) => {
             backdropFilter: "blur(8px)",
             boxShadow: "none",
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-            py: { xs: 0.8, md: 0.5 },
+            py: { xs: 0.8, md: 1 },
             px: { xs: 1.5, md: 0 },
           }}
         >
@@ -400,7 +396,7 @@ export const PublicLayout = ({ children, title, description }) => {
                           variant="body2"
                           sx={{ fontWeight: 600, fontSize: "0.9rem" }}
                         >
-                          {user?.displayName || "User"}
+                          {user?.name || "User"}
                         </Typography>
                         <Typography
                           variant="caption"
@@ -440,9 +436,9 @@ export const PublicLayout = ({ children, title, description }) => {
                             }),
                             ...(item.label !== "Logout" &&
                               isActive(item.path) && {
-                                color: ACTIVE_COLOR,
-                                backgroundColor: LIGHT_BG,
-                              }),
+                              color: ACTIVE_COLOR,
+                              backgroundColor: LIGHT_BG,
+                            }),
                           }}
                         >
                           <Box
@@ -676,35 +672,7 @@ export const PublicLayout = ({ children, title, description }) => {
       <Box sx={{ flex: 1, pt: 0 }}>{children}</Box>
 
       {/* Footer */}
-      <Box
-        sx={{
-          borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-          backgroundColor: theme.palette.background.paper,
-          py: 3,
-        }}
-      >
-        <Container maxWidth="lg">
-          <Typography
-            variant="body2"
-            align="center"
-            sx={{
-              color: theme.palette.text.secondary,
-              opacity: 0.7,
-              fontSize: "0.8rem",
-              letterSpacing: "0.02em",
-            }}
-          >
-            © {new Date().getFullYear()} FatherOfMeow. All rights reserved.
-            <Box
-              component="span"
-              sx={{ mx: 1, color: alpha(ACTIVE_COLOR, 0.5) }}
-            >
-              •
-            </Box>
-            Made with ❤️ for cat lovers
-          </Typography>
-        </Container>
-      </Box>
+      <Footer />
     </Box>
   );
 };

@@ -7,7 +7,6 @@ import {
   styled,
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
-import img3 from '../../public/About/pet3.png';
 
 // Theme colors
 const iconColor = '#db89ca';
@@ -15,27 +14,25 @@ const iconColor = '#db89ca';
 // Styled components
 const WhyChooseSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#fff',
-  [theme.breakpoints.up('lg')]: {
-    marginBottom: '80px',
-    paddingLeft: '300px',
-  },
+  padding: '80px 0',
 }));
 
-const SectionTitleWrapper = styled(Box)({
+const SectionSubtitle = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
   marginBottom: '15px',
 });
 
-const SectionTitle = styled(Typography)({
+const SubtitleText = styled(Typography)({
   fontSize: '15px',
   fontWeight: 600,
   letterSpacing: '1px',
   color: '#333',
+  textTransform: 'uppercase',
 });
 
-const SectionIcon = styled(Box)({
+const IconWrapper = styled(Box)({
   width: 40,
   height: 40,
   borderRadius: '50%',
@@ -45,7 +42,7 @@ const SectionIcon = styled(Box)({
   justifyContent: 'center',
 });
 
-const MainTitle = styled(Typography)({
+const SectionTitle = styled(Typography)({
   fontSize: '36px',
   fontWeight: 700,
   color: '#1a1a1a',
@@ -60,27 +57,51 @@ const Description = styled(Typography)({
   fontSize: '16px',
   color: '#666',
   lineHeight: 1.8,
-  marginBottom: '25px',
-  maxWidth: '90%',
+  marginBottom: '30px',
 });
 
-const WhyChooseImage = styled('img')(({ theme }) => ({
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-  borderRadius: '10px',
+const FeatureList = styled('ul')({
+  listStyle: 'none',
+  padding: 0,
+  margin: 0,
+});
+
+const FeatureItem = styled('li')({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  marginBottom: '12px',
+});
+
+const FeatureIcon = styled(Box)({
+  color: iconColor,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  '& svg': {
+    fontSize: '20px',
+  },
+});
+
+const FeatureText = styled(Typography)({
+  fontWeight: 500,
+  fontSize: '14px',
+  color: '#333',
+});
+
+const ImageWrapper = styled(Box)({
+  textAlign: 'right',
+  marginTop: '30px',
+  '@media (min-width: 900px)': {
+    marginTop: 0,
+  },
+});
+
+const WhyChooseImage = styled('img')({
+  maxWidth: '100%',
+  height: 'auto',
   display: 'block',
-  position: 'relative',
-  zIndex: 1,
-  maxHeight: '300px',
-  [theme.breakpoints.up('md')]: {
-    maxHeight: '400px',
-  },
-  [theme.breakpoints.up('lg')]: {
-    maxHeight: '500px',
-    margin: '-30px 0',
-  },
-}));
+});
 
 const WhyChooseSectionComponent = ({
   subtitle = "We love animals",
@@ -96,38 +117,79 @@ const WhyChooseSectionComponent = ({
     "Certified Groomer",
     "20+ Years Experience"
   ],
-  imageSrc = img3,
+  imageSrc = "https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/pet3.png",
   imageAlt = "Happy pet"
 }) => {
-  return (
-    <WhyChooseSection>
-      <Container maxWidth="xl">
-        <Grid container spacing={4} alignItems="center">
-          <Grid size={{ xs: 12, md: 6 }}>
-            <SectionTitleWrapper>
-              <SectionIcon>
-                <PetsIcon sx={{ color: '#fff', fontSize: 30 }} />
-              </SectionIcon>
-              <SectionTitle>{subtitle}</SectionTitle>
-            </SectionTitleWrapper>
-            <MainTitle sx={{ mb: 3 }}>{title}</MainTitle>
-            <Description>{description}</Description>
+  // Split features into two columns
+  const midIndex = Math.ceil(features.length / 2);
+  const leftColumnFeatures = features.slice(0, midIndex);
+  const rightColumnFeatures = features.slice(midIndex);
 
-            <Grid container spacing={1} sx={{ mt: 2 }}>
-              {features.map((feature, index) => (
-                <Grid size={{ xs: 6 }} key={index}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ color: iconColor }}>
-                      <PetsIcon sx={{ fontSize: '20px' }} />
-                    </Box>
-                    <Typography sx={{ fontWeight: 500, fontSize: '14px' }}>{feature}</Typography>
-                  </Box>
+  return (
+    <WhyChooseSection className="banner section-padding">
+      <Container maxWidth="lg">
+        <Grid container spacing={4} alignItems="center">
+          {/* Left Column - Content */}
+          <Grid size={{ xs: 12, lg: 6, md: 12 }}>
+            <Box className="content">
+              <SectionSubtitle className="section-subtitle">
+                <IconWrapper className="icon">
+                  <PetsIcon sx={{ color: '#fff', fontSize: 30 }} />
+                </IconWrapper>
+                <SubtitleText>{subtitle}</SubtitleText>
+              </SectionSubtitle>
+              
+              <SectionTitle className="section-title">
+                {title}
+              </SectionTitle>
+              
+              <Description>
+                {description}
+              </Description>
+
+              {/* Features Grid */}
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, lg: 6, md: 6 }}>
+                  <FeatureList className="listext list-unstyled">
+                    {leftColumnFeatures.map((feature, index) => (
+                      <FeatureItem key={`left-${index}`}>
+                        <FeatureIcon className="listext-icon">
+                          <PetsIcon />
+                        </FeatureIcon>
+                        <FeatureText className="listext-text">
+                          {feature}
+                        </FeatureText>
+                      </FeatureItem>
+                    ))}
+                  </FeatureList>
                 </Grid>
-              ))}
-            </Grid>
+                <Grid size={{ xs: 12, lg: 6, md: 6 }}>
+                  <FeatureList className="listext list-unstyled">
+                    {rightColumnFeatures.map((feature, index) => (
+                      <FeatureItem key={`right-${index}`}>
+                        <FeatureIcon className="listext-icon">
+                          <PetsIcon />
+                        </FeatureIcon>
+                        <FeatureText className="listext-text">
+                          {feature}
+                        </FeatureText>
+                      </FeatureItem>
+                    ))}
+                  </FeatureList>
+                </Grid>
+              </Grid>
+            </Box>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <WhyChooseImage src={imageSrc} alt={imageAlt} />
+
+          {/* Right Column - Image with offset */}
+          <Grid size={{ xs: 12, lg: 4, md: 12 }} offset={{ lg: 2 }}>
+            <ImageWrapper className="img">
+              <WhyChooseImage 
+                src={imageSrc} 
+                alt={imageAlt}
+                className="img-fluid"
+              />
+            </ImageWrapper>
           </Grid>
         </Grid>
       </Container>

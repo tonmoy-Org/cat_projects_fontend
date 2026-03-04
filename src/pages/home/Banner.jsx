@@ -1,0 +1,270 @@
+// Banner.jsx
+import React from 'react';
+import {
+    Container,
+    Typography,
+    Button,
+    Box,
+    CircularProgress,
+    styled,
+} from '@mui/material';
+import { CCarousel, CCarouselItem } from '@coreui/react';
+import '@coreui/coreui/dist/css/coreui.min.css';
+import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import axiosInstance from '../../api/axios';
+
+// Theme colors
+const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_DARK = '#4A3D75';
+
+// Styled components
+const BannerWrapper = styled(Box)(({ theme }) => ({
+    width: '100%',
+    [theme.breakpoints.down('sm')]: {
+        paddingTop: '60px',
+    },
+}));
+
+const SlideContainer = styled(Box)({
+    position: 'relative',
+    width: '100%',
+    height: '600px',
+    '@media (max-width: 900px)': {
+        height: '500px',
+    },
+    '@media (max-width: 600px)': {
+        height: '400px',
+    },
+});
+
+const SlideImage = styled('img')({
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+});
+
+const Overlay = styled(Box)({
+    position: 'absolute',
+    inset: 0,
+    background: 'linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 40px',
+    '@media (max-width: 600px)': {
+        padding: '0 20px',
+        justifyContent: 'center',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)',
+    },
+});
+
+const ContentWrapper = styled(motion.div)({
+    maxWidth: '600px',
+    textAlign: 'right',
+    '@media (max-width: 600px)': {
+        textAlign: 'center',
+        maxWidth: '100%',
+    },
+});
+
+const SlideTitle = styled(Typography)(({ theme }) => ({
+    fontWeight: 700,
+    color: '#fff',
+    marginBottom: '20px',
+    textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+    fontSize: '3rem',
+    [theme.breakpoints.down('md')]: {
+        fontSize: '2.5rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '2rem',
+    },
+}));
+
+const SlideDescription = styled(Typography)(({ theme }) => ({
+    color: '#fff',
+    marginBottom: '30px',
+    fontSize: '1.2rem',
+    lineHeight: 1.6,
+    textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '1rem',
+    },
+}));
+
+const OrderButton = styled(Button)({
+    backgroundColor: PRIMARY_COLOR,
+    color: '#fff',
+    borderRadius: '50px',
+    fontWeight: 600,
+    padding: '12px 40px',
+    fontSize: '1.1rem',
+    textTransform: 'none',
+    boxShadow: '0 4px 15px rgba(92,77,145,0.3)',
+    '&:hover': {
+        backgroundColor: PRIMARY_DARK,
+        transform: 'translateY(-2px)',
+        boxShadow: '0 6px 20px rgba(92,77,145,0.4)',
+    },
+    '@media (max-width: 600px)': {
+        padding: '10px 30px',
+        fontSize: '1rem',
+    },
+});
+
+const LoadingContainer = styled(Box)({
+    width: '100%',
+    height: '600px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+    '@media (max-width: 900px)': {
+        height: '500px',
+    },
+    '@media (max-width: 600px)': {
+        height: '400px',
+    },
+});
+
+const ErrorContainer = styled(Box)({
+    width: '100%',
+    height: '600px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+    '@media (max-width: 900px)': {
+        height: '500px',
+    },
+    '@media (max-width: 600px)': {
+        height: '400px',
+    },
+});
+
+// Animation variants
+const titleVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.8, ease: "easeOut" }
+    }
+};
+
+const descriptionVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.8, delay: 0.2, ease: "easeOut" }
+    }
+};
+
+const buttonVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.8, delay: 0.4, ease: "easeOut" }
+    }
+};
+
+const Banner = () => {
+    // Fetch banner data from API
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['banner'],
+        queryFn: async () => {
+            const response = await axiosInstance.get('/carousel');
+            return response.data;
+        },
+    });
+
+    // Process API data - only if data exists
+    const slides = data?.data || [];
+
+    if (isLoading) {
+        return (
+            <BannerWrapper>
+                <Container maxWidth="xl">
+                    <LoadingContainer>
+                        <CircularProgress sx={{ color: PRIMARY_COLOR }} />
+                    </LoadingContainer>
+                </Container>
+            </BannerWrapper>
+        );
+    }
+
+    if (error || !slides.length) {
+        return (
+            <BannerWrapper>
+                <Container maxWidth="xl">
+                    <ErrorContainer>
+                        <Typography variant="h6" color="textSecondary">
+                            No banner slides available
+                        </Typography>
+                    </ErrorContainer>
+                </Container>
+            </BannerWrapper>
+        );
+    }
+
+    return (
+        <BannerWrapper>
+            <CCarousel
+                indicators
+                transition="crossfade"
+                controls={false}
+                interval={5000}
+                wrap={true}
+            >
+                {slides.map((slide) => (
+                    <CCarouselItem key={slide._id}>
+                        <SlideContainer>
+                            <SlideImage
+                                src={slide.image}
+                                alt={slide.smallTitle || slide.title || 'Banner slide'}
+                            />
+                            <Overlay>
+                                <ContentWrapper
+                                    initial="hidden"
+                                    animate="visible"
+                                    variants={{
+                                        visible: {
+                                            transition: { staggerChildren: 0.2 }
+                                        }
+                                    }}
+                                >
+                                    <motion.div variants={titleVariants}>
+                                        <SlideTitle variant="h3">
+                                            {slide.title || slide.smallTitle}
+                                        </SlideTitle>
+                                    </motion.div>
+
+                                    <motion.div variants={descriptionVariants}>
+                                        <SlideDescription variant="body1">
+                                            {slide.paragraph}
+                                        </SlideDescription>
+                                    </motion.div>
+
+                                    <motion.div variants={buttonVariants}>
+                                        <OrderButton
+                                            variant="contained"
+                                            href={slide.btnLink}
+                                            size="large"
+                                        >
+                                            {slide.btnText || 'Learn More'}
+                                        </OrderButton>
+                                    </motion.div>
+                                </ContentWrapper>
+                            </Overlay>
+                        </SlideContainer>
+                    </CCarouselItem>
+                ))}
+            </CCarousel>
+        </BannerWrapper>
+    );
+};
+
+export default Banner;

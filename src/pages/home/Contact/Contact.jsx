@@ -187,7 +187,7 @@ const Contact = () => {
       />
       <ContactSection>
         <Container maxWidth="lg">
-          <Grid container spacing={7} justifyContent="center">
+          <Grid container spacing={4} justifyContent="center">
             {/* Left Column - Location & Opening hours */}
             <Grid size={{ xs: 12, md: 5 }}>
               <LeftColumnWrapper>

@@ -339,8 +339,7 @@ const Blog = () => {
   };
 
   const handleCardClick = (post) => {
-    console.log("Navigating to:", `/blog/${post.slug}`, post);
-    navigate(`/blog/${post.slug}`, { state: { post } });
+    navigate(`/blog/${post.title_id}`, { state: { post } });
   };
 
   const handleAuthorClick = (e, author) => {
@@ -391,7 +390,7 @@ const Blog = () => {
         >
           <Grid container spacing={isMobile ? 2 : 3}>
             {blogs.map((post) => (
-              <Grid item xs={12} sm={6} md={4} key={post._id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={post._id}>
                 <BlogCard onClick={() => handleCardClick(post)}>
                   <Box className="blog-image-wrapper">
                     <ImageWrapper>
@@ -399,7 +398,7 @@ const Blog = () => {
                         src={post.imageUrl || post.image}
                         alt={post.title}
                         className="blog-image"
-                        loading="lazy" // Add lazy loading for better performance
+                        loading="lazy"
                       />
                       <CategoryTag
                         className="blog-category"

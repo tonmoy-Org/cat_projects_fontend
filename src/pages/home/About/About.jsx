@@ -1,59 +1,21 @@
+// About.jsx
 import React from "react";
 import {
   Box,
   Container,
   Typography,
-  IconButton,
   styled,
   Grid,
   Card,
 } from "@mui/material";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PetsIcon from "@mui/icons-material/Pets";
 import HeroServiceSection from "../../../components/shared/HeroServiceSection";
-import TeamSection from "../../../components/shared/TeamSectionComponent";
 import WhyChooseSection from "../../../components/shared/WhyChooseSectionComponent";
 import SectionTile from "../../../components/SectionTile";
+import VideoSection from "../../../components/shared/VideoSection";
 
-// Video Section (kept as is since it's unique)
-const VideoSection = styled(Box)({
-  position: "relative",
-  height: "600px",
-  backgroundImage:
-    "url(https://images.unsplash.com/photo-1450778869180-41d0601e046e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1586&q=80)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundAttachment: "fixed",
-  backgroundRepeat: "no-repeat",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-});
-
-const PlayButton = styled(IconButton)({
-  backgroundColor: "#db89ca",
-  color: "#fff",
-  width: "80px",
-  height: "80px",
-  position: "relative",
-  zIndex: 2,
-  "&:hover": {
-    backgroundColor: "#ff6b6b",
-    transform: "scale(1.1)",
-  },
-  "& svg": {
-    fontSize: "50px",
-  },
-});
+// Theme colors
+const PRIMARY_COLOR = '#5C4D91';
 
 // Gallery Section
 const GallerySection = styled(Box)({
@@ -80,7 +42,7 @@ const SectionIcon = styled(Box)({
   width: 40,
   height: 40,
   borderRadius: "50%",
-  backgroundColor: "#db89ca",
+  backgroundColor: PRIMARY_COLOR,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -123,7 +85,7 @@ const GalleryCategory = styled(Box)({
   position: "absolute",
   bottom: "15px",
   left: "15px",
-  backgroundColor: "#ff5252",
+  backgroundColor: PRIMARY_COLOR,
   color: "#fff",
   padding: "5px 15px",
   borderRadius: "20px",
@@ -165,6 +127,14 @@ const galleryImages = [
   },
 ];
 
+// Handle video play
+const handleVideoPlay = () => {
+  // You can customize this function based on your needs
+  // For example, open a modal with YouTube video
+  console.log("Play video clicked");
+  // window.open('https://www.youtube.com/watch?v=your-video-id', '_blank');
+};
+
 const About = () => {
   return (
     <Box>
@@ -177,31 +147,16 @@ const About = () => {
       />
       <HeroServiceSection />
 
-      {/* Team Section - Now a reusable component */}
-      <TeamSection />
+      {/* Video Section - Using the reusable component */}
+      <VideoSection
+        videoUrl="https://youtu.be/545E1RCSzLw"
+        backgroundImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/3.jpg"
+        subtitle="Promo video"
+        title="Watch pepito video"
+        icon={true}
+      />
 
-      {/* Video Section - Kept as is */}
-      <VideoSection>
-        <PlayButton>
-          <PlayCircleOutlineIcon />
-        </PlayButton>
-        <Typography
-          variant="h4"
-          sx={{
-            position: "absolute",
-            bottom: "50px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            color: "#fff",
-            zIndex: 2,
-            fontWeight: 600,
-          }}
-        >
-          Watch people video
-        </Typography>
-      </VideoSection>
-
-      {/* Why Choose Us Section - Now a reusable component */}
+      {/* Why Choose Us Section */}
       <WhyChooseSection />
 
       {/* Gallery Section */}
