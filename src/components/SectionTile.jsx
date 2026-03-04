@@ -26,7 +26,7 @@ const ContentWrapper = styled(Box)({
   zIndex: 2,
   display: "flex",
   alignItems: "center",
-  minHeight: "150px",
+  minHeight: "200px",
 });
 
 const IconWrapper = styled(Box)(({ theme }) => ({

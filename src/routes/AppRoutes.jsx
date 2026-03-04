@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Login } from "../pages/login/Login";
-import { Home } from "../pages/home/Home";
+import Home from "../pages/home/Home";
 import { useAuth } from "../auth/AuthProvider";
 import { PrivateRoute } from "../auth/PrivateRoute";
 import { ErrorPage } from "../pages/error/ErrorPage";
@@ -34,9 +34,10 @@ import { PublicLayout } from "../layouts/PublicLayout";
 import { HomeCarousel } from "../pages/superadmin/HomeCarousel";
 import Blog from "../pages/home/Blog/Blog";
 import Contact from "../pages/home/Contact/Contact";
+import Video from "../pages/home/Video/Video";
 import UploadBlog from "../pages/superadmin/UploadBlog";
 import VideoUpload from "../pages/superadmin/VideoUpload";
-import Video from "../pages/home/Video/Video";
+import About from "../pages/home/About/About";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -159,6 +160,14 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Videos" description="Latest videos about pets">
               <Video />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PublicLayout title="About Us" description="Learn more about our company">
+              <About />
             </PublicLayout>
           }
         />

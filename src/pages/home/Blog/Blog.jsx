@@ -8,21 +8,29 @@ import {
   PaginationItem,
   useTheme,
   styled,
+  useMediaQuery,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../../api/axios";
 import SectionTile from "../../../components/SectionTile";
 
+// Theme colors
+const primaryColor = "#ff6b6b";
+
 // Styled components for custom hover effects
-const BlogSection = styled(Box)({
+const BlogSection = styled(Box)(({ theme }) => ({
   backgroundColor: "#ffffff",
   width: "100%",
   display: "flex",
   justifyContent: "center",
-});
+  padding: theme.spacing(4, 0),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(3, 0),
+  },
+}));
 
 const BlogCard = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -33,6 +41,8 @@ const BlogCard = styled(Box)(({ theme }) => ({
   width: "100%",
   boxShadow: "none",
   border: "1px solid #f0f0f0",
+  cursor: "pointer",
+  position: "relative",
   "&:hover": {
     transform: "translateY(-5px)",
     boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
@@ -55,20 +65,34 @@ const BlogCard = styled(Box)(({ theme }) => ({
       display: "flex",
     },
   },
+  // Mobile touch optimization
+  [theme.breakpoints.down("sm")]: {
+    "&:active": {
+      transform: "translateY(-3px)",
+      boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
+    },
+  },
 }));
 
-const ImageWrapper = styled(Box)({
+const ImageWrapper = styled(Box)(({ theme }) => ({
   position: "relative",
   overflow: "hidden",
   width: "100%",
   height: "240px",
-});
+  [theme.breakpoints.down("sm")]: {
+    height: "200px",
+  },
+  [theme.breakpoints.down("xs")]: {
+    height: "180px",
+  },
+}));
 
 const BlogImage = styled("img")({
   width: "100%",
   height: "100%",
   objectFit: "cover",
   transition: "transform 0.5s ease",
+  pointerEvents: "none",
 });
 
 const CategoryTag = styled(Box)(({ theme }) => ({
@@ -82,7 +106,7 @@ const CategoryTag = styled(Box)(({ theme }) => ({
   fontSize: "14px",
   fontWeight: 500,
   transition: "all 0.3s ease",
-  zIndex: 2,
+  zIndex: 10,
   cursor: "pointer",
   opacity: 0,
   visibility: "hidden",
@@ -90,29 +114,40 @@ const CategoryTag = styled(Box)(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.primary.dark,
   },
+  // Always show category on mobile for better UX
+  [theme.breakpoints.down("sm")]: {
+    opacity: 1,
+    visibility: "visible",
+    transform: "translateY(0)",
+    padding: "4px 12px",
+    fontSize: "12px",
+    top: "10px",
+    right: "10px",
+  },
 }));
 
-const BlogContent = styled(Box)({
+const BlogContent = styled(Box)(({ theme }) => ({
   padding: "20px 18px",
   position: "relative",
-});
+  pointerEvents: "none",
+  [theme.breakpoints.down("sm")]: {
+    padding: "15px 12px",
+  },
+}));
 
 const BlogTitle = styled(Typography)(({ theme }) => ({
   fontSize: "18px",
   fontWeight: 600,
   marginBottom: "10px",
   lineHeight: 1.4,
-  "& a": {
-    color: "#333",
-    textDecoration: "none",
-    transition: "color 0.3s ease",
-    "&:hover": {
-      color: theme.palette.primary.main,
-    },
+  color: "#333",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "16px",
+    marginBottom: "8px",
   },
 }));
 
-const BlogDescription = styled(Typography)({
+const BlogDescription = styled(Typography)(({ theme }) => ({
   color: "#666",
   fontSize: "14px",
   lineHeight: 1.6,
@@ -122,14 +157,18 @@ const BlogDescription = styled(Typography)({
   WebkitBoxOrient: "vertical",
   overflow: "hidden",
   textOverflow: "ellipsis",
-});
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "13px",
+    marginBottom: "12px",
+  },
+}));
 
 const AuthorInfoWrapper = styled(Box)({
   position: "relative",
   minHeight: "24px",
 });
 
-const DateOnly = styled(Typography)({
+const DateOnly = styled(Typography)(({ theme }) => ({
   position: "absolute",
   top: 0,
   left: 0,
@@ -140,9 +179,16 @@ const DateOnly = styled(Typography)({
   color: "#999",
   fontSize: "14px",
   fontWeight: 400,
-});
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "12px",
+    position: "relative", // Reset position on mobile
+    opacity: 1,
+    visibility: "visible",
+    display: "block",
+  },
+}));
 
-const AuthorInfo = styled(Box)({
+const AuthorInfo = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: 0,
   left: 0,
@@ -152,22 +198,39 @@ const AuthorInfo = styled(Box)({
   opacity: 0,
   visibility: "hidden",
   display: "none",
-});
+  // Show author info on mobile with different layout
+  [theme.breakpoints.down("sm")]: {
+    position: "relative",
+    opacity: 1,
+    visibility: "visible",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "5px",
+    marginTop: "10px",
+  },
+}));
 
-const DateText = styled(Typography)({
+const DateText = styled(Typography)(({ theme }) => ({
   color: "#999",
   fontSize: "14px",
   fontWeight: 400,
   whiteSpace: "nowrap",
-});
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "12px",
+  },
+}));
 
-const AuthorLink = styled("a")(({ theme }) => ({
+const AuthorLink = styled("span")(({ theme }) => ({
   color: "#333",
   textDecoration: "none",
   fontWeight: 500,
   fontSize: "14px",
   whiteSpace: "nowrap",
   position: "relative",
+  cursor: "pointer",
+  zIndex: 20,
+  pointerEvents: "auto",
   "&::after": {
     content: '""',
     position: "absolute",
@@ -181,14 +244,23 @@ const AuthorLink = styled("a")(({ theme }) => ({
   "&:hover::after": {
     width: "100%",
   },
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "13px",
+    "&::after": {
+      display: "none", // Remove underline effect on mobile for better performance
+    },
+  },
 }));
 
-const PaginationWrapper = styled(Box)({
+const PaginationWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
   marginTop: "50px",
   width: "100%",
-});
+  [theme.breakpoints.down("sm")]: {
+    marginTop: "30px",
+  },
+}));
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
   "& .MuiPaginationItem-root": {
@@ -202,6 +274,12 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
     backgroundColor: "#fff",
     border: "1px solid #e0e0e0",
     transition: "all 0.3s ease",
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "36px",
+      height: "36px",
+      fontSize: "14px",
+      margin: "0 3px",
+    },
     "&:hover": {
       backgroundColor: theme.palette.primary.main,
       color: "#fff",
@@ -220,20 +298,29 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
     fontSize: "18px",
     "& svg": {
       fontSize: "20px",
+      [theme.breakpoints.down("sm")]: {
+        fontSize: "18px",
+      },
     },
   },
 }));
 
+// Helper function to format date
 const formatDate = (dateString) => {
-  const options = { day: "2-digit", month: "short", year: "numeric" };
-  return new Date(dateString)
-    .toLocaleDateString("en-GB", options)
-    .replace(/ /g, " ");
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 };
 
 const Blog = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["blogs", page],
@@ -251,11 +338,26 @@ const Blog = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleCardClick = (post) => {
+    console.log("Navigating to:", `/blog/${post.slug}`, post);
+    navigate(`/blog/${post.slug}`, { state: { post } });
+  };
+
+  const handleAuthorClick = (e, author) => {
+    e.stopPropagation();
+    navigate(`/author/${author.toLowerCase().replace(/\s+/g, "-")}`);
+  };
+
+  const handleCategoryClick = (e, category) => {
+    e.stopPropagation();
+    navigate(`/category/${category.toLowerCase()}`);
+  };
+
   if (isLoading) {
     return (
-      <BlogSection sx={{ py: 6 }}>
+      <BlogSection>
         <Container maxWidth="lg">
-          <Typography textAlign="center">Loading blogs...</Typography>
+          <Typography>Loading...</Typography>
         </Container>
       </BlogSection>
     );
@@ -263,11 +365,9 @@ const Blog = () => {
 
   if (error) {
     return (
-      <BlogSection sx={{ py: 6 }}>
+      <BlogSection>
         <Container maxWidth="lg">
-          <Typography textAlign="center" color="error">
-            Error loading blogs: {error.message}
-          </Typography>
+          <Typography color="error">Error loading blogs</Typography>
         </Container>
       </BlogSection>
     );
@@ -282,129 +382,110 @@ const Blog = () => {
         icon={true}
         iconClass="flaticon-custom-icon"
       />
-      <BlogSection sx={{ py: 6 }}>
+      <BlogSection>
         <Container
           maxWidth="lg"
           sx={{
             px: { xs: 2, sm: 3, md: 3 },
-            margin: "0 auto",
           }}
         >
-          {blogs.length === 0 ? (
-            <Typography textAlign="center" variant="h6" color="text.secondary">
-              No blogs found
-            </Typography>
-          ) : (
-            <>
-              <Grid
-                container
-                spacing={3}
-                sx={{
-                  margin: 0,
-                  width: "100%",
-                }}
-              >
-                {blogs.map((post) => (
-                  <Grid
-                    size={{ xs: 12, sm: 6, md: 4 }}
-                    key={post._id}
-                    sx={{
-                      padding: "0 12px !important",
-                      marginBottom: "24px",
-                    }}
-                  >
-                    <BlogCard>
-                      <Box className="blog-image-wrapper">
-                        <ImageWrapper>
-                          <RouterLink to={`/blog/${post.title_id}`}>
-                            <BlogImage
-                              src={post.imageUrl}
-                              alt={post.title}
-                              className="blog-image"
-                            />
-                          </RouterLink>
-                          <CategoryTag className="blog-category">
-                            {post.category}
-                          </CategoryTag>
-                        </ImageWrapper>
-                      </Box>
+          <Grid container spacing={isMobile ? 2 : 3}>
+            {blogs.map((post) => (
+              <Grid item xs={12} sm={6} md={4} key={post._id}>
+                <BlogCard onClick={() => handleCardClick(post)}>
+                  <Box className="blog-image-wrapper">
+                    <ImageWrapper>
+                      <BlogImage
+                        src={post.imageUrl || post.image}
+                        alt={post.title}
+                        className="blog-image"
+                        loading="lazy" // Add lazy loading for better performance
+                      />
+                      <CategoryTag
+                        className="blog-category"
+                        onClick={(e) => handleCategoryClick(e, post.category)}
+                      >
+                        {post.category}
+                      </CategoryTag>
+                    </ImageWrapper>
+                  </Box>
 
-                      <BlogContent>
-                        <BlogTitle>
-                          <RouterLink to={`/blog/${post.title_id}`}>
-                            {post.title}
-                          </RouterLink>
-                        </BlogTitle>
+                  <BlogContent>
+                    <BlogTitle>{post.title}</BlogTitle>
 
-                        <BlogDescription>
-                          {post.excerpt ||
-                            post.content
-                              .replace(/<[^>]*>/g, "")
-                              .substring(0, 100) + "..."}
-                        </BlogDescription>
+                    <BlogDescription>
+                      {post.excerpt ||
+                        post.content
+                          ?.replace(/<[^>]*>/g, "")
+                          .substring(0, 100) + "..."}
+                    </BlogDescription>
 
-                        <AuthorInfoWrapper>
-                          {/* Initially visible - only date */}
-                          <DateOnly className="date-only">
-                            {formatDate(post.publishedAt)}
-                          </DateOnly>
+                    <AuthorInfoWrapper>
+                      {/* Initially visible - only date (hidden on mobile) */}
+                      {!isMobile && (
+                        <DateOnly className="date-only">
+                          {formatDate(post.publishedAt || post.date)}
+                        </DateOnly>
+                      )}
 
-                          {/* Shown on hover - full author info (date hides completely) */}
-                          <AuthorInfo className="author-info">
-                            <DateText variant="body2">
-                              {formatDate(post.publishedAt)}
-                            </DateText>
-                            <Box
+                      {/* Author info - visible on hover (always visible on mobile) */}
+                      <AuthorInfo className="author-info">
+                        <DateText variant="body2">
+                          {formatDate(post.publishedAt || post.date)}
+                        </DateText>
+                        {post.author && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
                               sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
+                                color: "#666",
+                                fontSize: isMobile ? "12px" : "14px",
                               }}
                             >
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  color: "#666",
-                                  fontSize: "14px",
-                                }}
-                              >
-                                by
-                              </Typography>
-                              <AuthorLink
-                                href={`/author/${post.author?.toLowerCase().replace(/\s+/g, "-")}`}
-                              >
-                                {post.author}
-                              </AuthorLink>
-                            </Box>
-                          </AuthorInfo>
-                        </AuthorInfoWrapper>
-                      </BlogContent>
-                    </BlogCard>
-                  </Grid>
-                ))}
+                              by
+                            </Typography>
+                            <AuthorLink
+                              onClick={(e) => handleAuthorClick(e, post.author)}
+                            >
+                              {post.author}
+                            </AuthorLink>
+                          </Box>
+                        )}
+                      </AuthorInfo>
+                    </AuthorInfoWrapper>
+                  </BlogContent>
+                </BlogCard>
               </Grid>
+            ))}
+          </Grid>
 
-              {pagination.totalPages > 1 && (
-                <PaginationWrapper>
-                  <StyledPagination
-                    count={pagination.totalPages}
-                    page={page}
-                    onChange={handlePageChange}
-                    variant="outlined"
-                    shape="rounded"
-                    renderItem={(item) => (
-                      <PaginationItem
-                        {...item}
-                        components={{
-                          next: ChevronRightIcon,
-                          previous: ChevronLeftIcon,
-                        }}
-                      />
-                    )}
+          {pagination.totalPages > 1 && (
+            <PaginationWrapper>
+              <StyledPagination
+                count={pagination.totalPages}
+                page={page}
+                onChange={handlePageChange}
+                variant="outlined"
+                shape="rounded"
+                size={isMobile ? "small" : "medium"}
+                renderItem={(item) => (
+                  <PaginationItem
+                    {...item}
+                    components={{
+                      next: ChevronRightIcon,
+                      previous: ChevronLeftIcon,
+                    }}
                   />
-                </PaginationWrapper>
-              )}
-            </>
+                )}
+              />
+            </PaginationWrapper>
           )}
         </Container>
       </BlogSection>
