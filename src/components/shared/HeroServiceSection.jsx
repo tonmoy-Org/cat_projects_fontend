@@ -13,6 +13,7 @@ import PetsIcon from '@mui/icons-material/Pets';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import StarIcon from '@mui/icons-material/Star';
+import img1 from '../../public/About/pet1.png';
 
 // Theme colors
 const primaryColor = '#ff6b6b';
@@ -240,7 +241,7 @@ const HeroServiceSection = ({
   ],
   buttonText = "Read more",
   phoneNumber = "123 456 7890",
-  imageUrl = "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1769&q=80",
+  imageUrl = img1,
   testimonial = {
     text: "Take care of animals as if they were your children!",
     author: "Olivia Martin",

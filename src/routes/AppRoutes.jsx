@@ -32,6 +32,7 @@ import Contact from '../pages/home/Contact/Contact';
 import About from '../pages/home/About/About';
 import Home from '../pages/home/Home';
 import BlogDetail from '../pages/home/Blog/BlogDetail';
+import Faq from '../pages/FAQ/faq';
 
 
 export const AppRoutes = () => {
@@ -137,6 +138,14 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Contact Us" description="Get in touch with us for any inquiries or support">
               <Contact />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/faq"
+          element={
+            <PublicLayout title="FAQ" description="Frequently asked questions about our services">
+              <Faq />
             </PublicLayout>
           }
         />
