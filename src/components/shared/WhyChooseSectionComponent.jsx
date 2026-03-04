@@ -14,7 +14,7 @@ const iconColor = '#db89ca';
 // Styled components
 const WhyChooseSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#fff',
-  padding: '80px 0',
+  paddingTop: '80px',
 }));
 
 const SectionSubtitle = styled(Box)({
@@ -89,18 +89,33 @@ const FeatureText = styled(Typography)({
   color: '#333',
 });
 
+// Updated ImageWrapper with better positioning for larger image
 const ImageWrapper = styled(Box)({
   textAlign: 'right',
   marginTop: '30px',
+  position: 'relative',
+  right: '-20px',
   '@media (min-width: 900px)': {
     marginTop: 0,
+    right: '-40px',
+  },
+  '@media (min-width: 1200px)': {
+    right: '-60px',
   },
 });
 
+// Updated WhyChooseImage with increased size
 const WhyChooseImage = styled('img')({
-  maxWidth: '100%',
+  width: '130%', // 30% larger than container
+  maxWidth: '130%',
   height: 'auto',
   display: 'block',
+  objectFit: 'contain',
+  '@media (max-width: 899px)': {
+    width: '100%',
+    maxWidth: '100%',
+    margin: '0 auto',
+  },
 });
 
 const WhyChooseSectionComponent = ({
@@ -138,11 +153,11 @@ const WhyChooseSectionComponent = ({
                 </IconWrapper>
                 <SubtitleText>{subtitle}</SubtitleText>
               </SectionSubtitle>
-              
+
               <SectionTitle className="section-title">
                 {title}
               </SectionTitle>
-              
+
               <Description>
                 {description}
               </Description>
@@ -181,11 +196,11 @@ const WhyChooseSectionComponent = ({
             </Box>
           </Grid>
 
-          {/* Right Column - Image with offset */}
-          <Grid size={{ xs: 12, lg: 4, md: 12 }} offset={{ lg: 2 }}>
+          {/* Right Column - Image with adjusted offset for larger image */}
+          <Grid size={{ xs: 12, lg: 5, md: 12 }} offset={{ lg: 1 }}>
             <ImageWrapper className="img">
-              <WhyChooseImage 
-                src={imageSrc} 
+              <WhyChooseImage
+                src={imageSrc}
                 alt={imageAlt}
                 className="img-fluid"
               />

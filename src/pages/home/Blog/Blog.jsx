@@ -9,6 +9,7 @@ import {
   useTheme,
   styled,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -18,7 +19,8 @@ import axiosInstance from "../../../api/axios";
 import SectionTile from "../../../components/SectionTile";
 
 // Theme colors
-const primaryColor = "#ff6b6b";
+const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_DARK = '#4A3D75';
 
 // Styled components for custom hover effects
 const BlogSection = styled(Box)(({ theme }) => ({
@@ -99,7 +101,7 @@ const CategoryTag = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: "15px",
   right: "15px",
-  backgroundColor: theme.palette.primary.main,
+  backgroundColor: PRIMARY_COLOR,
   color: "#fff",
   padding: "6px 15px",
   borderRadius: "20px",
@@ -112,7 +114,7 @@ const CategoryTag = styled(Box)(({ theme }) => ({
   visibility: "hidden",
   transform: "translateY(-10px)",
   "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: PRIMARY_DARK,
   },
   // Always show category on mobile for better UX
   [theme.breakpoints.down("sm")]: {
@@ -181,7 +183,7 @@ const DateOnly = styled(Typography)(({ theme }) => ({
   fontWeight: 400,
   [theme.breakpoints.down("sm")]: {
     fontSize: "12px",
-    position: "relative", // Reset position on mobile
+    position: "relative",
     opacity: 1,
     visibility: "visible",
     display: "block",
@@ -238,7 +240,7 @@ const AuthorLink = styled("span")(({ theme }) => ({
     left: "0",
     width: "0",
     height: "1px",
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: PRIMARY_COLOR,
     transition: "width 0.3s ease",
   },
   "&:hover::after": {
@@ -247,7 +249,7 @@ const AuthorLink = styled("span")(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     fontSize: "13px",
     "&::after": {
-      display: "none", // Remove underline effect on mobile for better performance
+      display: "none",
     },
   },
 }));
@@ -281,16 +283,16 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
       margin: "0 3px",
     },
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: PRIMARY_COLOR,
       color: "#fff",
-      borderColor: theme.palette.primary.main,
+      borderColor: PRIMARY_COLOR,
     },
     "&.Mui-selected": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: PRIMARY_COLOR,
       color: "#fff",
-      borderColor: theme.palette.primary.main,
+      borderColor: PRIMARY_COLOR,
       "&:hover": {
-        backgroundColor: theme.palette.primary.dark,
+        backgroundColor: PRIMARY_DARK,
       },
     },
   },
@@ -304,6 +306,14 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
     },
   },
 }));
+
+const LoadingContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: "400px",
+  width: "100%",
+});
 
 // Helper function to format date
 const formatDate = (dateString) => {
@@ -321,11 +331,12 @@ const Blog = () => {
   const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const itemsPerPage = 9;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["blogs", page],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/blogs?page=${page}&limit=6`);
+      const response = await axiosInstance.get(`/blogs?page=${page}&limit=${itemsPerPage}`);
       return response.data;
     },
   });
@@ -354,21 +365,43 @@ const Blog = () => {
 
   if (isLoading) {
     return (
-      <BlogSection>
-        <Container maxWidth="lg">
-          <Typography>Loading...</Typography>
-        </Container>
-      </BlogSection>
+      <Box>
+        <SectionTile
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
+          subtitle="Our Services"
+          title="What We Offer"
+          icon={true}
+          iconClass="flaticon-custom-icon"
+        />
+        <BlogSection>
+          <Container maxWidth="lg">
+            <LoadingContainer>
+              <CircularProgress sx={{ color: PRIMARY_COLOR }} />
+            </LoadingContainer>
+          </Container>
+        </BlogSection>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <BlogSection>
-        <Container maxWidth="lg">
-          <Typography color="error">Error loading blogs</Typography>
-        </Container>
-      </BlogSection>
+      <Box>
+        <SectionTile
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
+          subtitle="Our Services"
+          title="What We Offer"
+          icon={true}
+          iconClass="flaticon-custom-icon"
+        />
+        <BlogSection>
+          <Container maxWidth="lg">
+            <Typography textAlign="center" color="error">
+              Error loading blogs: {error.message}
+            </Typography>
+          </Container>
+        </BlogSection>
+      </Box>
     );
   }
 
@@ -381,110 +414,114 @@ const Blog = () => {
         icon={true}
         iconClass="flaticon-custom-icon"
       />
-      <BlogSection>
-        <Container
-          maxWidth="lg"
-          sx={{
-            px: { xs: 2, sm: 3, md: 3 },
-          }}
-        >
-          <Grid container spacing={isMobile ? 2 : 3}>
-            {blogs.map((post) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={post._id}>
-                <BlogCard onClick={() => handleCardClick(post)}>
-                  <Box className="blog-image-wrapper">
-                    <ImageWrapper>
-                      <BlogImage
-                        src={post.imageUrl || post.image}
-                        alt={post.title}
-                        className="blog-image"
-                        loading="lazy"
-                      />
-                      <CategoryTag
-                        className="blog-category"
-                        onClick={(e) => handleCategoryClick(e, post.category)}
-                      >
-                        {post.category}
-                      </CategoryTag>
-                    </ImageWrapper>
-                  </Box>
-
-                  <BlogContent>
-                    <BlogTitle>{post.title}</BlogTitle>
-
-                    <BlogDescription>
-                      {post.excerpt ||
-                        post.content
-                          ?.replace(/<[^>]*>/g, "")
-                          .substring(0, 100) + "..."}
-                    </BlogDescription>
-
-                    <AuthorInfoWrapper>
-                      {/* Initially visible - only date (hidden on mobile) */}
-                      {!isMobile && (
-                        <DateOnly className="date-only">
-                          {formatDate(post.publishedAt || post.date)}
-                        </DateOnly>
-                      )}
-
-                      {/* Author info - visible on hover (always visible on mobile) */}
-                      <AuthorInfo className="author-info">
-                        <DateText variant="body2">
-                          {formatDate(post.publishedAt || post.date)}
-                        </DateText>
-                        {post.author && (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                              flexWrap: "wrap",
-                            }}
+      <BlogSection sx={{ py: { xs: 5, md: 12 } }}>
+        <Container maxWidth="lg">
+          {blogs.length === 0 ? (
+            <Typography textAlign="center" variant="h6" color="text.secondary">
+              No blogs found
+            </Typography>
+          ) : (
+            <>
+              <Grid container spacing={isMobile ? 2 : 3}>
+                {blogs.map((post) => (
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={post._id}>
+                    <BlogCard onClick={() => handleCardClick(post)}>
+                      <Box className="blog-image-wrapper">
+                        <ImageWrapper>
+                          <BlogImage
+                            src={post.imageUrl || post.image}
+                            alt={post.title}
+                            className="blog-image"
+                            loading="lazy"
+                          />
+                          <CategoryTag
+                            className="blog-category"
+                            onClick={(e) => handleCategoryClick(e, post.category)}
                           >
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "#666",
-                                fontSize: isMobile ? "12px" : "14px",
-                              }}
-                            >
-                              by
-                            </Typography>
-                            <AuthorLink
-                              onClick={(e) => handleAuthorClick(e, post.author)}
-                            >
-                              {post.author}
-                            </AuthorLink>
-                          </Box>
-                        )}
-                      </AuthorInfo>
-                    </AuthorInfoWrapper>
-                  </BlogContent>
-                </BlogCard>
-              </Grid>
-            ))}
-          </Grid>
+                            {post.category}
+                          </CategoryTag>
+                        </ImageWrapper>
+                      </Box>
 
-          {pagination.totalPages > 1 && (
-            <PaginationWrapper>
-              <StyledPagination
-                count={pagination.totalPages}
-                page={page}
-                onChange={handlePageChange}
-                variant="outlined"
-                shape="rounded"
-                size={isMobile ? "small" : "medium"}
-                renderItem={(item) => (
-                  <PaginationItem
-                    {...item}
-                    components={{
-                      next: ChevronRightIcon,
-                      previous: ChevronLeftIcon,
-                    }}
+                      <BlogContent>
+                        <BlogTitle>{post.title}</BlogTitle>
+
+                        <BlogDescription>
+                          {post.excerpt ||
+                            post.content
+                              ?.replace(/<[^>]*>/g, "")
+                              .substring(0, 100) + "..."}
+                        </BlogDescription>
+
+                        <AuthorInfoWrapper>
+                          {/* Initially visible - only date (hidden on mobile) */}
+                          {!isMobile && (
+                            <DateOnly className="date-only">
+                              {formatDate(post.publishedAt || post.date)}
+                            </DateOnly>
+                          )}
+
+                          {/* Author info - visible on hover (always visible on mobile) */}
+                          <AuthorInfo className="author-info">
+                            <DateText variant="body2">
+                              {formatDate(post.publishedAt || post.date)}
+                            </DateText>
+                            {post.author && (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                  flexWrap: "wrap",
+                                }}
+                              >
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: "#666",
+                                    fontSize: isMobile ? "12px" : "14px",
+                                  }}
+                                >
+                                  by
+                                </Typography>
+                                <AuthorLink
+                                  onClick={(e) => handleAuthorClick(e, post.author)}
+                                >
+                                  {post.author}
+                                </AuthorLink>
+                              </Box>
+                            )}
+                          </AuthorInfo>
+                        </AuthorInfoWrapper>
+                      </BlogContent>
+                    </BlogCard>
+                  </Grid>
+                ))}
+              </Grid>
+
+              {/* Show pagination only if total items > 9 */}
+              {pagination.totalPages > 1 && (
+                <PaginationWrapper>
+                  <StyledPagination
+                    count={pagination.totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    variant="outlined"
+                    shape="rounded"
+                    size={isMobile ? "small" : "medium"}
+                    renderItem={(item) => (
+                      <PaginationItem
+                        {...item}
+                        components={{
+                          next: ChevronRightIcon,
+                          previous: ChevronLeftIcon,
+                        }}
+                      />
+                    )}
                   />
-                )}
-              />
-            </PaginationWrapper>
+                </PaginationWrapper>
+              )}
+            </>
           )}
         </Container>
       </BlogSection>

@@ -1,6 +1,11 @@
 import React from "react";
 import { Box, Container, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import PetsIcon from '@mui/icons-material/Pets';
+
+// Theme colors
+const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_LIGHT = '#7B6BA8';
 
 const BannerHeader = styled(Box)(({ theme, bgimage }) => ({
   position: "relative",
@@ -32,9 +37,25 @@ const ContentWrapper = styled(Box)({
 const IconWrapper = styled(Box)(({ theme }) => ({
   display: "inline-flex",
   marginRight: "10px",
+  width: "40px",
+  height: "40px",
+  borderRadius: "50%",
+  backgroundColor: PRIMARY_COLOR,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "all 0.3s ease",
   "& i": {
-    fontSize: "24px",
-    color: theme.palette.primary.main,
+    fontSize: "20px",
+    color: "#fff",
+  },
+  "& svg": {
+    fontSize: "20px",
+    color: "#fff",
+  },
+  "&:hover": {
+    backgroundColor: PRIMARY_LIGHT,
+    transform: "scale(1.05)",
   },
 }));
 
@@ -63,6 +84,9 @@ const Title = styled(Typography)({
   "@media (max-width: 768px)": {
     fontSize: "36px",
   },
+  "@media (max-width: 480px)": {
+    fontSize: "28px",
+  },
 });
 
 export default function SectionTile({
@@ -71,6 +95,8 @@ export default function SectionTile({
   title = "About Pepito",
   icon = true,
   iconClass = "flaticon-prize-badge-with-paw-print",
+  iconColor = PRIMARY_COLOR, // Allow custom color if needed
+  iconSize = 40, // Allow custom size if needed
 }) {
   return (
     <Box className="elementor-widget-container">
@@ -83,14 +109,21 @@ export default function SectionTile({
                   <SubtitleWrapper>
                     <Subtitle variant="h6">
                       {icon && (
-                        <IconWrapper>
-                          <i className={iconClass}></i>
+                        <IconWrapper 
+                          sx={{ 
+                            backgroundColor: iconColor,
+                            width: iconSize,
+                            height: iconSize,
+                          }}
+                        >
+                          <PetsIcon sx={{ fontSize: iconSize * 0.6 }} />
                         </IconWrapper>
                       )}
                       {subtitle}
                     </Subtitle>
                   </SubtitleWrapper>
                 )}
+                
                 <Title variant="h1">{title}</Title>
               </Box>
             </Box>

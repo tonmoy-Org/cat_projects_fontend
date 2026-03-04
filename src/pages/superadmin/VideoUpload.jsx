@@ -27,6 +27,7 @@ import {
   TablePagination,
   alpha,
   CircularProgress,
+  FormHelperText,
 } from "@mui/material";
 import {
   Delete,
@@ -95,6 +96,11 @@ const CloseButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
+const RequiredAsterisk = styled("span")(({ theme }) => ({
+  color: theme.palette.error.main,
+  marginLeft: 1,
+}));
+
 export default function VideoUpload() {
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -125,7 +131,7 @@ export default function VideoUpload() {
     reset,
     setValue,
     watch,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
   } = useForm({
     mode: "onChange",
     defaultValues: {
@@ -135,13 +141,19 @@ export default function VideoUpload() {
   });
 
   const watchUrl = watch("url");
+  const watchTitle = watch("title");
 
   React.useEffect(() => {
-    if (watchUrl && isValidYouTubeUrl(watchUrl)) {
-      const id = getYouTubeVideoId(watchUrl);
-      setVideoId(id);
-      setThumbnailPreview(getYouTubeThumbnail(id));
-      setUrlError(false);
+    if (watchUrl) {
+      if (isValidYouTubeUrl(watchUrl)) {
+        const id = getYouTubeVideoId(watchUrl);
+        setVideoId(id);
+        setThumbnailPreview(getYouTubeThumbnail(id));
+        setUrlError(false);
+      } else {
+        setVideoId(null);
+        setThumbnailPreview(null);
+      }
     } else {
       setVideoId(null);
       setThumbnailPreview(null);
@@ -251,7 +263,7 @@ export default function VideoUpload() {
       addAlert(
         "error",
         error.response?.data?.message ||
-          "Failed to add video. Please try again.",
+        "Failed to add video. Please try again.",
       );
     },
   });
@@ -270,7 +282,7 @@ export default function VideoUpload() {
       addAlert(
         "error",
         error.response?.data?.message ||
-          "Failed to update video. Please try again.",
+        "Failed to update video. Please try again.",
       );
     },
   });
@@ -290,7 +302,7 @@ export default function VideoUpload() {
       addAlert(
         "error",
         error.response?.data?.message ||
-          "Failed to delete video. Please try again.",
+        "Failed to delete video. Please try again.",
       );
       setDeleteDialogOpen(false);
       setVideoToDelete(null);
@@ -393,7 +405,7 @@ export default function VideoUpload() {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: theme.palette.background.paper,
           },
         }}
@@ -405,7 +417,6 @@ export default function VideoUpload() {
             fontSize: "0.95rem",
             py: 1.5,
             px: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
           }}
         >
           Confirm Delete
@@ -420,7 +431,6 @@ export default function VideoUpload() {
           sx={{
             px: 2,
             py: 1.5,
-            borderTop: `1px solid ${theme.palette.divider}`,
           }}
         >
           <OutlineButton
@@ -450,38 +460,37 @@ export default function VideoUpload() {
 
       {/* Header */}
       <Box
-        sx={{ display: { xs: "", lg: "flex" } }}
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 2,
+          mb: 3
+        }}
       >
-        <Box mb={1}>
+        <Box>
           <Typography
+            variant="h6"
             sx={{
               fontWeight: 600,
-              mb: 0.5,
-              fontSize: "1.1rem",
-              background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${BLUE_COLOR} 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              color: TEXT_PRIMARY,
             }}
           >
             Video Management
           </Typography>
           <Typography
-            variant="caption"
-            sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}
+            variant="body2"
+            sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
           >
             Manage your YouTube videos
           </Typography>
         </Box>
         <GradientButton
           variant="contained"
-          startIcon={<AddIcon sx={{ fontSize: "0.9rem" }} />}
+          startIcon={<AddIcon />}
           onClick={() => handleOpenModal("create")}
           size="small"
-          sx={{ fontSize: "0.8rem", py: 0.6, px: 1.5 }}
         >
           Add New Video
         </GradientButton>
@@ -492,7 +501,7 @@ export default function VideoUpload() {
         component={Paper}
         elevation={0}
         sx={{
-          borderRadius: 1.5,
+          borderRadius: 1,
           border: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
           overflow: "hidden",
@@ -502,19 +511,15 @@ export default function VideoUpload() {
           <TableHead>
             <TableRow
               sx={{
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? alpha(BLUE_COLOR, 0.1)
-                    : alpha(BLUE_COLOR, 0.05),
+                backgroundColor: alpha(BLUE_COLOR, 0.05),
               }}
             >
               <TableCell
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Thumbnail
@@ -523,9 +528,8 @@ export default function VideoUpload() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Title
@@ -534,20 +538,8 @@ export default function VideoUpload() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
-                }}
-              >
-                URL
-              </TableCell>
-              <TableCell
-                sx={{
-                  fontWeight: 600,
-                  color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Video ID
@@ -557,9 +549,8 @@ export default function VideoUpload() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Actions
@@ -569,24 +560,24 @@ export default function VideoUpload() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                  <CircularProgress size={24} sx={{ color: BLUE_COLOR }} />
+                <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                  <CircularProgress size={32} sx={{ color: BLUE_COLOR }} />
                 </TableCell>
               </TableRow>
             ) : paginatedVideos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                  <Box py={2}>
+                <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                  <Box>
                     <VideoIcon
                       sx={{
-                        fontSize: 32,
+                        fontSize: 48,
                         color: alpha(TEXT_PRIMARY, 0.2),
-                        mb: 1.5,
+                        mb: 1,
                       }}
                     />
                     <Typography
-                      variant="caption"
-                      sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}
+                      variant="body2"
+                      sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
                     >
                       No videos found. Add one to get started.
                     </Typography>
@@ -602,10 +593,7 @@ export default function VideoUpload() {
                     hover
                     sx={{
                       "&:hover": {
-                        backgroundColor:
-                          theme.palette.mode === "dark"
-                            ? alpha(BLUE_COLOR, 0.05)
-                            : alpha(BLUE_COLOR, 0.03),
+                        backgroundColor: alpha(BLUE_COLOR, 0.03),
                       },
                       "&:last-child td": {
                         borderBottom: 0,
@@ -618,10 +606,10 @@ export default function VideoUpload() {
                         src={getYouTubeThumbnail(videoId)}
                         alt={video.title}
                         sx={{
-                          width: 80,
-                          height: 45,
+                          width: 100,
+                          height: 56,
                           objectFit: "cover",
-                          borderRadius: 1,
+                          borderRadius: 0.5,
                           border: `1px solid ${theme.palette.divider}`,
                           cursor: "pointer",
                           transition: "opacity 0.2s",
@@ -634,23 +622,13 @@ export default function VideoUpload() {
                     </TableCell>
                     <TableCell sx={{ py: 1 }}>
                       <Typography
-                        variant="caption"
-                        fontWeight={500}
-                        sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}
-                      >
-                        {video.title}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ py: 1 }}>
-                      <Typography
-                        variant="caption"
+                        variant="body2"
                         sx={{
-                          fontSize: "0.7rem",
+                          fontWeight: 500,
                           color: TEXT_PRIMARY,
-                          opacity: 0.7,
                         }}
                       >
-                        {video.url.substring(0, 40)}...
+                        {video.title}
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ py: 1 }}>
@@ -659,8 +637,8 @@ export default function VideoUpload() {
                         size="small"
                         sx={{
                           fontWeight: 500,
-                          fontSize: "0.7rem",
-                          height: 20,
+                          fontSize: "0.75rem",
+                          height: 24,
                           backgroundColor: alpha(RED_COLOR, 0.1),
                           color: RED_COLOR,
                         }}
@@ -672,56 +650,55 @@ export default function VideoUpload() {
                         onClick={() => window.open(video.url, "_blank")}
                         sx={{
                           color: RED_COLOR,
-                          fontSize: "0.8rem",
+                          mr: 0.5,
                           "&:hover": {
                             backgroundColor: alpha(RED_COLOR, 0.1),
                           },
                         }}
                         title="Open in YouTube"
                       >
-                        <YouTubeIcon fontSize="inherit" />
+                        <YouTubeIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => handleOpenPlayer(video)}
                         sx={{
                           color: BLUE_COLOR,
-                          fontSize: "0.8rem",
+                          mr: 0.5,
                           "&:hover": {
                             backgroundColor: alpha(BLUE_COLOR, 0.1),
                           },
                         }}
                         title="Play Video"
                       >
-                        <VisibilityIcon fontSize="inherit" />
+                        <VisibilityIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => handleOpenModal("edit", video)}
                         sx={{
                           color: BLUE_COLOR,
-                          fontSize: "0.8rem",
+                          mr: 0.5,
                           "&:hover": {
                             backgroundColor: alpha(BLUE_COLOR, 0.1),
                           },
                         }}
                         title="Edit Video"
                       >
-                        <EditIcon fontSize="inherit" />
+                        <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
                         size="small"
                         onClick={() => handleDeleteClick(video)}
                         sx={{
                           color: RED_COLOR,
-                          fontSize: "0.8rem",
                           "&:hover": {
                             backgroundColor: alpha(RED_COLOR, 0.1),
                           },
                         }}
                         title="Delete Video"
                       >
-                        <Delete fontSize="inherit" />
+                        <Delete fontSize="small" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -741,18 +718,7 @@ export default function VideoUpload() {
           onRowsPerPageChange={handleChangeRowsPerPage}
           sx={{
             borderTop: `1px solid ${theme.palette.divider}`,
-            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
-              {
-                fontSize: "0.75rem",
-                color: TEXT_PRIMARY,
-              },
-            "& .MuiSelect-select": {
-              fontSize: "0.8rem",
-              padding: "4px 32px 4px 12px",
-              color: TEXT_PRIMARY,
-            },
           }}
-          size="small"
         />
       </TableContainer>
 
@@ -764,7 +730,7 @@ export default function VideoUpload() {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: theme.palette.background.paper,
           },
         }}
@@ -773,41 +739,76 @@ export default function VideoUpload() {
           sx={{
             color: TEXT_PRIMARY,
             fontWeight: 600,
-            fontSize: "0.95rem",
-            py: 1.5,
-            px: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
+            fontSize: "1rem",
+            py: 2,
+            px: 3,
           }}
         >
           {modalMode === "create" && "Add New Video"}
           {modalMode === "edit" && "Edit Video"}
-          {modalMode === "view" && "View Video"}
         </DialogTitle>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent sx={{ px: 2, py: 2 }}>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12 }}>
+          <DialogContent sx={{ px: 3, py: 2 }}>
+            <Grid container spacing={2.5}>
+              <Grid size={{ md: 12 }} item>
+                <Box sx={{ mb: 0.5 }}>
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    sx={{
+                      fontWeight: 500,
+                      color: TEXT_PRIMARY,
+                    }}
+                  >
+                    YouTube URL
+                  </Typography>
+                  <RequiredAsterisk>*</RequiredAsterisk>
+                </Box>
                 <StyledTextField
-                  label="YouTube URL"
                   fullWidth
                   size="small"
                   disabled={modalMode === "view"}
                   {...register("url", {
                     required: "URL is required",
+                    validate: {
+                      validUrl: (value) =>
+                        isValidYouTubeUrl(value) || "Please enter a valid YouTube URL",
+                    },
                   })}
-                  error={!!errors.url || urlError}
-                  helperText={
-                    errors.url?.message ||
-                    (urlError && "Please enter a valid YouTube URL")
-                  }
+                  error={!!errors.url}
+                  helperText={errors.url?.message}
                   placeholder="https://www.youtube.com/watch?v=..."
+                  sx={{
+                    '& .MuiFormHelperText-root': {
+                      fontSize: '0.75rem',
+                      mt: 0.5,
+                    },
+                  }}
                 />
               </Grid>
 
-              <Grid size={{ xs: 12 }}>
+              <Grid size={{ md: 12 }}>
+                <Box sx={{ mb: 0.5 }}>
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    sx={{
+                      fontWeight: 500,
+                      color: TEXT_PRIMARY,
+                    }}
+                  >
+                    Video Title
+                  </Typography>
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    sx={{ color: alpha(TEXT_PRIMARY, 0.5), ml: 1 }}
+                  >
+                    (Optional)
+                  </Typography>
+                </Box>
                 <StyledTextField
-                  label="Video Title (Optional)"
                   fullWidth
                   size="small"
                   disabled={modalMode === "view"}
@@ -819,24 +820,37 @@ export default function VideoUpload() {
                   })}
                   error={!!errors.title}
                   helperText={
-                    errors.title?.message ||
-                    "If not provided, a default title will be used"
+                    errors.title?.message || (
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        sx={{ color: alpha(TEXT_PRIMARY, 0.5) }}
+                      >
+                        If not provided, a default title will be used
+                      </Typography>
+                    )
                   }
+                  placeholder="Enter video title"
+                  sx={{
+                    '& .MuiFormHelperText-root': {
+                      fontSize: '0.75rem',
+                      mt: 0.5,
+                    },
+                  }}
                 />
               </Grid>
 
               {thumbnailPreview && (
-                <Grid size={{ xs: 12 }}>
+                <Grid item xs={12}>
                   <Typography
-                    variant="subtitle2"
-                    gutterBottom
+                    variant="body2"
                     sx={{
-                      fontWeight: 600,
+                      fontWeight: 500,
                       mb: 1,
-                      color: "text.primary",
+                      color: TEXT_PRIMARY,
                     }}
                   >
-                    Video Preview
+                    Preview
                   </Typography>
                   <PreviewWrapper>
                     <Box
@@ -847,11 +861,12 @@ export default function VideoUpload() {
                         width: "100%",
                         maxHeight: 200,
                         objectFit: "cover",
+                        borderRadius: 0.5,
                       }}
                     />
                     {videoId && (
                       <Chip
-                        label={`Video ID: ${videoId}`}
+                        label={`ID: ${videoId}`}
                         size="small"
                         sx={{
                           position: "absolute",
@@ -860,6 +875,7 @@ export default function VideoUpload() {
                           backgroundColor: alpha("#000", 0.7),
                           color: "white",
                           fontSize: "0.7rem",
+                          height: 20,
                         }}
                       />
                     )}
@@ -871,40 +887,36 @@ export default function VideoUpload() {
 
           <DialogActions
             sx={{
-              px: 2,
-              py: 1.5,
+              px: 3,
+              py: 2,
               borderTop: `1px solid ${theme.palette.divider}`,
             }}
           >
             <OutlineButton
               onClick={handleCloseModal}
               size="small"
-              sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
             >
-              {modalMode === "view" ? "Close" : "Cancel"}
+              Cancel
             </OutlineButton>
-
-            {modalMode !== "view" && (
-              <GradientButton
-                type="submit"
-                size="small"
-                disabled={
-                  createVideoMutation.isPending ||
-                  updateVideoMutation.isPending ||
-                  !isValid
-                }
-                sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
-              >
-                {createVideoMutation.isPending ||
+            <GradientButton
+              type="submit"
+              size="small"
+              disabled={
+                createVideoMutation.isPending ||
+                updateVideoMutation.isPending ||
+                !isValid ||
+                (modalMode === "edit" && !isDirty)
+              }
+            >
+              {createVideoMutation.isPending ||
                 updateVideoMutation.isPending ? (
-                  <CircularProgress size={16} sx={{ color: "white" }} />
-                ) : modalMode === "create" ? (
-                  "Add Video"
-                ) : (
-                  "Update Video"
-                )}
-              </GradientButton>
-            )}
+                <CircularProgress size={18} sx={{ color: "white" }} />
+              ) : modalMode === "create" ? (
+                "Add Video"
+              ) : (
+                "Update Video"
+              )}
+            </GradientButton>
           </DialogActions>
         </form>
       </Dialog>

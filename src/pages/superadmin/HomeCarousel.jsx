@@ -27,6 +27,9 @@ import {
   TablePagination,
   useTheme,
   LinearProgress,
+  Grid,
+  FormHelperText,
+  styled,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -54,6 +57,11 @@ const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/ima
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+const RequiredAsterisk = styled("span")(({ theme }) => ({
+  color: theme.palette.error.main,
+  marginLeft: 1,
+}));
+
 export const HomeCarousel = () => {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -78,6 +86,7 @@ export const HomeCarousel = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({});
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -87,8 +96,9 @@ export const HomeCarousel = () => {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm({
+    mode: "onChange",
     defaultValues: {
       title: "",
       smallTitle: "",
@@ -118,8 +128,9 @@ export const HomeCarousel = () => {
 
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setTouchedFields({ ...touchedFields, image: true });
     }
-  }, []);
+  }, [touchedFields]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
@@ -149,6 +160,7 @@ export const HomeCarousel = () => {
     }
     setImageFile(null);
     setImagePreview(null);
+    setTouchedFields({ ...touchedFields, image: false });
   };
 
   const uploadToCloudinary = async () => {
@@ -356,9 +368,31 @@ export const HomeCarousel = () => {
     });
     handleRemoveImage();
     setSelectedCarousel(null);
+    setTouchedFields({});
+  };
+
+  const isFormValid = () => {
+    if (selectedCarousel) {
+      // For edit mode, check if at least one field is changed
+      return isValid;
+    }
+    // For create mode, check all required fields
+    return isValid && imageFile;
   };
 
   const onSubmit = async (data) => {
+    // Mark all fields as touched for validation
+    const allTouched = {
+      title: true,
+      smallTitle: true,
+      paragraph: true,
+      btnText: true,
+      btnLink: true,
+      order: true,
+      image: true,
+    };
+    setTouchedFields(allTouched);
+
     if (!selectedCarousel && !imageFile) {
       setError("Please select an image");
       setTimeout(() => setError(""), 3000);
@@ -392,44 +426,45 @@ export const HomeCarousel = () => {
         <meta name="description" content="Manage homepage carousel slides" />
       </Helmet>
 
+      {/* Header */}
       <Box
-        sx={{ display: { xs: "", lg: "flex" } }}
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
+        sx={{ 
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 2,
+          mb: 3 
+        }}
       >
-        <Box mb={1}>
+        <Box>
           <Typography
+            variant="h6"
             sx={{
               fontWeight: 600,
-              mb: 0.5,
-              fontSize: "1.1rem",
-              background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${BLUE_COLOR} 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              color: TEXT_PRIMARY,
             }}
           >
             Carousel Management
           </Typography>
           <Typography
-            variant="caption"
-            sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}
+            variant="body2"
+            sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
           >
             Manage homepage carousel slides and content
           </Typography>
         </Box>
         <GradientButton
           variant="contained"
-          startIcon={<AddIcon sx={{ fontSize: "0.9rem" }} />}
+          startIcon={<AddIcon />}
           onClick={() => handleOpenDialog()}
           size="small"
-          sx={{ fontSize: "0.8rem", py: 0.6, px: 1.5 }}
         >
           Add Carousel
         </GradientButton>
       </Box>
 
+      {/* Search */}
       <Box mb={2}>
         <StyledTextField
           fullWidth
@@ -454,23 +489,16 @@ export const HomeCarousel = () => {
               fontSize: "0.8rem",
               color: TEXT_PRIMARY,
             },
-            "& .MuiOutlinedInput-root": {
-              "&:hover fieldset": {
-                borderColor: BLUE_COLOR,
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: BLUE_COLOR,
-              },
-            },
           }}
         />
       </Box>
 
+      {/* Table */}
       <TableContainer
         component={Paper}
         elevation={0}
         sx={{
-          borderRadius: 1.5,
+          borderRadius: 1,
           border: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
           overflow: "hidden",
@@ -480,19 +508,15 @@ export const HomeCarousel = () => {
           <TableHead>
             <TableRow
               sx={{
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? alpha(BLUE_COLOR, 0.1)
-                    : alpha(BLUE_COLOR, 0.05),
+                backgroundColor: alpha(BLUE_COLOR, 0.05),
               }}
             >
               <TableCell
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Image
@@ -501,9 +525,8 @@ export const HomeCarousel = () => {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Title
@@ -512,9 +535,8 @@ export const HomeCarousel = () => {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Order
@@ -523,9 +545,8 @@ export const HomeCarousel = () => {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Status
@@ -535,9 +556,8 @@ export const HomeCarousel = () => {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Actions
@@ -547,18 +567,18 @@ export const HomeCarousel = () => {
           <TableBody>
             {paginatedCarousels.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                  <Box py={2}>
+                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                  <Box>
                     <ImageIcon
                       sx={{
-                        fontSize: 32,
+                        fontSize: 48,
                         color: alpha(TEXT_PRIMARY, 0.2),
-                        mb: 1.5,
+                        mb: 1,
                       }}
                     />
                     <Typography
-                      variant="caption"
-                      sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}
+                      variant="body2"
+                      sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
                     >
                       {searchQuery
                         ? "No carousels found."
@@ -574,10 +594,7 @@ export const HomeCarousel = () => {
                   hover
                   sx={{
                     "&:hover": {
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? alpha(BLUE_COLOR, 0.05)
-                          : alpha(BLUE_COLOR, 0.03),
+                      backgroundColor: alpha(BLUE_COLOR, 0.03),
                     },
                     "&:last-child td": {
                       borderBottom: 0,
@@ -595,7 +612,7 @@ export const HomeCarousel = () => {
                           width: 60,
                           height: 60,
                           objectFit: "cover",
-                          borderRadius: 1,
+                          borderRadius: 0.5,
                           border: `1px solid ${theme.palette.divider}`,
                           cursor: "pointer",
                           transition: "opacity 0.2s",
@@ -613,7 +630,7 @@ export const HomeCarousel = () => {
                           alignItems: "center",
                           justifyContent: "center",
                           backgroundColor: alpha(BLUE_COLOR, 0.05),
-                          borderRadius: 1,
+                          borderRadius: 0.5,
                           border: `1px dashed ${theme.palette.divider}`,
                         }}
                       >
@@ -629,19 +646,19 @@ export const HomeCarousel = () => {
                   <TableCell sx={{ py: 1 }}>
                     <Box>
                       <Typography
-                        variant="caption"
-                        fontWeight={500}
-                        sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
                       >
                         {carousel.title}
                       </Typography>
                       <Typography
                         variant="caption"
                         sx={{
-                          fontSize: "0.7rem",
                           display: "block",
-                          color: TEXT_PRIMARY,
-                          opacity: 0.7,
+                          color: alpha(TEXT_PRIMARY, 0.7),
                         }}
                       >
                         {carousel.smallTitle}
@@ -650,10 +667,8 @@ export const HomeCarousel = () => {
                         <Typography
                           variant="caption"
                           sx={{
-                            fontSize: "0.65rem",
                             display: "block",
-                            color: TEXT_PRIMARY,
-                            opacity: 0.6,
+                            color: alpha(TEXT_PRIMARY, 0.6),
                             mt: 0.5,
                           }}
                         >
@@ -665,8 +680,8 @@ export const HomeCarousel = () => {
                   </TableCell>
                   <TableCell sx={{ py: 1 }}>
                     <Typography
-                      variant="caption"
-                      sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}
+                      variant="body2"
+                      sx={{ color: TEXT_PRIMARY }}
                     >
                       {carousel.order}
                     </Typography>
@@ -675,29 +690,24 @@ export const HomeCarousel = () => {
                     <Chip
                       label={carousel.isActive ? "Active" : "Inactive"}
                       size="small"
-                      variant="outlined"
                       icon={
                         carousel.isActive ? (
-                          <CheckCircleIcon sx={{ fontSize: "0.7rem" }} />
+                          <CheckCircleIcon sx={{ fontSize: "0.8rem" }} />
                         ) : undefined
                       }
                       sx={{
                         fontWeight: 500,
-                        fontSize: "0.7rem",
-                        height: 20,
+                        fontSize: "0.75rem",
+                        height: 24,
                         backgroundColor: carousel.isActive
-                          ? theme.palette.mode === "dark"
-                            ? alpha(GREEN_COLOR, 0.2)
-                            : alpha(GREEN_COLOR, 0.1)
-                          : "transparent",
-                        color: carousel.isActive ? GREEN_COLOR : TEXT_PRIMARY,
+                          ? alpha(GREEN_COLOR, 0.1)
+                          : alpha(TEXT_PRIMARY, 0.05),
+                        color: carousel.isActive ? GREEN_COLOR : alpha(TEXT_PRIMARY, 0.7),
                         borderColor: carousel.isActive
-                          ? GREEN_COLOR
-                          : alpha(TEXT_PRIMARY, 0.3),
-                        "& .MuiChip-label": {
-                          px: 1,
-                        },
+                          ? alpha(GREEN_COLOR, 0.3)
+                          : alpha(TEXT_PRIMARY, 0.2),
                       }}
+                      variant="outlined"
                     />
                   </TableCell>
                   <TableCell align="right" sx={{ py: 1 }}>
@@ -707,13 +717,13 @@ export const HomeCarousel = () => {
                         onClick={() => handleOpenDialog(carousel)}
                         sx={{
                           color: BLUE_COLOR,
-                          fontSize: "0.8rem",
+                          mr: 0.5,
                           "&:hover": {
                             backgroundColor: alpha(BLUE_COLOR, 0.1),
                           },
                         }}
                       >
-                        <EditIcon fontSize="inherit" />
+                        <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete">
@@ -722,13 +732,12 @@ export const HomeCarousel = () => {
                         onClick={() => handleDeleteClick(carousel)}
                         sx={{
                           color: RED_COLOR,
-                          fontSize: "0.8rem",
                           "&:hover": {
                             backgroundColor: alpha(RED_COLOR, 0.1),
                           },
                         }}
                       >
-                        <DeleteIcon fontSize="inherit" />
+                        <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
@@ -748,33 +757,20 @@ export const HomeCarousel = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
           sx={{
             borderTop: `1px solid ${theme.palette.divider}`,
-            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
-              {
-                fontSize: "0.75rem",
-                color: TEXT_PRIMARY,
-              },
-            "& .MuiSelect-select": {
-              fontSize: "0.8rem",
-              padding: "4px 32px 4px 12px",
-              color: TEXT_PRIMARY,
-            },
-            "& .MuiSvgIcon-root": {
-              color: TEXT_PRIMARY,
-            },
           }}
         />
       </TableContainer>
 
+      {/* Create/Edit Dialog */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: theme.palette.background.paper,
-            p: 1,
           },
         }}
       >
@@ -783,278 +779,461 @@ export const HomeCarousel = () => {
             sx={{
               color: TEXT_PRIMARY,
               fontWeight: 600,
-              fontSize: "0.95rem",
-              py: 1.5,
-              px: 2,
+              fontSize: "1rem",
+              py: 2,
+              px: 3,
             }}
           >
             {selectedCarousel ? "Edit Carousel" : "Add New Carousel"}
           </DialogTitle>
-          <DialogContent sx={{ px: 2, py: 1 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Controller
-                name="title"
-                control={control}
-                rules={{ required: "Title is required" }}
-                render={({ field }) => (
-                  <StyledTextField
-                    {...field}
-                    fullWidth
-                    label="Title"
-                    required
-                    error={!!errors.title}
-                    helperText={errors.title?.message}
-                    size="small"
-                  />
-                )}
-              />
-
-              <Controller
-                name="smallTitle"
-                control={control}
-                render={({ field }) => (
-                  <StyledTextField
-                    {...field}
-                    fullWidth
-                    label="Small Title"
-                    size="small"
-                  />
-                )}
-              />
-
-              <Controller
-                name="paragraph"
-                control={control}
-                render={({ field }) => (
-                  <StyledTextField
-                    {...field}
-                    fullWidth
-                    label="Description"
-                    multiline
-                    rows={3}
-                    size="small"
-                  />
-                )}
-              />
-
-              <Controller
-                name="btnText"
-                control={control}
-                render={({ field }) => (
-                  <StyledTextField
-                    {...field}
-                    fullWidth
-                    label="Button Text"
-                    size="small"
-                  />
-                )}
-              />
-
-              <Controller
-                name="btnLink"
-                control={control}
-                render={({ field }) => (
-                  <StyledTextField
-                    {...field}
-                    fullWidth
-                    label="Button Link"
-                    size="small"
-                  />
-                )}
-              />
-
-              <Controller
-                name="order"
-                control={control}
-                render={({ field }) => (
-                  <StyledTextField
-                    {...field}
-                    fullWidth
-                    label="Order"
-                    type="number"
-                    size="small"
-                  />
-                )}
-              />
-
-              <Controller
-                name="isActive"
-                control={control}
-                render={({ field: { value, onChange } }) => (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={value}
-                        onChange={onChange}
-                        color="primary"
-                        size="small"
-                      />
-                    }
-                    label={
+          <DialogContent sx={{ px: 3, py: 2 }}>
+            <Grid container spacing={3}>
+              {/* Left Column - Form Fields */}
+              <Grid item xs={12} md={8}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+                  {/* Title Field */}
+                  <Box>
+                    <Box sx={{ mb: 0.5 }}>
                       <Typography
-                        variant="caption"
-                        fontWeight={500}
-                        sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}
-                      >
-                        Active
-                      </Typography>
-                    }
-                  />
-                )}
-              />
-
-              <Box>
-                <Typography
-                  variant="caption"
-                  fontWeight={500}
-                  sx={{
-                    fontSize: "0.8rem",
-                    color: TEXT_PRIMARY,
-                    mb: 1,
-                    display: "block",
-                  }}
-                >
-                  Image{" "}
-                  {!selectedCarousel && (
-                    <span style={{ color: RED_COLOR }}>*</span>
-                  )}
-                </Typography>
-
-                {/* Dropzone */}
-                <Box
-                  {...getRootProps()}
-                  sx={{
-                    border: `2px dashed ${isDragActive ? BLUE_COLOR : alpha(TEXT_PRIMARY, 0.2)}`,
-                    borderRadius: 1,
-                    p: 2,
-                    textAlign: "center",
-                    cursor: "pointer",
-                    backgroundColor: isDragActive
-                      ? alpha(BLUE_COLOR, 0.05)
-                      : "transparent",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      borderColor: BLUE_COLOR,
-                      backgroundColor: alpha(BLUE_COLOR, 0.05),
-                    },
-                  }}
-                >
-                  <input {...getInputProps()} />
-                  <CloudUploadIcon
-                    sx={{
-                      fontSize: "1.5rem",
-                      color: alpha(TEXT_PRIMARY, 0.5),
-                      mb: 0.5,
-                    }}
-                  />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontSize: "0.7rem",
-                      color: TEXT_PRIMARY,
-                      display: "block",
-                    }}
-                  >
-                    {isDragActive
-                      ? "Drop the image here"
-                      : "Drag & drop image here, or click to select"}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontSize: "0.6rem",
-                      color: alpha(TEXT_PRIMARY, 0.5),
-                      display: "block",
-                      mt: 0.5,
-                    }}
-                  >
-                    Max size: 5MB (JPG, PNG, GIF)
-                  </Typography>
-                </Box>
-
-                {/* Image Preview */}
-                {(imagePreview || selectedCarousel?.image) && (
-                  <Box sx={{ mt: 1, position: "relative" }}>
-                    <img
-                      src={imagePreview || selectedCarousel?.image}
-                      alt="Preview"
-                      style={{
-                        width: "100%",
-                        height: 150,
-                        objectFit: "cover",
-                        borderRadius: 8,
-                      }}
-                    />
-                    {!selectedCarousel && (
-                      <IconButton
-                        onClick={handleRemoveImage}
-                        size="small"
+                        component="span"
+                        variant="body2"
                         sx={{
-                          position: "absolute",
-                          top: 4,
-                          right: 4,
-                          bgcolor: "error.main",
-                          color: "white",
-                          "&:hover": {
-                            bgcolor: "error.dark",
-                          },
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                    {imageFile && (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: "block",
-                          mt: 0.5,
+                          fontWeight: 500,
                           color: TEXT_PRIMARY,
-                          fontSize: "0.7rem",
                         }}
                       >
-                        Selected file: {imageFile.name}
+                        Title
                       </Typography>
-                    )}
-                  </Box>
-                )}
-
-                {isUploading && (
-                  <Box sx={{ mt: 1 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={uploadProgress}
-                      sx={{
-                        height: 4,
-                        borderRadius: 2,
-                        bgcolor: alpha(BLUE_COLOR, 0.2),
-                        "& .MuiLinearProgress-bar": {
-                          bgcolor: BLUE_COLOR,
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <Controller
+                      name="title"
+                      control={control}
+                      rules={{ 
+                        required: "Title is required",
+                        minLength: {
+                          value: 3,
+                          message: "Title must be at least 3 characters",
                         },
                       }}
+                      render={({ field }) => (
+                        <StyledTextField
+                          {...field}
+                          fullWidth
+                          size="small"
+                          error={!!errors.title}
+                          helperText={errors.title?.message}
+                          placeholder="Enter carousel title"
+                        />
+                      )}
                     />
-                    <Typography
-                      variant="caption"
+                  </Box>
+
+                  {/* Small Title Field */}
+                  <Box>
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Small Title
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <Controller
+                      name="smallTitle"
+                      control={control}
+                      rules={{ 
+                        required: "Small title is required",
+                      }}
+                      render={({ field }) => (
+                        <StyledTextField
+                          {...field}
+                          fullWidth
+                          size="small"
+                          error={!!errors.smallTitle}
+                          helperText={errors.smallTitle?.message}
+                          placeholder="Enter small title/subtitle"
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  {/* Description Field */}
+                  <Box>
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Description
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <Controller
+                      name="paragraph"
+                      control={control}
+                      rules={{ 
+                        required: "Description is required",
+                        minLength: {
+                          value: 10,
+                          message: "Description must be at least 10 characters",
+                        },
+                      }}
+                      render={({ field }) => (
+                        <StyledTextField
+                          {...field}
+                          fullWidth
+                          multiline
+                          rows={3}
+                          size="small"
+                          error={!!errors.paragraph}
+                          helperText={errors.paragraph?.message}
+                          placeholder="Enter carousel description"
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  {/* Button Text Field */}
+                  <Box>
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Button Text
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <Controller
+                      name="btnText"
+                      control={control}
+                      rules={{ 
+                        required: "Button text is required",
+                      }}
+                      render={({ field }) => (
+                        <StyledTextField
+                          {...field}
+                          fullWidth
+                          size="small"
+                          error={!!errors.btnText}
+                          helperText={errors.btnText?.message}
+                          placeholder="Enter button text (e.g., Learn More)"
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  {/* Button Link Field */}
+                  <Box>
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Button Link
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <Controller
+                      name="btnLink"
+                      control={control}
+                      rules={{ 
+                        required: "Button link is required",
+                        pattern: {
+                          value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
+                          message: "Please enter a valid URL",
+                        },
+                      }}
+                      render={({ field }) => (
+                        <StyledTextField
+                          {...field}
+                          fullWidth
+                          size="small"
+                          error={!!errors.btnLink}
+                          helperText={errors.btnLink?.message}
+                          placeholder="Enter button link (e.g., /services or https://example.com)"
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  {/* Order Field */}
+                  <Box>
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Order
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <Controller
+                      name="order"
+                      control={control}
+                      rules={{ 
+                        required: "Order is required",
+                        min: {
+                          value: 1,
+                          message: "Order must be at least 1",
+                        },
+                      }}
+                      render={({ field }) => (
+                        <StyledTextField
+                          {...field}
+                          fullWidth
+                          type="number"
+                          size="small"
+                          error={!!errors.order}
+                          helperText={errors.order?.message}
+                          placeholder="Enter display order (1, 2, 3...)"
+                        />
+                      )}
+                    />
+                  </Box>
+                </Box>
+              </Grid>
+
+              {/* Right Column - Settings & Image */}
+              <Grid item xs={12} md={4}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2.5,
+                    bgcolor: alpha(BLUE_COLOR, 0.02),
+                    borderRadius: 1,
+                    border: 1,
+                    borderColor: theme.palette.divider,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 2.5,
+                      color: TEXT_PRIMARY,
+                    }}
+                  >
+                    Settings
+                  </Typography>
+
+                  {/* Active Status */}
+                  <Box sx={{ mb: 2.5 }}>
+                    <Controller
+                      name="isActive"
+                      control={control}
+                      render={({ field: { value, onChange } }) => (
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={value}
+                              onChange={onChange}
+                              color="primary"
+                              size="small"
+                            />
+                          }
+                          label={
+                            <Typography
+                              variant="body2"
+                              sx={{ color: TEXT_PRIMARY }}
+                            >
+                              Active
+                            </Typography>
+                          }
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  {/* Image Upload */}
+                  <Box>
+                    <Box sx={{ mb: 1 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Image
+                      </Typography>
+                      {!selectedCarousel && <RequiredAsterisk>*</RequiredAsterisk>}
+                    </Box>
+
+                    {/* Dropzone */}
+                    <Box
+                      {...getRootProps()}
                       sx={{
-                        display: "block",
-                        mt: 0.5,
-                        color: TEXT_PRIMARY,
-                        fontSize: "0.7rem",
+                        border: `2px dashed ${isDragActive ? BLUE_COLOR : alpha(TEXT_PRIMARY, 0.2)}`,
+                        borderRadius: 1,
+                        p: 2,
                         textAlign: "center",
+                        cursor: "pointer",
+                        backgroundColor: isDragActive
+                          ? alpha(BLUE_COLOR, 0.05)
+                          : "transparent",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          borderColor: BLUE_COLOR,
+                          backgroundColor: alpha(BLUE_COLOR, 0.05),
+                        },
                       }}
                     >
-                      Uploading: {uploadProgress}%
-                    </Typography>
+                      <input {...getInputProps()} />
+                      <CloudUploadIcon
+                        sx={{
+                          fontSize: "2rem",
+                          color: alpha(TEXT_PRIMARY, 0.5),
+                          mb: 1,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "0.75rem",
+                          color: TEXT_PRIMARY,
+                          display: "block",
+                        }}
+                      >
+                        {isDragActive
+                          ? "Drop the image here"
+                          : "Drag & drop image here, or click to select"}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: "0.7rem",
+                          color: alpha(TEXT_PRIMARY, 0.5),
+                          display: "block",
+                          mt: 0.5,
+                        }}
+                      >
+                        Max size: 5MB (JPG, PNG, GIF)
+                      </Typography>
+                    </Box>
+
+                    {/* Image Preview */}
+                    {(imagePreview || selectedCarousel?.image) && (
+                      <Box sx={{ mt: 2, position: "relative" }}>
+                        <img
+                          src={imagePreview || selectedCarousel?.image}
+                          alt="Preview"
+                          style={{
+                            width: "100%",
+                            height: 150,
+                            objectFit: "cover",
+                            borderRadius: 4,
+                          }}
+                        />
+                        {!selectedCarousel && (
+                          <IconButton
+                            onClick={handleRemoveImage}
+                            size="small"
+                            sx={{
+                              position: "absolute",
+                              top: 4,
+                              right: 4,
+                              bgcolor: RED_COLOR,
+                              color: "white",
+                              "&:hover": {
+                                bgcolor: alpha(RED_COLOR, 0.8),
+                              },
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                        {imageFile && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: "block",
+                              mt: 0.5,
+                              color: alpha(TEXT_PRIMARY, 0.7),
+                              fontSize: "0.7rem",
+                            }}
+                          >
+                            Selected file: {imageFile.name}
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+
+                    {/* Image Error */}
+                    {!selectedCarousel && !imageFile && touchedFields.image && (
+                      <FormHelperText error sx={{ mt: 1 }}>
+                        Image is required
+                      </FormHelperText>
+                    )}
+
+                    {/* Upload Progress */}
+                    {isUploading && (
+                      <Box sx={{ mt: 1 }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={uploadProgress}
+                          sx={{
+                            height: 4,
+                            borderRadius: 2,
+                            bgcolor: alpha(BLUE_COLOR, 0.1),
+                            "& .MuiLinearProgress-bar": {
+                              bgcolor: BLUE_COLOR,
+                            },
+                          }}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "block",
+                            mt: 0.5,
+                            color: alpha(TEXT_PRIMARY, 0.7),
+                            fontSize: "0.7rem",
+                            textAlign: "center",
+                          }}
+                        >
+                          Uploading: {uploadProgress}%
+                        </Typography>
+                      </Box>
+                    )}
                   </Box>
-                )}
-              </Box>
-            </Box>
+                </Paper>
+              </Grid>
+            </Grid>
           </DialogContent>
-          <DialogActions sx={{ px: 2, py: 1.5 }}>
+
+          <DialogActions
+            sx={{
+              px: 3,
+              py: 2,
+              borderTop: `1px solid ${theme.palette.divider}`,
+            }}
+          >
             <OutlineButton
               onClick={handleCloseDialog}
               size="small"
-              sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
             >
               Cancel
             </OutlineButton>
@@ -1065,15 +1244,14 @@ export const HomeCarousel = () => {
                 isUploading ||
                 createCarouselMutation.isPending ||
                 updateCarouselMutation.isPending ||
-                (!selectedCarousel && !imageFile)
+                !isFormValid()
               }
               size="small"
-              sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
             >
               {isUploading ||
               createCarouselMutation.isPending ||
               updateCarouselMutation.isPending ? (
-                <CircularProgress size={16} sx={{ color: "white" }} />
+                <CircularProgress size={18} sx={{ color: "white" }} />
               ) : selectedCarousel ? (
                 "Update"
               ) : (
@@ -1084,6 +1262,7 @@ export const HomeCarousel = () => {
         </form>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
@@ -1091,41 +1270,36 @@ export const HomeCarousel = () => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: theme.palette.background.paper,
-            p: 1,
           },
         }}
       >
         <DialogTitle
           sx={{
-            pb: 1,
             color: RED_COLOR,
             fontWeight: 600,
-            fontSize: "0.9rem",
-            py: 1.5,
-            px: 2,
+            fontSize: "1rem",
+            py: 2,
+            px: 3,
           }}
         >
-          <Box display="flex" alignItems="center" gap={0.75}>
-            <DeleteIcon sx={{ fontSize: "0.9rem" }} />
+          <Box display="flex" alignItems="center" gap={1}>
+            <DeleteIcon fontSize="small" />
             Confirm Delete
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ px: 2, py: 1 }}>
-          <Box py={0.5}>
-            <DialogContentText sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}>
-              Are you sure you want to delete the carousel{" "}
-              <strong>"{carouselToDelete?.title}"</strong>? This action cannot
-              be undone.
-            </DialogContentText>
-          </Box>
+        <DialogContent sx={{ px: 3, py: 1 }}>
+          <DialogContentText sx={{ color: alpha(TEXT_PRIMARY, 0.8) }}>
+            Are you sure you want to delete the carousel{" "}
+            <strong>"{carouselToDelete?.title}"</strong>? This action cannot
+            be undone.
+          </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{ px: 2, py: 1.5 }}>
+        <DialogActions sx={{ px: 3, py: 2 }}>
           <OutlineButton
             onClick={() => setOpenDeleteDialog(false)}
             size="small"
-            sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
           >
             Cancel
           </OutlineButton>
@@ -1140,16 +1314,16 @@ export const HomeCarousel = () => {
               fontSize: "0.8rem",
               textTransform: "none",
               "&:hover": {
-                background: `linear-gradient(135deg, ${RED_COLOR} 0%, #b91c1c 100%)`,
+                background: `linear-gradient(135deg, ${RED_COLOR} 0%, ${RED_DARK} 100%)`,
               },
             }}
             onClick={handleDeleteConfirm}
             disabled={deleteCarouselMutation.isPending}
-            startIcon={<DeleteIcon sx={{ fontSize: "0.8rem" }} />}
+            startIcon={<DeleteIcon fontSize="small" />}
             size="small"
           >
             {deleteCarouselMutation.isPending ? (
-              <CircularProgress size={16} sx={{ color: "white" }} />
+              <CircularProgress size={18} sx={{ color: "white" }} />
             ) : (
               "Delete"
             )}
@@ -1157,6 +1331,7 @@ export const HomeCarousel = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Success Snackbar */}
       <Snackbar
         open={!!success}
         autoHideDuration={3000}
@@ -1168,14 +1343,9 @@ export const HomeCarousel = () => {
           sx={{
             width: "100%",
             borderRadius: 1,
-            backgroundColor:
-              theme.palette.mode === "dark"
-                ? alpha(GREEN_COLOR, 0.1)
-                : alpha(GREEN_COLOR, 0.05),
+            backgroundColor: alpha(GREEN_COLOR, 0.1),
             borderLeft: `3px solid ${GREEN_COLOR}`,
             color: TEXT_PRIMARY,
-            py: 0.5,
-            px: 1.5,
           }}
         >
           <Typography fontWeight={500} sx={{ fontSize: "0.8rem" }}>
@@ -1184,6 +1354,7 @@ export const HomeCarousel = () => {
         </Alert>
       </Snackbar>
 
+      {/* Error Snackbar */}
       <Snackbar
         open={!!error}
         autoHideDuration={3000}
@@ -1195,14 +1366,9 @@ export const HomeCarousel = () => {
           sx={{
             width: "100%",
             borderRadius: 1,
-            backgroundColor:
-              theme.palette.mode === "dark"
-                ? alpha(RED_COLOR, 0.1)
-                : alpha(RED_COLOR, 0.05),
+            backgroundColor: alpha(RED_COLOR, 0.1),
             borderLeft: `3px solid ${RED_COLOR}`,
             color: TEXT_PRIMARY,
-            py: 0.5,
-            px: 1.5,
           }}
         >
           <Typography fontWeight={500} sx={{ fontSize: "0.8rem" }}>

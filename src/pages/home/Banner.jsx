@@ -13,6 +13,7 @@ import '@coreui/coreui/dist/css/coreui.min.css';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../../api/axios';
+import PetsIcon from '@mui/icons-material/Pets';
 
 // Theme colors
 const PRIMARY_COLOR = '#5C4D91';
@@ -34,7 +35,7 @@ const SlideContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '400px',
+        height: '450px',
     },
 });
 
@@ -47,26 +48,58 @@ const SlideImage = styled('img')({
 const Overlay = styled(Box)({
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%)',
+    background: 'linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 100%)',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 40px',
     '@media (max-width: 600px)': {
-        padding: '0 20px',
-        justifyContent: 'center',
         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)',
+        alignItems: 'flex-end',
+        paddingBottom: '40px',
     },
 });
 
 const ContentWrapper = styled(motion.div)({
     maxWidth: '600px',
-    textAlign: 'right',
-    '@media (max-width: 600px)': {
-        textAlign: 'center',
-        maxWidth: '100%',
-    },
+    textAlign: 'left',
 });
+
+const PassionBadge = styled(Box)(({ theme }) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    backgroundColor: 'rgba(219, 137, 202, 0.2)',
+    backdropFilter: 'blur(5px)',
+    padding: '8px 16px',
+    borderRadius: '40px',
+    marginBottom: '20px',
+    border: '1px solid rgba(219, 137, 202, 0.3)',
+    width: 'fit-content',
+    [theme.breakpoints.down('sm')]: {
+        margin: '0 auto 20px',
+        backgroundColor: 'rgba(219, 137, 202, 0.3)',
+    },
+}));
+
+const SectionIcon = styled(Box)({
+    width: 32,
+    height: 32,
+    borderRadius: '50%',
+    backgroundColor: '#db89ca',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+});
+
+const PassionText = styled(Typography)(({ theme }) => ({
+    color: '#fff',
+    fontWeight: 500,
+    fontSize: '0.95rem',
+    letterSpacing: '0.5px',
+    textTransform: 'uppercase',
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '0.85rem',
+    },
+}));
 
 const SlideTitle = styled(Typography)(({ theme }) => ({
     fontWeight: 700,
@@ -79,6 +112,7 @@ const SlideTitle = styled(Typography)(({ theme }) => ({
     },
     [theme.breakpoints.down('sm')]: {
         fontSize: '2rem',
+        textAlign: 'center',
     },
 }));
 
@@ -90,16 +124,18 @@ const SlideDescription = styled(Typography)(({ theme }) => ({
     textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
     [theme.breakpoints.down('sm')]: {
         fontSize: '1rem',
+        textAlign: 'center',
+        marginBottom: '20px',
     },
 }));
 
-const OrderButton = styled(Button)({
+const OrderButton = styled(Button)(({ theme }) => ({
     backgroundColor: PRIMARY_COLOR,
     color: '#fff',
     borderRadius: '50px',
-    fontWeight: 600,
-    padding: '12px 40px',
-    fontSize: '1.1rem',
+    fontWeight: 500,
+    padding: '8px 35px',
+    fontSize: '1rem',
     textTransform: 'none',
     boxShadow: '0 4px 15px rgba(92,77,145,0.3)',
     '&:hover': {
@@ -107,11 +143,14 @@ const OrderButton = styled(Button)({
         transform: 'translateY(-2px)',
         boxShadow: '0 6px 20px rgba(92,77,145,0.4)',
     },
-    '@media (max-width: 600px)': {
-        padding: '10px 30px',
-        fontSize: '1rem',
+    [theme.breakpoints.down('sm')]: {
+        padding: '8px 30px',
+        fontSize: '0.95rem',
+        display: 'block',
+        margin: '0 auto',
+        width: 'fit-content',
     },
-});
+}));
 
 const LoadingContainer = styled(Box)({
     width: '100%',
@@ -124,7 +163,7 @@ const LoadingContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '400px',
+        height: '450px',
     },
 });
 
@@ -139,13 +178,22 @@ const ErrorContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '400px',
+        height: '450px',
     },
 });
 
 // Animation variants
+const badgeVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: "easeOut" }
+    }
+};
+
 const titleVariants = {
-    hidden: { opacity: 0, x: 50 },
+    hidden: { opacity: 0, x: -50 },
     visible: {
         opacity: 1,
         x: 0,
@@ -154,7 +202,7 @@ const titleVariants = {
 };
 
 const descriptionVariants = {
-    hidden: { opacity: 0, x: 50 },
+    hidden: { opacity: 0, x: -50 },
     visible: {
         opacity: 1,
         x: 0,
@@ -187,7 +235,7 @@ const Banner = () => {
     if (isLoading) {
         return (
             <BannerWrapper>
-                <Container maxWidth="xl">
+                <Container maxWidth="xl" fixed>
                     <LoadingContainer>
                         <CircularProgress sx={{ color: PRIMARY_COLOR }} />
                     </LoadingContainer>
@@ -199,7 +247,7 @@ const Banner = () => {
     if (error || !slides.length) {
         return (
             <BannerWrapper>
-                <Container maxWidth="xl">
+                <Container maxWidth="xl" fixed>
                     <ErrorContainer>
                         <Typography variant="h6" color="textSecondary">
                             No banner slides available
@@ -227,37 +275,50 @@ const Banner = () => {
                                 alt={slide.smallTitle || slide.title || 'Banner slide'}
                             />
                             <Overlay>
-                                <ContentWrapper
-                                    initial="hidden"
-                                    animate="visible"
-                                    variants={{
-                                        visible: {
-                                            transition: { staggerChildren: 0.2 }
-                                        }
-                                    }}
-                                >
-                                    <motion.div variants={titleVariants}>
-                                        <SlideTitle variant="h3">
-                                            {slide.title || slide.smallTitle}
-                                        </SlideTitle>
-                                    </motion.div>
+                                <Container maxWidth="lg" fixed>
+                                    <ContentWrapper
+                                        initial="hidden"
+                                        animate="visible"
+                                        variants={{
+                                            visible: {
+                                                transition: { staggerChildren: 0.2 }
+                                            }
+                                        }}
+                                    >
+                                        <motion.div variants={badgeVariants}>
+                                            <PassionBadge>
+                                                <SectionIcon>
+                                                    <PetsIcon sx={{ color: '#fff', fontSize: 20 }} />
+                                                </SectionIcon>
+                                                <PassionText variant="span">
+                                                    Our Passion is Animals
+                                                </PassionText>
+                                            </PassionBadge>
+                                        </motion.div>
 
-                                    <motion.div variants={descriptionVariants}>
-                                        <SlideDescription variant="body1">
-                                            {slide.paragraph}
-                                        </SlideDescription>
-                                    </motion.div>
+                                        <motion.div variants={titleVariants}>
+                                            <SlideTitle variant="h3">
+                                                {slide.title || slide.smallTitle}
+                                            </SlideTitle>
+                                        </motion.div>
 
-                                    <motion.div variants={buttonVariants}>
-                                        <OrderButton
-                                            variant="contained"
-                                            href={slide.btnLink}
-                                            size="large"
-                                        >
-                                            {slide.btnText || 'Learn More'}
-                                        </OrderButton>
-                                    </motion.div>
-                                </ContentWrapper>
+                                        <motion.div variants={descriptionVariants}>
+                                            <SlideDescription variant="body1">
+                                                {slide.paragraph}
+                                            </SlideDescription>
+                                        </motion.div>
+
+                                        <motion.div variants={buttonVariants}>
+                                            <OrderButton
+                                                variant="contained"
+                                                href={slide.btnLink}
+                                                size="large"
+                                            >
+                                                {slide.btnText || 'Learn More'}
+                                            </OrderButton>
+                                        </motion.div>
+                                    </ContentWrapper>
+                                </Container>
                             </Overlay>
                         </SlideContainer>
                     </CCarouselItem>

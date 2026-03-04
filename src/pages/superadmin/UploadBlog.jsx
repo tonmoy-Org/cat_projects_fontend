@@ -36,6 +36,7 @@ import {
   TablePagination,
   alpha,
   CircularProgress,
+  FormHelperText,
 } from "@mui/material";
 import {
   Delete,
@@ -86,6 +87,11 @@ const PreviewWrapper = styled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   overflow: "hidden",
   boxShadow: theme.shadows[1],
+}));
+
+const RequiredAsterisk = styled("span")(({ theme }) => ({
+  color: theme.palette.error.main,
+  marginLeft: 1,
 }));
 
 const modules = {
@@ -153,16 +159,14 @@ export default function UploadBlog() {
   const [isFeatured, setIsFeatured] = useState(false);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
-  const [categoryError, setCategoryError] = useState(false);
-  const [contentError, setContentError] = useState(false);
-  const [petTypeError, setPetTypeError] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({});
 
   const {
     handleSubmit,
     register,
     reset,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
   } = useForm({
     mode: "onChange",
     defaultValues: {
@@ -309,9 +313,7 @@ export default function UploadBlog() {
     setTags([]);
     handleRemoveImage();
     setUploadProgress(0);
-    setContentError(false);
-    setCategoryError(false);
-    setPetTypeError(false);
+    setTouchedFields({});
   };
 
   const handleOpenModal = (mode, blog = null) => {
@@ -421,27 +423,18 @@ export default function UploadBlog() {
     setAlerts([]);
 
     if (!content || content === "<p><br></p>") {
-      setContentError(true);
       addAlert("error", "Blog content is required.");
       return;
-    } else {
-      setContentError(false);
     }
 
     if (!category) {
-      setCategoryError(true);
       addAlert("error", "Please select a category.");
       return;
-    } else {
-      setCategoryError(false);
     }
 
     if (!petType) {
-      setPetTypeError(true);
       addAlert("error", "Please select a pet type.");
       return;
-    } else {
-      setPetTypeError(false);
     }
 
     if (modalMode === "create" && !imageFile) {
@@ -468,7 +461,7 @@ export default function UploadBlog() {
         petType,
         isFeatured,
         tags,
-        author: "Admin", // You might want to get this from user context
+        author: "Admin",
         type: "article",
       };
 
@@ -509,6 +502,23 @@ export default function UploadBlog() {
     return types[value] || value;
   };
 
+  const isFormValid = () => {
+    if (modalMode === "view") return true;
+    
+    const hasRequiredFields = 
+      isValid && 
+      content && 
+      content !== "<p><br></p>" && 
+      category && 
+      petType;
+    
+    if (modalMode === "create") {
+      return hasRequiredFields && imageFile;
+    }
+    
+    return hasRequiredFields;
+  };
+
   return (
     <Box>
       <Helmet>
@@ -547,7 +557,7 @@ export default function UploadBlog() {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: theme.palette.background.paper,
           },
         }}
@@ -556,15 +566,14 @@ export default function UploadBlog() {
           sx={{
             color: TEXT_PRIMARY,
             fontWeight: 600,
-            fontSize: "0.95rem",
-            py: 1.5,
-            px: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
+            fontSize: "1rem",
+            py: 2,
+            px: 3,
           }}
         >
           Confirm Delete
         </DialogTitle>
-        <DialogContent sx={{ px: 2, py: 2 }}>
+        <DialogContent sx={{ px: 3, py: 2 }}>
           <Typography variant="body2" sx={{ color: TEXT_PRIMARY }}>
             Are you sure you want to delete "{blogToDelete?.title}"? This action
             cannot be undone.
@@ -572,15 +581,13 @@ export default function UploadBlog() {
         </DialogContent>
         <DialogActions
           sx={{
-            px: 2,
-            py: 1.5,
-            borderTop: `1px solid ${theme.palette.divider}`,
+            px: 3,
+            py: 2,
           }}
         >
           <OutlineButton
             onClick={handleDeleteCancel}
             size="small"
-            sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
             disabled={deleteBlogMutation.isPending}
           >
             Cancel
@@ -590,11 +597,10 @@ export default function UploadBlog() {
             size="small"
             variant="contained"
             color="error"
-            sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
             disabled={deleteBlogMutation.isPending}
           >
             {deleteBlogMutation.isPending ? (
-              <CircularProgress size={16} sx={{ color: "white" }} />
+              <CircularProgress size={18} sx={{ color: "white" }} />
             ) : (
               "Delete"
             )}
@@ -604,38 +610,37 @@ export default function UploadBlog() {
 
       {/* Header */}
       <Box
-        sx={{ display: { xs: "", lg: "flex" } }}
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
+        sx={{ 
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 2,
+          mb: 3 
+        }}
       >
-        <Box mb={1}>
+        <Box>
           <Typography
+            variant="h6"
             sx={{
               fontWeight: 600,
-              mb: 0.5,
-              fontSize: "1.1rem",
-              background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${BLUE_COLOR} 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
+              color: TEXT_PRIMARY,
             }}
           >
             Blog Management
           </Typography>
           <Typography
-            variant="caption"
-            sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}
+            variant="body2"
+            sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
           >
             Manage your pet blog posts
           </Typography>
         </Box>
         <GradientButton
           variant="contained"
-          startIcon={<AddIcon sx={{ fontSize: "0.9rem" }} />}
+          startIcon={<AddIcon />}
           onClick={() => handleOpenModal("create")}
           size="small"
-          sx={{ fontSize: "0.8rem", py: 0.6, px: 1.5 }}
         >
           Create New Post
         </GradientButton>
@@ -646,7 +651,7 @@ export default function UploadBlog() {
         component={Paper}
         elevation={0}
         sx={{
-          borderRadius: 1.5,
+          borderRadius: 1,
           border: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
           overflow: "hidden",
@@ -656,19 +661,15 @@ export default function UploadBlog() {
           <TableHead>
             <TableRow
               sx={{
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? alpha(BLUE_COLOR, 0.1)
-                    : alpha(BLUE_COLOR, 0.05),
+                backgroundColor: alpha(BLUE_COLOR, 0.05),
               }}
             >
               <TableCell
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Image
@@ -677,9 +678,8 @@ export default function UploadBlog() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Title
@@ -688,9 +688,8 @@ export default function UploadBlog() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Category
@@ -699,9 +698,8 @@ export default function UploadBlog() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Pet Type
@@ -710,9 +708,8 @@ export default function UploadBlog() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Featured
@@ -721,9 +718,8 @@ export default function UploadBlog() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Tags
@@ -733,9 +729,8 @@ export default function UploadBlog() {
                 sx={{
                   fontWeight: 600,
                   color: TEXT_PRIMARY,
-                  borderBottom: `2px solid ${BLUE_COLOR}`,
-                  fontSize: "0.8rem",
-                  py: 1,
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  py: 1.5,
                 }}
               >
                 Actions
@@ -745,24 +740,24 @@ export default function UploadBlog() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                  <CircularProgress size={24} sx={{ color: BLUE_COLOR }} />
+                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                  <CircularProgress size={32} sx={{ color: BLUE_COLOR }} />
                 </TableCell>
               </TableRow>
             ) : paginatedBlogs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                  <Box py={2}>
+                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                  <Box>
                     <PetsIcon
                       sx={{
-                        fontSize: 32,
+                        fontSize: 48,
                         color: alpha(TEXT_PRIMARY, 0.2),
-                        mb: 1.5,
+                        mb: 1,
                       }}
                     />
                     <Typography
-                      variant="caption"
-                      sx={{ fontSize: "0.75rem", color: TEXT_PRIMARY }}
+                      variant="body2"
+                      sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
                     >
                       No blog posts found. Create one to get started.
                     </Typography>
@@ -776,10 +771,7 @@ export default function UploadBlog() {
                   hover
                   sx={{
                     "&:hover": {
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? alpha(BLUE_COLOR, 0.05)
-                          : alpha(BLUE_COLOR, 0.03),
+                      backgroundColor: alpha(BLUE_COLOR, 0.03),
                     },
                     "&:last-child td": {
                       borderBottom: 0,
@@ -796,7 +788,7 @@ export default function UploadBlog() {
                           width: 60,
                           height: 60,
                           objectFit: "cover",
-                          borderRadius: 1,
+                          borderRadius: 0.5,
                           border: `1px solid ${theme.palette.divider}`,
                           cursor: "pointer",
                           transition: "opacity 0.2s",
@@ -815,7 +807,7 @@ export default function UploadBlog() {
                           alignItems: "center",
                           justifyContent: "center",
                           backgroundColor: alpha(BLUE_COLOR, 0.05),
-                          borderRadius: 1,
+                          borderRadius: 0.5,
                           border: `1px dashed ${theme.palette.divider}`,
                         }}
                       >
@@ -830,9 +822,11 @@ export default function UploadBlog() {
                   </TableCell>
                   <TableCell sx={{ py: 1 }}>
                     <Typography
-                      variant="caption"
-                      fontWeight={500}
-                      sx={{ fontSize: "0.8rem", color: TEXT_PRIMARY }}
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        color: TEXT_PRIMARY,
+                      }}
                     >
                       {blog.title}
                     </Typography>
@@ -840,10 +834,8 @@ export default function UploadBlog() {
                       <Typography
                         variant="caption"
                         sx={{
-                          fontSize: "0.7rem",
                           display: "block",
-                          color: TEXT_PRIMARY,
-                          opacity: 0.7,
+                          color: alpha(TEXT_PRIMARY, 0.7),
                         }}
                       >
                         {blog.excerpt.substring(0, 50)}...
@@ -856,11 +848,10 @@ export default function UploadBlog() {
                       size="small"
                       sx={{
                         fontWeight: 500,
-                        fontSize: "0.7rem",
-                        height: 20,
+                        fontSize: "0.75rem",
+                        height: 24,
                         backgroundColor: alpha(BLUE_COLOR, 0.1),
                         color: BLUE_COLOR,
-                        borderColor: BLUE_COLOR,
                       }}
                     />
                   </TableCell>
@@ -870,11 +861,10 @@ export default function UploadBlog() {
                       size="small"
                       sx={{
                         fontWeight: 500,
-                        fontSize: "0.7rem",
-                        height: 20,
+                        fontSize: "0.75rem",
+                        height: 24,
                         backgroundColor: alpha(GREEN_COLOR, 0.1),
                         color: GREEN_COLOR,
-                        borderColor: GREEN_COLOR,
                       }}
                     />
                   </TableCell>
@@ -885,8 +875,8 @@ export default function UploadBlog() {
                         size="small"
                         sx={{
                           fontWeight: 500,
-                          fontSize: "0.7rem",
-                          height: 20,
+                          fontSize: "0.75rem",
+                          height: 24,
                           backgroundColor: alpha(GREEN_COLOR, 0.1),
                           color: GREEN_COLOR,
                         }}
@@ -895,9 +885,7 @@ export default function UploadBlog() {
                       <Typography
                         variant="caption"
                         sx={{
-                          fontSize: "0.7rem",
-                          color: TEXT_PRIMARY,
-                          opacity: 0.5,
+                          color: alpha(TEXT_PRIMARY, 0.5),
                         }}
                       >
                         No
@@ -905,22 +893,22 @@ export default function UploadBlog() {
                     )}
                   </TableCell>
                   <TableCell sx={{ py: 1 }}>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.3 }}>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {blog.tags?.slice(0, 2).map((tag) => (
                         <Chip
                           key={tag}
                           label={tag}
                           size="small"
                           sx={{
-                            fontSize: "0.6rem",
-                            height: 18,
+                            fontSize: "0.7rem",
+                            height: 20,
                           }}
                         />
                       ))}
                       {blog.tags?.length > 2 && (
                         <Typography
                           variant="caption"
-                          sx={{ fontSize: "0.6rem", color: TEXT_PRIMARY }}
+                          sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
                         >
                           +{blog.tags.length - 2}
                         </Typography>
@@ -933,42 +921,41 @@ export default function UploadBlog() {
                       onClick={() => handleOpenModal("view", blog)}
                       sx={{
                         color: BLUE_COLOR,
-                        fontSize: "0.8rem",
+                        mr: 0.5,
                         "&:hover": {
                           backgroundColor: alpha(BLUE_COLOR, 0.1),
                         },
                       }}
                       title="View Blog"
                     >
-                      <VisibilityIcon fontSize="inherit" />
+                      <VisibilityIcon fontSize="small" />
                     </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => handleOpenModal("edit", blog)}
                       sx={{
                         color: BLUE_COLOR,
-                        fontSize: "0.8rem",
+                        mr: 0.5,
                         "&:hover": {
                           backgroundColor: alpha(BLUE_COLOR, 0.1),
                         },
                       }}
                       title="Edit Blog"
                     >
-                      <EditIcon fontSize="inherit" />
+                      <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => handleDeleteClick(blog)}
                       sx={{
                         color: RED_COLOR,
-                        fontSize: "0.8rem",
                         "&:hover": {
                           backgroundColor: alpha(RED_COLOR, 0.1),
                         },
                       }}
                       title="Delete Blog"
                     >
-                      <Delete fontSize="inherit" />
+                      <Delete fontSize="small" />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -988,18 +975,7 @@ export default function UploadBlog() {
           onRowsPerPageChange={handleChangeRowsPerPage}
           sx={{
             borderTop: `1px solid ${theme.palette.divider}`,
-            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
-              {
-                fontSize: "0.75rem",
-                color: TEXT_PRIMARY,
-              },
-            "& .MuiSelect-select": {
-              fontSize: "0.8rem",
-              padding: "4px 32px 4px 12px",
-              color: TEXT_PRIMARY,
-            },
           }}
-          size="small"
         />
       </TableContainer>
 
@@ -1007,12 +983,13 @@ export default function UploadBlog() {
       <Dialog
         open={openModal}
         onClose={handleCloseModal}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 2,
+            borderRadius: 1,
             backgroundColor: theme.palette.background.paper,
+            maxHeight: '90vh',
           },
         }}
       >
@@ -1020,10 +997,9 @@ export default function UploadBlog() {
           sx={{
             color: TEXT_PRIMARY,
             fontWeight: 600,
-            fontSize: "0.95rem",
-            py: 1.5,
-            px: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`,
+            fontSize: "1rem",
+            py: 2,
+            px: 3,
           }}
         >
           {modalMode === "create" && "Create New Blog Post"}
@@ -1032,13 +1008,26 @@ export default function UploadBlog() {
         </DialogTitle>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent sx={{ px: 2, py: 2 }}>
+          <DialogContent sx={{ px: 3, py: 2 }}>
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 8 }}>
+              {/* Main Content Area - 8 columns */}
+              <Grid size={{ md: 8 }}>
                 {/* Title Field */}
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2.5 }}>
+                  <Box sx={{ mb: 0.5 }}>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        color: TEXT_PRIMARY,
+                      }}
+                    >
+                      Blog Title
+                    </Typography>
+                    <RequiredAsterisk>*</RequiredAsterisk>
+                  </Box>
                   <StyledTextField
-                    label="Blog Title"
                     fullWidth
                     size="small"
                     disabled={modalMode === "view"}
@@ -1055,72 +1044,80 @@ export default function UploadBlog() {
                     })}
                     error={!!errors.title}
                     helperText={errors.title?.message}
+                    placeholder="Enter blog title"
                   />
                 </Box>
 
                 {/* Excerpt Field */}
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2.5 }}>
+                  <Box sx={{ mb: 0.5 }}>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        color: TEXT_PRIMARY,
+                      }}
+                    >
+                      Short Excerpt
+                    </Typography>
+                    <RequiredAsterisk>*</RequiredAsterisk>
+                  </Box>
                   <StyledTextField
-                    label="Short Excerpt (Optional)"
                     fullWidth
                     size="small"
                     multiline
                     rows={2}
                     disabled={modalMode === "view"}
                     {...register("excerpt", {
+                      required: "Excerpt is required",
                       maxLength: {
                         value: 200,
                         message: "Excerpt must not exceed 200 characters",
                       },
                     })}
                     error={!!errors.excerpt}
-                    helperText={
-                      errors.excerpt?.message || "Brief summary of your post"
-                    }
+                    helperText={errors.excerpt?.message}
+                    placeholder="Brief summary of your post"
                   />
                 </Box>
 
                 {/* Content Editor */}
-                <Box sx={{ mb: 2 }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: "text.primary",
-                    }}
-                  >
-                    Content
-                    {contentError && modalMode !== "view" && (
-                      <Typography
-                        variant="caption"
-                        color="error"
-                        sx={{ ml: 1 }}
-                      >
-                        (required)
-                      </Typography>
-                    )}
-                  </Typography>
+                <Box sx={{ mb: 2.5 }}>
+                  <Box sx={{ mb: 1 }}>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        color: TEXT_PRIMARY,
+                      }}
+                    >
+                      Content
+                    </Typography>
+                    <RequiredAsterisk>*</RequiredAsterisk>
+                  </Box>
                   <Box
                     sx={{
                       pointerEvents: modalMode === "view" ? "none" : "auto",
-                      "& .quill": {
-                        "& .ql-toolbar": {
-                          borderColor: "divider",
+                      '& .quill': {
+                        '& .ql-toolbar': {
+                          borderColor: theme.palette.divider,
                           borderTopLeftRadius: 4,
                           borderTopRightRadius: 4,
                           display: modalMode === "view" ? "none" : "block",
+                          backgroundColor: alpha(BLUE_COLOR, 0.02),
                         },
-                        "& .ql-container": {
-                          borderColor: "divider",
+                        '& .ql-container': {
+                          borderColor: theme.palette.divider,
                           borderBottomLeftRadius: 4,
                           borderBottomRightRadius: 4,
-                          minHeight: 200,
-                          fontSize: "0.875rem",
+                          minHeight: 250,
+                          fontSize: '0.875rem',
+                          backgroundColor: theme.palette.background.paper,
                         },
-                        "& .ql-editor": {
-                          minHeight: 200,
+                        '& .ql-editor': {
+                          minHeight: 250,
                         },
                       },
                     }}
@@ -1130,9 +1127,6 @@ export default function UploadBlog() {
                       onChange={(value) => {
                         if (modalMode !== "view") {
                           setContent(value);
-                          if (value && value !== "<p><br></p>") {
-                            setContentError(false);
-                          }
                         }
                       }}
                       theme="snow"
@@ -1144,44 +1138,45 @@ export default function UploadBlog() {
                   </Box>
                 </Box>
 
-                {/* Image Upload - Only show for create/edit */}
+                {/* Image Upload */}
                 {modalMode !== "view" && (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography
-                      variant="subtitle2"
-                      gutterBottom
-                      sx={{
-                        fontWeight: 600,
-                        mb: 1,
-                        color: "text.primary",
-                      }}
-                    >
-                      Featured Image
-                    </Typography>
+                  <Box sx={{ mb: 2.5 }}>
+                    <Box sx={{ mb: 1 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Featured Image
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
                     <DropzoneWrapper
                       {...getRootProps()}
                       className={isDragActive ? "active" : ""}
                     >
                       <input {...getInputProps()} />
-                      <PetsIcon
+                      <CloudUpload
                         sx={{
                           fontSize: 40,
-                          color: "primary.main",
+                          color: BLUE_COLOR,
                           mb: 1,
-                          opacity: 0.6,
                         }}
                       />
                       <Typography
                         variant="body2"
-                        sx={{ mb: 1, color: "text.primary" }}
+                        sx={{ mb: 1, color: TEXT_PRIMARY }}
                       >
                         {isDragActive
                           ? "Drop the image here"
-                          : "Drag & drop your pet's photo here, or click to select"}
+                          : "Drag & drop your image here, or click to select"}
                       </Typography>
                       <Typography
                         variant="caption"
-                        sx={{ color: "text.secondary" }}
+                        sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
                       >
                         Recommended: 1200x630px • Max: 5MB (JPG, PNG, GIF)
                       </Typography>
@@ -1195,7 +1190,7 @@ export default function UploadBlog() {
                             alt="Preview"
                             style={{
                               width: "100%",
-                              maxHeight: 200,
+                              maxHeight: 250,
                               objectFit: "cover",
                             }}
                           />
@@ -1207,10 +1202,10 @@ export default function UploadBlog() {
                                 position: "absolute",
                                 top: 8,
                                 right: 8,
-                                bgcolor: "error.main",
+                                bgcolor: RED_COLOR,
                                 color: "white",
-                                "&:hover": {
-                                  bgcolor: "error.dark",
+                                '&:hover': {
+                                  bgcolor: alpha(RED_COLOR, 0.8),
                                 },
                               }}
                             >
@@ -1229,9 +1224,9 @@ export default function UploadBlog() {
                           sx={{
                             height: 6,
                             borderRadius: 3,
-                            bgcolor: "primary.light",
-                            "& .MuiLinearProgress-bar": {
-                              bgcolor: "primary.main",
+                            bgcolor: alpha(BLUE_COLOR, 0.1),
+                            '& .MuiLinearProgress-bar': {
+                              bgcolor: BLUE_COLOR,
                             },
                           }}
                         />
@@ -1241,7 +1236,7 @@ export default function UploadBlog() {
                           sx={{
                             mt: 0.5,
                             display: "block",
-                            color: "text.secondary",
+                            color: alpha(TEXT_PRIMARY, 0.7),
                           }}
                         >
                           Uploading: {uploadProgress}%
@@ -1253,14 +1248,13 @@ export default function UploadBlog() {
 
                 {/* Show image in view mode */}
                 {modalMode === "view" && selectedBlog?.imageUrl && (
-                  <Box sx={{ mb: 2 }}>
+                  <Box sx={{ mb: 2.5 }}>
                     <Typography
-                      variant="subtitle2"
-                      gutterBottom
+                      variant="body2"
                       sx={{
-                        fontWeight: 600,
+                        fontWeight: 500,
                         mb: 1,
-                        color: "text.primary",
+                        color: TEXT_PRIMARY,
                       }}
                     >
                       Featured Image
@@ -1271,8 +1265,9 @@ export default function UploadBlog() {
                         alt={selectedBlog.title}
                         style={{
                           width: "100%",
-                          maxHeight: 200,
+                          maxHeight: 250,
                           objectFit: "cover",
+                          borderRadius: 4,
                         }}
                       />
                     </PreviewWrapper>
@@ -1280,168 +1275,187 @@ export default function UploadBlog() {
                 )}
               </Grid>
 
-              <Grid size={{ xs: 12, md: 4 }}>
-                {/* Settings Panel */}
+              {/* Settings Panel - 4 columns */}
+              <Grid size={{ md: 4 }}>
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 2,
-                    bgcolor: "background.default",
-                    borderRadius: 2,
+                    p: 2.5,
+                    bgcolor: alpha(BLUE_COLOR, 0.02),
+                    borderRadius: 1,
                     border: 1,
-                    borderColor: "divider",
+                    borderColor: theme.palette.divider,
                   }}
                 >
                   <Typography
-                    variant="subtitle2"
-                    gutterBottom
+                    variant="subtitle1"
                     sx={{
                       fontWeight: 600,
-                      mb: 2,
-                      color: "text.primary",
+                      mb: 2.5,
+                      color: TEXT_PRIMARY,
                     }}
                   >
                     Post Settings
                   </Typography>
 
                   {/* Category Selection */}
-                  <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                    <InputLabel error={categoryError}>
-                      Category{" "}
-                      {categoryError && modalMode !== "view" && "(required)"}
-                    </InputLabel>
-                    <Select
-                      value={category}
-                      onChange={(e) => {
-                        if (modalMode !== "view") {
-                          setCategory(e.target.value);
-                          if (e.target.value) {
-                            setCategoryError(false);
+                  <Box sx={{ mb: 2.5 }}>
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Category
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <FormControl fullWidth size="small" error={!category && touchedFields.category}>
+                      <Select
+                        value={category}
+                        onChange={(e) => {
+                          if (modalMode !== "view") {
+                            setCategory(e.target.value);
+                            setTouchedFields({ ...touchedFields, category: true });
                           }
-                        }
-                      }}
-                      label={`Category ${categoryError ? "(required)" : ""}`}
-                      error={categoryError}
-                      disabled={modalMode === "view"}
-                    >
-                      <MenuItem value="care">Care</MenuItem>
-                      <MenuItem value="pet">Pet</MenuItem>
-                      <MenuItem value="dental">Dental</MenuItem>
-                      <MenuItem value="surgery">Surgery</MenuItem>
-                      <MenuItem value="diagnostic">Diagnostic</MenuItem>
-                      <MenuItem value="safety">Safety</MenuItem>
-                    </Select>
-                  </FormControl>
+                        }}
+                        disabled={modalMode === "view"}
+                        displayEmpty
+                      >
+                        <MenuItem value="" disabled>Select category</MenuItem>
+                        <MenuItem value="care">Care</MenuItem>
+                        <MenuItem value="pet">Pet</MenuItem>
+                        <MenuItem value="dental">Dental</MenuItem>
+                        <MenuItem value="surgery">Surgery</MenuItem>
+                        <MenuItem value="diagnostic">Diagnostic</MenuItem>
+                        <MenuItem value="safety">Safety</MenuItem>
+                      </Select>
+                      {!category && touchedFields.category && (
+                        <FormHelperText error>Category is required</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Box>
 
                   {/* Pet Type Selection */}
-                  <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                    <InputLabel error={petTypeError}>
-                      Pet Type{" "}
-                      {petTypeError && modalMode !== "view" && "(required)"}
-                    </InputLabel>
-                    <Select
-                      value={petType}
-                      onChange={(e) => {
-                        if (modalMode !== "view") {
-                          setPetType(e.target.value);
-                          if (e.target.value) {
-                            setPetTypeError(false);
+                  <Box sx={{ mb: 2.5 }}>
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: TEXT_PRIMARY,
+                        }}
+                      >
+                        Pet Type
+                      </Typography>
+                      <RequiredAsterisk>*</RequiredAsterisk>
+                    </Box>
+                    <FormControl fullWidth size="small" error={!petType && touchedFields.petType}>
+                      <Select
+                        value={petType}
+                        onChange={(e) => {
+                          if (modalMode !== "view") {
+                            setPetType(e.target.value);
+                            setTouchedFields({ ...touchedFields, petType: true });
                           }
-                        }
-                      }}
-                      label={`Pet Type ${petTypeError ? "(required)" : ""}`}
-                      error={petTypeError}
-                      disabled={modalMode === "view"}
-                    >
-                      <MenuItem value="cat">Cat</MenuItem>
-                      <MenuItem value="dog">Dog</MenuItem>
-                      <MenuItem value="bird">Bird</MenuItem>
-                      <MenuItem value="rabbit">Rabbit</MenuItem>
-                      <MenuItem value="hamster">Hamster</MenuItem>
-                      <MenuItem value="fish">Fish</MenuItem>
-                      <MenuItem value="reptile">Reptile</MenuItem>
-                      <MenuItem value="other">Other Pets</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <Divider sx={{ my: 2 }} />
+                        }}
+                        disabled={modalMode === "view"}
+                        displayEmpty
+                      >
+                        <MenuItem value="" disabled>Select pet type</MenuItem>
+                        <MenuItem value="cat">Cat</MenuItem>
+                        <MenuItem value="dog">Dog</MenuItem>
+                        <MenuItem value="bird">Bird</MenuItem>
+                        <MenuItem value="rabbit">Rabbit</MenuItem>
+                        <MenuItem value="hamster">Hamster</MenuItem>
+                        <MenuItem value="fish">Fish</MenuItem>
+                        <MenuItem value="reptile">Reptile</MenuItem>
+                        <MenuItem value="other">Other Pets</MenuItem>
+                      </Select>
+                      {!petType && touchedFields.petType && (
+                        <FormHelperText error>Pet type is required</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Box>
 
                   {/* Tags */}
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: "text.primary",
-                    }}
-                  >
-                    Tags
-                  </Typography>
+                  <Box sx={{ mb: 2.5 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        mb: 1,
+                        color: TEXT_PRIMARY,
+                      }}
+                    >
+                      Tags
+                    </Typography>
 
-                  {modalMode !== "view" ? (
-                    <>
-                      <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
-                        <StyledTextField
-                          placeholder="Add tag"
-                          size="small"
-                          fullWidth
-                          value={tagInput}
-                          onChange={(e) => setTagInput(e.target.value)}
-                          onKeyPress={(e) =>
-                            e.key === "Enter" && handleAddTag()
-                          }
-                        />
-                        <OutlineButton
-                          onClick={handleAddTag}
-                          disabled={!tagInput.trim()}
-                          size="small"
+                    {modalMode !== "view" ? (
+                      <>
+                        <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+                          <StyledTextField
+                            placeholder="Add tag"
+                            size="small"
+                            fullWidth
+                            value={tagInput}
+                            onChange={(e) => setTagInput(e.target.value)}
+                            onKeyPress={(e) =>
+                              e.key === "Enter" && handleAddTag()
+                            }
+                          />
+                          <OutlineButton
+                            onClick={handleAddTag}
+                            disabled={!tagInput.trim()}
+                            size="small"
+                          >
+                            Add
+                          </OutlineButton>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 0.5,
+                            minHeight: 32,
+                          }}
                         >
-                          Add
-                        </OutlineButton>
-                      </Box>
+                          {tags.map((tag) => (
+                            <Chip
+                              key={tag}
+                              label={tag}
+                              onDelete={() => handleRemoveTag(tag)}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                            />
+                          ))}
+                        </Box>
+                      </>
+                    ) : (
                       <Box
                         sx={{
                           display: "flex",
                           flexWrap: "wrap",
                           gap: 0.5,
-                          mb: 2,
                         }}
                       >
                         {tags.map((tag) => (
                           <Chip
                             key={tag}
                             label={tag}
-                            onDelete={() => handleRemoveTag(tag)}
                             size="small"
                             color="primary"
                             variant="outlined"
                           />
                         ))}
                       </Box>
-                    </>
-                  ) : (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 0.5,
-                        mb: 2,
-                      }}
-                    >
-                      {tags.map((tag) => (
-                        <Chip
-                          key={tag}
-                          label={tag}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
-                      ))}
-                    </Box>
-                  )}
-
-                  <Divider sx={{ my: 2 }} />
+                    )}
+                  </Box>
 
                   {/* Featured Option */}
                   <FormControlLabel
@@ -1458,7 +1472,11 @@ export default function UploadBlog() {
                         disabled={modalMode === "view"}
                       />
                     }
-                    label="Feature this post"
+                    label={
+                      <Typography variant="body2" sx={{ color: TEXT_PRIMARY }}>
+                        Feature this post
+                      </Typography>
+                    }
                   />
                 </Paper>
               </Grid>
@@ -1467,15 +1485,14 @@ export default function UploadBlog() {
 
           <DialogActions
             sx={{
-              px: 2,
-              py: 1.5,
+              px: 3,
+              py: 2,
               borderTop: `1px solid ${theme.palette.divider}`,
             }}
           >
             <OutlineButton
               onClick={handleCloseModal}
               size="small"
-              sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
             >
               {modalMode === "view" ? "Close" : "Cancel"}
             </OutlineButton>
@@ -1488,19 +1505,14 @@ export default function UploadBlog() {
                   isUploading ||
                   createBlogMutation.isPending ||
                   updateBlogMutation.isPending ||
-                  !isValid ||
-                  !content ||
-                  content === "<p><br></p>" ||
-                  !category ||
-                  !petType ||
-                  (modalMode === "create" && !imageFile)
+                  !isFormValid() ||
+                  (modalMode === "edit" && !isDirty)
                 }
-                sx={{ fontSize: "0.8rem", py: 0.4, px: 1.5 }}
               >
                 {isUploading ||
                 createBlogMutation.isPending ||
                 updateBlogMutation.isPending ? (
-                  <CircularProgress size={16} sx={{ color: "white" }} />
+                  <CircularProgress size={18} sx={{ color: "white" }} />
                 ) : modalMode === "create" ? (
                   "Create Post"
                 ) : (

@@ -387,7 +387,7 @@ export const UserManagement = () => {
                     }}
                     size="small"
                     sx={{
-                        '& .MuiInputBase-input': { 
+                        '& .MuiInputBase-input': {
                             fontSize: '0.8rem',
                             color: TEXT_PRIMARY,
                         },
@@ -689,7 +689,7 @@ export const UserManagement = () => {
                     {selectedUser ? 'Edit User' : 'Add New User'}
                 </DialogTitle>
                 <DialogContent sx={{ px: 2, py: 1 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
                         <StyledTextField
                             fullWidth
                             label="Name"
@@ -699,11 +699,11 @@ export const UserManagement = () => {
                             required
                             size="small"
                             sx={{
-                                '& .MuiInputBase-input': { 
+                                '& .MuiInputBase-input': {
                                     fontSize: '0.8rem',
                                     color: TEXT_PRIMARY,
                                 },
-                                '& .MuiInputLabel-root': { 
+                                '& .MuiInputLabel-root': {
                                     fontSize: '0.8rem',
                                     color: TEXT_PRIMARY,
                                 },
@@ -724,11 +724,11 @@ export const UserManagement = () => {
                             required
                             size="small"
                             sx={{
-                                '& .MuiInputBase-input': { 
+                                '& .MuiInputBase-input': {
                                     fontSize: '0.8rem',
                                     color: TEXT_PRIMARY,
                                 },
-                                '& .MuiInputLabel-root': { 
+                                '& .MuiInputLabel-root': {
                                     fontSize: '0.8rem',
                                     color: TEXT_PRIMARY,
                                 },
@@ -749,11 +749,11 @@ export const UserManagement = () => {
                             required={!selectedUser}
                             size="small"
                             sx={{
-                                '& .MuiInputBase-input': { 
+                                '& .MuiInputBase-input': {
                                     fontSize: '0.8rem',
                                     color: TEXT_PRIMARY,
                                 },
-                                '& .MuiInputLabel-root': { 
+                                '& .MuiInputLabel-root': {
                                     fontSize: '0.8rem',
                                     color: TEXT_PRIMARY,
                                 },

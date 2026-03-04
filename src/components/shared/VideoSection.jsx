@@ -50,7 +50,7 @@ const ContentWrapper = styled(Box)({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "300px",
+    minHeight: "280px",
 });
 
 const SectionSubtitle = styled(Box)({
@@ -81,7 +81,7 @@ const IconWrapper = styled(Box)({
 });
 
 const SectionTitle = styled(Typography)({
-    fontSize: "48px",
+    fontSize: "44px",
     fontWeight: 700,
     color: "#fff",
     lineHeight: 1.2,
@@ -105,12 +105,12 @@ const SectionTitle = styled(Typography)({
 const PlayButton = styled(IconButton)({
     backgroundColor: PRIMARY_COLOR,
     color: "#fff",
-    width: "80px",
-    height: "80px", 
+    width: "70px",
+    height: "70px", 
     position: "relative",
     zIndex: 2,
     transition: "all 0.3s ease",
-    border: "4px solid rgba(255,255,255,0.5)",
+    // border: "4px solid rgba(255,255,255,0.5)",
     '&:hover': {
         backgroundColor: PRIMARY_DARK,
         borderColor: "#fff",
@@ -255,7 +255,7 @@ const VideoSection = ({
                             </Typography>
                         </SectionSubtitle>
 
-                        <SectionTitle variant="h2">
+                        <SectionTitle variant="h3">
                             {title}
                         </SectionTitle>
 

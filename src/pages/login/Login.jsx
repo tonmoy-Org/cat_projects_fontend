@@ -78,9 +78,10 @@ export const Login = () => {
         alignItems: 'center',
         justifyContent: 'center',
         px: 2,
+        py: 4,
         background: theme.palette.mode === 'dark'
-          ? `linear-gradient(135deg, ${alpha('#1a1a1a', 1)} 0%, ${alpha('#2d2d2d', 1)} 100%)`
-          : `linear-gradient(135deg, ${alpha('#f8fafc', 1)} 0%, ${alpha('#f1f5f9', 1)} 100%)`,
+          ? `linear-gradient(135deg, ${alpha('#1a1a1a', 0.95)} 0%, ${alpha('#2d2d2d', 0.95)} 100%)`
+          : `linear-gradient(135deg, ${alpha('#667eea', 0.05)} 0%, ${alpha('#764ba2', 0.05)} 100%)`,
       }}
     >
       <Container maxWidth="xs">
@@ -253,9 +254,12 @@ export const Login = () => {
                   fontSize: '0.85rem',
                   color: BLUE_COLOR,
                   fontWeight: 500,
-                  '&:hover': {
-                    textDecoration: 'underline',
-                  },
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.textDecoration = 'underline';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.textDecoration = 'none';
                 }}
               >
                 Forgot password?
@@ -281,6 +285,33 @@ export const Login = () => {
                 'Sign In'
               )}
             </GradientButton>
+          </Box>
+
+          {/* Sign Up Link */}
+          <Box sx={{
+            mt: 3,
+            textAlign: 'center',
+          }}>
+            <Typography variant="body2" color={TEXT_PRIMARY} sx={{ display: 'inline', mr: 0.5 }}>
+              Don't have an account?
+            </Typography>
+            <Link
+              to="/signup"
+              style={{
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                color: BLUE_COLOR,
+                fontWeight: 600,
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.textDecoration = 'underline';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.textDecoration = 'none';
+              }}
+            >
+              Sign Up
+            </Link>
           </Box>
 
           <Box sx={{

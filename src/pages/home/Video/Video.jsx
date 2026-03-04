@@ -9,13 +9,24 @@ import {
   IconButton,
   Dialog,
   DialogContent,
+  Pagination,
+  PaginationItem,
   styled,
+  useTheme,
+  useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../../api/axios";
 import SectionTile from "../../../components/SectionTile";
+
+// Theme colors
+const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_DARK = '#4A3D75';
 
 const VideoSection = styled(Box)({
   backgroundColor: "#ffffff",
@@ -78,7 +89,7 @@ const PlayButton = styled(IconButton)(({ theme }) => ({
   },
   "& .MuiSvgIcon-root": {
     fontSize: "48px",
-    color: theme.palette.primary.main,
+    color: PRIMARY_COLOR,
   },
 }));
 
@@ -124,6 +135,67 @@ const CloseButton = styled(IconButton)({
   },
 });
 
+const PaginationWrapper = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  marginTop: "50px",
+  width: "100%",
+  [theme.breakpoints.down("sm")]: {
+    marginTop: "30px",
+  },
+}));
+
+const StyledPagination = styled(Pagination)(({ theme }) => ({
+  "& .MuiPaginationItem-root": {
+    margin: "0 5px",
+    minWidth: "40px",
+    height: "40px",
+    borderRadius: "40px",
+    fontSize: "15px",
+    fontWeight: 500,
+    color: "#333",
+    backgroundColor: "#fff",
+    border: "1px solid #e0e0e0",
+    transition: "all 0.3s ease",
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "36px",
+      height: "36px",
+      fontSize: "14px",
+      margin: "0 3px",
+    },
+    "&:hover": {
+      backgroundColor: PRIMARY_COLOR,
+      color: "#fff",
+      borderColor: PRIMARY_COLOR,
+    },
+    "&.Mui-selected": {
+      backgroundColor: PRIMARY_COLOR,
+      color: "#fff",
+      borderColor: PRIMARY_COLOR,
+      "&:hover": {
+        backgroundColor: PRIMARY_DARK,
+      },
+    },
+  },
+  "& .MuiPaginationItem-previousNext": {
+    fontSize: "18px",
+    "& svg": {
+      fontSize: "20px",
+      [theme.breakpoints.down("sm")]: {
+        fontSize: "18px",
+      },
+    },
+  },
+}));
+
+const LoadingContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: "400px",
+  width: "100%",
+});
+
 // Simple date formatter without date-fns
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -161,20 +233,30 @@ const getEmbedUrl = (url) => {
 };
 
 export default function Video() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 9;
 
   const {
-    data: videos = [],
+    data: response,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["videos"],
+    queryKey: ["videos", page],
     queryFn: async () => {
-      const response = await axiosInstance.get("/videos");
-      return response.data.data || response.data.videos || response.data || [];
+      const response = await axiosInstance.get(`/videos?page=${page}&limit=${itemsPerPage}`);
+      return response.data;
     },
   });
+
+  // Handle different response structures
+  const videos = response?.data || response?.videos || response || [];
+  const pagination = response?.pagination || { 
+    totalPages: Math.ceil((response?.total || videos.length) / itemsPerPage) || 1 
+  };
 
   const handleVideoClick = (video) => {
     setSelectedVideo(video);
@@ -186,25 +268,50 @@ export default function Video() {
     setSelectedVideo(null);
   };
 
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (isLoading) {
     return (
-      <VideoSection sx={{ py: 6 }}>
-        <Container maxWidth="lg">
-          <Typography textAlign="center">Loading videos...</Typography>
-        </Container>
-      </VideoSection>
+      <Box>
+        <SectionTile
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
+          subtitle="Our Services"
+          title="What We Offer"
+          icon={true}
+          iconClass="flaticon-custom-icon"
+        />
+        <VideoSection sx={{ py: { xs: 5, md: 12 } }}>
+          <Container maxWidth="lg">
+            <LoadingContainer>
+              <CircularProgress sx={{ color: PRIMARY_COLOR }} />
+            </LoadingContainer>
+          </Container>
+        </VideoSection>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <VideoSection sx={{ py: 6 }}>
-        <Container maxWidth="lg">
-          <Typography textAlign="center" color="error">
-            Error loading videos: {error.message}
-          </Typography>
-        </Container>
-      </VideoSection>
+      <Box>
+        <SectionTile
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
+          subtitle="Our Services"
+          title="What We Offer"
+          icon={true}
+          iconClass="flaticon-custom-icon"
+        />
+        <VideoSection sx={{ py: { xs: 5, md: 12 } }}>
+          <Container maxWidth="lg">
+            <Typography textAlign="center" color="error">
+              Error loading videos: {error.message}
+            </Typography>
+          </Container>
+        </VideoSection>
+      </Box>
     );
   }
 
@@ -219,37 +326,62 @@ export default function Video() {
       />
       <VideoSection sx={{ py: { xs: 5, md: 12 } }}>
         <Container maxWidth="lg">
-          {videos.length === 0 ? (
+          {!videos || videos.length === 0 ? (
             <Typography textAlign="center" variant="h6" color="text.secondary">
               No videos found
             </Typography>
           ) : (
-            <Grid container spacing={3}>
-              {videos.map((video) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={video._id}>
-                  <VideoCard onClick={() => handleVideoClick(video)}>
-                    <ThumbnailWrapper>
-                      <VideoThumbnail
-                        src={getYouTubeThumbnail(video.url)}
-                        alt={video.title}
-                        className="video-thumbnail"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://via.placeholder.com/640x360?text=Video+Thumbnail";
+            <>
+              <Grid container spacing={isMobile ? 2 : 3}>
+                {videos.map((video) => (
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={video._id}>
+                    <VideoCard onClick={() => handleVideoClick(video)}>
+                      <ThumbnailWrapper>
+                        <VideoThumbnail
+                          src={getYouTubeThumbnail(video.url)}
+                          alt={video.title}
+                          className="video-thumbnail"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/640x360?text=Video+Thumbnail";
+                          }}
+                        />
+                        <PlayButton className="play-icon">
+                          <PlayCircleOutlineIcon />
+                        </PlayButton>
+                      </ThumbnailWrapper>
+                      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                        <VideoTitle>{video.title}</VideoTitle>
+                        <VideoMeta>{formatDate(video.createdAt)}</VideoMeta>
+                      </CardContent>
+                    </VideoCard>
+                  </Grid>
+                ))}
+              </Grid>
+
+              {/* Show pagination only if total items > 9 */}
+              {pagination.totalPages > 1 && (
+                <PaginationWrapper>
+                  <StyledPagination
+                    count={pagination.totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    variant="outlined"
+                    shape="rounded"
+                    size={isMobile ? "small" : "medium"}
+                    renderItem={(item) => (
+                      <PaginationItem
+                        {...item}
+                        components={{
+                          next: ChevronRightIcon,
+                          previous: ChevronLeftIcon,
                         }}
                       />
-                      <PlayButton className="play-icon">
-                        <PlayCircleOutlineIcon />
-                      </PlayButton>
-                    </ThumbnailWrapper>
-                    <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                      <VideoTitle>{video.title}</VideoTitle>
-                      <VideoMeta>{formatDate(video.createdAt)}</VideoMeta>
-                    </CardContent>
-                  </VideoCard>
-                </Grid>
-              ))}
-            </Grid>
+                    )}
+                  />
+                </PaginationWrapper>
+              )}
+            </>
           )}
 
           <StyledDialog

@@ -39,6 +39,7 @@ import UploadBlog from "../pages/superadmin/UploadBlog";
 import VideoUpload from "../pages/superadmin/VideoUpload";
 import About from "../pages/home/About/About";
 import BlogDetail from "../pages/home/Blog/BlogDetail";
+import { SignUp } from "../pages/SignUp/SignUp";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -66,6 +67,17 @@ export const AppRoutes = () => {
               description="Sign in to your FatherOfMeow account"
             >
               <Login />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicLayout
+              title="Sign Up"
+              description="Sign up in to your FatherOfMeow account"
+            >
+              <SignUp />
             </PublicLayout>
           }
         />

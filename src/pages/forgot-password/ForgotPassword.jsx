@@ -145,10 +145,6 @@ export const ForgotPassword = () => {
               sx={{
                 fontWeight: 'bold',
                 mb: 0.5,
-                background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${BLUE_COLOR} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
                 fontSize: '1.5rem',
               }}
             >
