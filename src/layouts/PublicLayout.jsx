@@ -40,7 +40,7 @@ import ContactMailIcon from "@mui/icons-material/ContactMail";
 import GradientButton from "../components/ui/GradientButton";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "../auth/AuthProvider";
-import logo from "../public/logo.png";
+import logo from "../public/High-quality logo of.png";
 import Footer from "./Footer";
 
 // HideOnScroll component for hiding AppBar on scroll
@@ -246,25 +246,11 @@ export const PublicLayout = ({ children, title, description }) => {
                     src={logo}
                     alt="FatherOfMeow Logo"
                     sx={{
-                      height: { xs: 32, sm: 36 },
-                      width: "auto",
+                      height: 'auto',
+                      width: "150px",
                       display: "block",
                     }}
                   />
-                  <Typography
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: { xs: "1rem", sm: "1.2rem" },
-                      color: ACTIVE_COLOR,
-                      display: { xs: "none", sm: "block" },
-                      letterSpacing: "-0.02em",
-                      background: `linear-gradient(135deg, ${ACTIVE_COLOR} 0%, ${alpha(ACTIVE_COLOR, 0.8)} 100%)`,
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    FatherOfMeow
-                  </Typography>
                 </Box>
               </Box>
 

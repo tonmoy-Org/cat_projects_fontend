@@ -22,9 +22,6 @@ const iconColor = '#db89ca';
 // Styled components
 const BannerWrapper = styled(Box)(({ theme }) => ({
     width: '100%',
-    [theme.breakpoints.down('sm')]: {
-        paddingTop: '60px',
-    },
 }));
 
 const SlideContainer = styled(Box)({
@@ -67,42 +64,31 @@ const ContentWrapper = styled(motion.div)({
     },
 });
 
-const PassionBadge = styled(Box)(({ theme }) => ({
-    display: 'inline-flex',
+const SectionTitleWrapper = styled(Box)({
+    display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    backgroundColor: 'rgba(219, 137, 202, 0.15)',
-    backdropFilter: 'blur(8px)',
-    padding: '6px 16px 6px 6px',
-    borderRadius: '30px',
-    marginBottom: '25px',
-    border: '1px solid rgba(219, 137, 202, 0.3)',
-    width: 'fit-content',
-    [theme.breakpoints.down('sm')]: {
-        margin: '0 auto 20px',
-    },
-}));
+    marginBottom: '15px',
+});
+
+
+const SectionTitle = styled(Typography)({
+    fontSize: '14px',
+    fontWeight: 600,
+    letterSpacing: '1px',
+    color: '#666',
+    textTransform: 'uppercase',
+});
 
 const SectionIcon = styled(Box)({
-    width: '30px',
-    height: '30px',
+    width: 30,
+    height: 30,
     borderRadius: '50%',
-    backgroundColor: iconColor,
+    backgroundColor: '#db89ca',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
 });
-
-const PassionText = styled(Typography)(({ theme }) => ({
-    color: '#fff',
-    fontWeight: 600,
-    fontSize: '14px',
-    letterSpacing: '1px',
-    textTransform: 'uppercase',
-    [theme.breakpoints.down('sm')]: {
-        fontSize: '13px',
-    },
-}));
 
 const SlideTitle = styled(Typography)(({ theme }) => ({
     fontWeight: 700,
@@ -293,14 +279,12 @@ const Banner = () => {
                                         }}
                                     >
                                         <motion.div variants={badgeVariants}>
-                                            <PassionBadge>
+                                            <SectionTitleWrapper>
                                                 <SectionIcon>
                                                     <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
                                                 </SectionIcon>
-                                                <PassionText variant="span">
-                                                    {slide.smallTitle || 'Our Passion is Animals'}
-                                                </PassionText>
-                                            </PassionBadge>
+                                                <SectionTitle>Our Passion is Animals</SectionTitle>
+                                            </SectionTitleWrapper>
                                         </motion.div>
 
                                         <motion.div variants={titleVariants}>
