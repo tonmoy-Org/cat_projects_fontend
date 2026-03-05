@@ -15,8 +15,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import StarIcon from '@mui/icons-material/Star';
 
 // Theme colors
-const primaryColor = '#ff6b6b';
-const iconColor = '#db89ca';
+const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_DARK = '#4A3D75';
 
 // Styled components
 const HeroSection = styled(Box)({
@@ -44,7 +44,7 @@ const SectionIcon = styled(Box)({
   width: 40,
   height: 40,
   borderRadius: '50%',
-  backgroundColor: '#db89ca',
+  backgroundColor: PRIMARY_COLOR,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -69,7 +69,7 @@ const Description = styled(Typography)({
 });
 
 const StyledButton = styled(Button)({
-  backgroundColor: primaryColor,
+  backgroundColor: PRIMARY_COLOR,
   color: '#fff',
   padding: '12px 30px',
   fontSize: '16px',
@@ -79,8 +79,8 @@ const StyledButton = styled(Button)({
   boxShadow: 'none',
   whiteSpace: 'nowrap',
   '&:hover': {
-    backgroundColor: '#ff5252',
-    boxShadow: '0 5px 20px rgba(255,107,107,0.3)',
+    backgroundColor: PRIMARY_DARK,
+    boxShadow: '0 5px 20px rgba(92,77,145,0.3)',
   },
   '@media (max-width: 400px)': {
     padding: '10px 20px',
@@ -108,7 +108,7 @@ const PhoneBox = styled(Box)({
 });
 
 const PhoneIconWrapper = styled(Box)({
-  backgroundColor: '#db89ca',
+  backgroundColor: PRIMARY_COLOR,
   borderRadius: '50%',
   padding: '8px',
   display: 'flex',
@@ -266,7 +266,7 @@ const HeroServiceSection = ({
             <Box sx={{ mb: 3 }}>
               {features.map((feature, index) => (
                 <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                  <Box sx={{ color: iconColor, display: 'flex' }}>
+                  <Box sx={{ color: PRIMARY_COLOR, display: 'flex' }}>
                     <PetsIcon />
                   </Box>
                   <Typography variant="body1" sx={{ fontWeight: 500 }}>{feature}</Typography>
@@ -293,7 +293,7 @@ const HeroServiceSection = ({
               <TestimonialCard className="testimonial-card">
                 <Box sx={{ display: 'flex', mb: 1 }}>
                   {[...Array(rating)].map((_, i) => (
-                    <StarIcon key={i} sx={{ color: iconColor, fontSize: '14px' }} />
+                    <StarIcon key={i} sx={{ color: PRIMARY_COLOR, fontSize: '14px' }} />
                   ))}
                 </Box>
                 <TestimonialText>"{testimonial.text}"</TestimonialText>

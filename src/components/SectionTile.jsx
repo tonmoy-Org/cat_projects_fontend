@@ -35,7 +35,6 @@ const ContentWrapper = styled(Box)({
 });
 
 const IconWrapper = styled(Box)(({ theme }) => ({
-  display: "inline-flex",
   marginRight: "10px",
   width: "40px",
   height: "40px",

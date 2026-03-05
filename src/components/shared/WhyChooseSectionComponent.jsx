@@ -9,7 +9,7 @@ import {
 import PetsIcon from '@mui/icons-material/Pets';
 
 // Theme colors
-const iconColor = '#db89ca';
+const iconColor = '#5C4D91';
 
 // Styled components
 const WhyChooseSection = styled(Box)(({ theme }) => ({
@@ -148,9 +148,6 @@ const WhyChooseSectionComponent = ({
           <Grid size={{ xs: 12, lg: 6, md: 12 }}>
             <Box className="content">
               <SectionSubtitle className="section-subtitle">
-                <IconWrapper className="icon">
-                  <PetsIcon sx={{ color: '#fff', fontSize: 30 }} />
-                </IconWrapper>
                 <SubtitleText>{subtitle}</SubtitleText>
               </SectionSubtitle>
 

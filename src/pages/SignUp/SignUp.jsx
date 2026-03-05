@@ -23,7 +23,7 @@ import StyledTextField from '../../components/ui/StyledTextField';
 export const SignUp = () => {
     const theme = useTheme();
     const navigate = useNavigate();
-    const { signup } = useAuth();
+    const { register } = useAuth();
 
     const [formData, setFormData] = useState({
         name: '',
@@ -62,7 +62,6 @@ export const SignUp = () => {
                     delete newErrors.name;
                 }
                 break;
-
             case 'email':
                 if (!value) {
                     newErrors.email = 'Email is required';
@@ -72,7 +71,6 @@ export const SignUp = () => {
                     delete newErrors.email;
                 }
                 break;
-
             case 'password':
                 if (!value) {
                     newErrors.password = 'Password is required';
@@ -83,7 +81,6 @@ export const SignUp = () => {
                 }
                 checkPasswordStrength(value);
                 break;
-
             case 'confirmPassword':
                 if (!value) {
                     newErrors.confirmPassword = 'Please confirm your password';
@@ -93,7 +90,6 @@ export const SignUp = () => {
                     delete newErrors.confirmPassword;
                 }
                 break;
-
             default:
                 break;
         }
@@ -109,16 +105,10 @@ export const SignUp = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => ({ ...prev, [name]: value }));
 
-        // Real-time validation for password fields
         if (name === 'password' || name === 'confirmPassword') {
-            if (touchedFields[name]) {
-                validateField(name, value);
-            }
+            if (touchedFields[name]) validateField(name, value);
             if (name === 'password' && formData.confirmPassword && touchedFields.confirmPassword) {
                 validateField('confirmPassword', formData.confirmPassword);
             }
@@ -152,21 +142,17 @@ export const SignUp = () => {
         return theme.palette.success.main;
     };
 
-    const getPasswordStrengthWidth = () => {
-        return `${(passwordStrength.score / 4) * 100}%`;
-    };
+    const getPasswordStrengthWidth = () => `${(passwordStrength.score / 4) * 100}%`;
 
     const validateForm = () => {
-        // Validate all fields
-        Object.keys(formData).forEach(key => {
-            validateField(key, formData[key]);
-        });
-
-        return Object.keys(errors).length === 0 &&
+        Object.keys(formData).forEach(key => validateField(key, formData[key]));
+        return (
+            Object.keys(errors).length === 0 &&
             formData.name &&
             formData.email &&
             formData.password &&
-            formData.confirmPassword;
+            formData.confirmPassword
+        );
     };
 
     const handleSubmit = async (e) => {
@@ -174,36 +160,22 @@ export const SignUp = () => {
         setApiError('');
         setSuccess('');
 
-        // Mark all fields as touched
         const allTouched = {};
-        Object.keys(formData).forEach(key => {
-            allTouched[key] = true;
-        });
+        Object.keys(formData).forEach(key => { allTouched[key] = true; });
         setTouchedFields(allTouched);
 
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         setIsLoading(true);
 
         try {
-            await signup(formData.email, formData.password, formData.name);
+            // role defaults to 'client' in AuthProvider — no need to pass it
+            await register(formData.name, formData.email, formData.password);
 
             setSuccess('Account created successfully! Redirecting to login...');
+            setFormData({ name: '', email: '', password: '', confirmPassword: '' });
 
-            // Clear form
-            setFormData({
-                name: '',
-                email: '',
-                password: '',
-                confirmPassword: '',
-            });
-
-            // Redirect to login after 2 seconds
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
+            setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
             setApiError(err.message || 'Signup failed. Please try again.');
         } finally {
@@ -240,14 +212,7 @@ export const SignUp = () => {
                         }}
                     >
                         <Box sx={{ textAlign: 'center', mb: 4 }}>
-                            <Typography
-                                variant="h4"
-                                sx={{
-                                    fontWeight: 'bold',
-                                    mb: 0.5,
-                                    fontSize: '1.5rem',
-                                }}
-                            >
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5, fontSize: '1.5rem' }}>
                                 Father Of Meow
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -260,13 +225,7 @@ export const SignUp = () => {
                                 <Alert
                                     severity="error"
                                     icon={<AlertCircle size={20} />}
-                                    sx={{
-                                        mb: 3,
-                                        borderRadius: 1,
-                                        '& .MuiAlert-icon': {
-                                            color: theme.palette.error.main,
-                                        },
-                                    }}
+                                    sx={{ mb: 3, borderRadius: 1, '& .MuiAlert-icon': { color: theme.palette.error.main } }}
                                     onClose={() => setApiError('')}
                                 >
                                     {apiError}
@@ -279,13 +238,7 @@ export const SignUp = () => {
                                 <Alert
                                     severity="success"
                                     icon={<CheckCircle size={20} />}
-                                    sx={{
-                                        mb: 3,
-                                        borderRadius: 1,
-                                        '& .MuiAlert-icon': {
-                                            color: theme.palette.success.main,
-                                        },
-                                    }}
+                                    sx={{ mb: 3, borderRadius: 1, '& .MuiAlert-icon': { color: theme.palette.success.main } }}
                                 >
                                     {success}
                                 </Alert>
@@ -306,11 +259,6 @@ export const SignUp = () => {
                                     error={touchedFields.name && !!errors.name}
                                     helperText={touchedFields.name && errors.name}
                                     size="small"
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            transition: 'all 0.2s ease',
-                                        },
-                                    }}
                                 />
                             </Box>
 
@@ -348,17 +296,7 @@ export const SignUp = () => {
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                <IconButton
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                    edge="end"
-                                                    size="small"
-                                                    sx={{
-                                                        color: theme.palette.text.secondary,
-                                                        '&:hover': {
-                                                            color: theme.palette.primary.main,
-                                                        },
-                                                    }}
-                                                >
+                                                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small" sx={{ color: theme.palette.text.secondary, '&:hover': { color: theme.palette.primary.main } }}>
                                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                                 </IconButton>
                                             </InputAdornment>
@@ -369,67 +307,21 @@ export const SignUp = () => {
                                 {formData.password && (
                                     <Fade in={true}>
                                         <Box sx={{ mt: 1.5, mb: 0.5 }}>
-                                            <Box sx={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                mb: 0.5,
-                                            }}>
-                                                <Typography variant="caption" sx={{
-                                                    color: getPasswordStrengthColor(),
-                                                    fontWeight: 600,
-                                                }}>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                                                <Typography variant="caption" sx={{ color: getPasswordStrengthColor(), fontWeight: 600 }}>
                                                     {passwordStrength.message}
                                                 </Typography>
                                                 <Typography variant="caption" color="text.secondary">
                                                     {passwordStrength.score}/4
                                                 </Typography>
                                             </Box>
-
-                                            <Box sx={{
-                                                height: 4,
-                                                width: '100%',
-                                                backgroundColor: alpha(theme.palette.text.primary, 0.1),
-                                                borderRadius: 2,
-                                                overflow: 'hidden',
-                                            }}>
-                                                <Box
-                                                    sx={{
-                                                        height: '100%',
-                                                        width: getPasswordStrengthWidth(),
-                                                        backgroundColor: getPasswordStrengthColor(),
-                                                        borderRadius: 2,
-                                                        transition: 'width 0.3s ease, background-color 0.3s ease',
-                                                    }}
-                                                />
+                                            <Box sx={{ height: 4, width: '100%', backgroundColor: alpha(theme.palette.text.primary, 0.1), borderRadius: 2, overflow: 'hidden' }}>
+                                                <Box sx={{ height: '100%', width: getPasswordStrengthWidth(), backgroundColor: getPasswordStrengthColor(), borderRadius: 2, transition: 'width 0.3s ease, background-color 0.3s ease' }} />
                                             </Box>
-
-                                            <Box sx={{
-                                                display: 'grid',
-                                                gridTemplateColumns: 'repeat(2, 1fr)',
-                                                gap: 1,
-                                                mt: 1.5,
-                                            }}>
+                                            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, mt: 1.5 }}>
                                                 {Object.entries(passwordStrength.requirements).map(([key, met]) => (
-                                                    <Box
-                                                        key={key}
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: 0.5,
-                                                        }}
-                                                    >
-                                                        <Box
-                                                            sx={{
-                                                                width: 6,
-                                                                height: 6,
-                                                                borderRadius: '50%',
-                                                                backgroundColor: met
-                                                                    ? theme.palette.success.main
-                                                                    : alpha(theme.palette.text.primary, 0.2),
-                                                                transition: 'background-color 0.2s ease',
-                                                            }}
-                                                        />
+                                                    <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: met ? theme.palette.success.main : alpha(theme.palette.text.primary, 0.2), transition: 'background-color 0.2s ease' }} />
                                                         <Typography variant="caption" color="text.secondary">
                                                             {key === 'length' && '8+ characters'}
                                                             {key === 'uppercase' && 'Uppercase'}
@@ -461,17 +353,7 @@ export const SignUp = () => {
                                     InputProps={{
                                         endAdornment: (
                                             <InputAdornment position="end">
-                                                <IconButton
-                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                    edge="end"
-                                                    size="small"
-                                                    sx={{
-                                                        color: theme.palette.text.secondary,
-                                                        '&:hover': {
-                                                            color: theme.palette.primary.main,
-                                                        },
-                                                    }}
-                                                >
+                                                <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" size="small" sx={{ color: theme.palette.text.secondary, '&:hover': { color: theme.palette.primary.main } }}>
                                                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                                 </IconButton>
                                             </InputAdornment>
@@ -480,76 +362,29 @@ export const SignUp = () => {
                                 />
                             </Box>
 
-                            <GradientButton
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                disabled={isLoading}
-                            >
+                            <GradientButton type="submit" fullWidth variant="contained" disabled={isLoading}>
                                 {isLoading ? (
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <CircularProgress size={20} sx={{ color: 'white' }} />
-                                        <Typography sx={{ color: 'white' }}>
-                                            Creating account...
-                                        </Typography>
+                                        <Typography sx={{ color: 'white' }}>Creating account...</Typography>
                                     </Box>
                                 ) : (
                                     'Create Account'
                                 )}
                             </GradientButton>
 
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                gap: 0.5,
-                                my: 3,
-                            }}>
-                                <Typography variant="body2" color="text.secondary">
-                                    Already have an account?
-                                </Typography>
-                                <Link
-                                    to="/login"
-                                    style={{
-                                        textDecoration: 'none',
-                                        color: theme.palette.primary.main,
-                                        fontWeight: 600,
-                                        fontSize: '0.875rem',
-                                    }}
-                                >
+                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0.5, my: 3 }}>
+                                <Typography variant="body2" color="text.secondary">Already have an account?</Typography>
+                                <Link to="/login" style={{ textDecoration: 'none', color: theme.palette.primary.main, fontWeight: 600, fontSize: '0.875rem' }}>
                                     Sign In
                                 </Link>
                             </Box>
 
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                align="center"
-                                sx={{
-                                    display: 'block',
-                                    mt: 2,
-                                }}
-                            >
+                            <Typography variant="caption" color="text.secondary" align="center" sx={{ display: 'block', mt: 2 }}>
                                 By creating an account, you agree to our{' '}
-                                <Link
-                                    to="/terms"
-                                    style={{
-                                        color: theme.palette.primary.main,
-                                        textDecoration: 'none',
-                                    }}
-                                >
-                                    Terms of Service
-                                </Link>{' '}
+                                <Link to="/terms" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>Terms of Service</Link>{' '}
                                 and{' '}
-                                <Link
-                                    to="/privacy"
-                                    style={{
-                                        color: theme.palette.primary.main,
-                                        textDecoration: 'none',
-                                    }}
-                                >
-                                    Privacy Policy
-                                </Link>
+                                <Link to="/privacy" style={{ color: theme.palette.primary.main, textDecoration: 'none' }}>Privacy Policy</Link>
                             </Typography>
                         </Box>
                     </Paper>

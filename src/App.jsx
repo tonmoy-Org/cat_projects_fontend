@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-query'
 import CustomTheme from './styles/theme';
 import { HelmetProvider } from 'react-helmet-async';
+import { AlertProvider } from './components/ui/AlertProvider';
 
 // Create a client
 const queryClient = new QueryClient()
@@ -18,7 +19,9 @@ function App() {
       <HelmetProvider>
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
-            <AppRoutes />
+            <AlertProvider>
+              <AppRoutes />
+            </AlertProvider>
           </QueryClientProvider>
         </AuthProvider>
       </HelmetProvider>

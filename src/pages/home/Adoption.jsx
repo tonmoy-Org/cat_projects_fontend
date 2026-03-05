@@ -16,8 +16,8 @@ import CakeIcon from '@mui/icons-material/Cake';
 import HotelIcon from '@mui/icons-material/Hotel';
 
 // Theme colors
-const iconColor = '#db89ca';
-const primaryColor = '#ff6b6b';
+const iconColor = '#5C4D91';
+const primaryColor = '#5C4D91';
 
 // Styled components
 const AdoptionSection = styled(Box)({
