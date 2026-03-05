@@ -16,8 +16,8 @@ import axiosInstance from '../../api/axios';
 import PetsIcon from '@mui/icons-material/Pets';
 
 // Theme colors
-const PRIMARY_COLOR = '#5C4D91';
-const PRIMARY_DARK = '#4A3D75';
+const primaryColor = '#ff6b6b';
+const iconColor = '#db89ca';
 
 // Styled components
 const BannerWrapper = styled(Box)(({ theme }) => ({
@@ -61,30 +61,33 @@ const Overlay = styled(Box)({
 const ContentWrapper = styled(motion.div)({
     maxWidth: '600px',
     textAlign: 'left',
+    '@media (max-width: 600px)': {
+        textAlign: 'center',
+        margin: '0 auto',
+    },
 });
 
 const PassionBadge = styled(Box)(({ theme }) => ({
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '8px',
-    backgroundColor: 'rgba(219, 137, 202, 0.2)',
-    backdropFilter: 'blur(5px)',
-    padding: '8px 16px',
-    borderRadius: '40px',
-    marginBottom: '20px',
+    gap: '10px',
+    backgroundColor: 'rgba(219, 137, 202, 0.15)',
+    backdropFilter: 'blur(8px)',
+    padding: '6px 16px 6px 6px',
+    borderRadius: '30px',
+    marginBottom: '25px',
     border: '1px solid rgba(219, 137, 202, 0.3)',
     width: 'fit-content',
     [theme.breakpoints.down('sm')]: {
         margin: '0 auto 20px',
-        backgroundColor: 'rgba(219, 137, 202, 0.3)',
     },
 }));
 
 const SectionIcon = styled(Box)({
-    width: 32,
-    height: 32,
+    width: '30px',
+    height: '30px',
     borderRadius: '50%',
-    backgroundColor: '#db89ca',
+    backgroundColor: iconColor,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -92,12 +95,12 @@ const SectionIcon = styled(Box)({
 
 const PassionText = styled(Typography)(({ theme }) => ({
     color: '#fff',
-    fontWeight: 500,
-    fontSize: '0.95rem',
-    letterSpacing: '0.5px',
+    fontWeight: 600,
+    fontSize: '14px',
+    letterSpacing: '1px',
     textTransform: 'uppercase',
     [theme.breakpoints.down('sm')]: {
-        fontSize: '0.85rem',
+        fontSize: '13px',
     },
 }));
 
@@ -106,12 +109,13 @@ const SlideTitle = styled(Typography)(({ theme }) => ({
     color: '#fff',
     marginBottom: '20px',
     textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-    fontSize: '3rem',
+    fontSize: '48px',
+    lineHeight: 1.2,
     [theme.breakpoints.down('md')]: {
-        fontSize: '2.5rem',
+        fontSize: '42px',
     },
     [theme.breakpoints.down('sm')]: {
-        fontSize: '2rem',
+        fontSize: '36px',
         textAlign: 'center',
     },
 }));
@@ -119,33 +123,36 @@ const SlideTitle = styled(Typography)(({ theme }) => ({
 const SlideDescription = styled(Typography)(({ theme }) => ({
     color: '#fff',
     marginBottom: '30px',
-    fontSize: '1.2rem',
-    lineHeight: 1.6,
+    fontSize: '16px',
+    lineHeight: 1.7,
     textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+    maxWidth: '550px',
     [theme.breakpoints.down('sm')]: {
-        fontSize: '1rem',
+        fontSize: '15px',
         textAlign: 'center',
-        marginBottom: '20px',
+        marginBottom: '25px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
     },
 }));
 
 const OrderButton = styled(Button)(({ theme }) => ({
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: primaryColor,
     color: '#fff',
-    borderRadius: '50px',
+    borderRadius: '25px',
     fontWeight: 500,
-    padding: '8px 35px',
-    fontSize: '1rem',
+    padding: '10px 28px',
+    fontSize: '14px',
     textTransform: 'none',
-    boxShadow: '0 4px 15px rgba(92,77,145,0.3)',
+    boxShadow: '0 4px 15px rgba(255,107,107,0.3)',
     '&:hover': {
-        backgroundColor: PRIMARY_DARK,
+        backgroundColor: '#ff5252',
         transform: 'translateY(-2px)',
-        boxShadow: '0 6px 20px rgba(92,77,145,0.4)',
+        boxShadow: '0 6px 20px rgba(255,107,107,0.4)',
     },
     [theme.breakpoints.down('sm')]: {
-        padding: '8px 30px',
-        fontSize: '0.95rem',
+        padding: '8px 24px',
+        fontSize: '13px',
         display: 'block',
         margin: '0 auto',
         width: 'fit-content',
@@ -237,7 +244,7 @@ const Banner = () => {
             <BannerWrapper>
                 <Container maxWidth="xl" fixed>
                     <LoadingContainer>
-                        <CircularProgress sx={{ color: PRIMARY_COLOR }} />
+                        <CircularProgress sx={{ color: primaryColor }} />
                     </LoadingContainer>
                 </Container>
             </BannerWrapper>
@@ -288,10 +295,10 @@ const Banner = () => {
                                         <motion.div variants={badgeVariants}>
                                             <PassionBadge>
                                                 <SectionIcon>
-                                                    <PetsIcon sx={{ color: '#fff', fontSize: 20 }} />
+                                                    <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
                                                 </SectionIcon>
                                                 <PassionText variant="span">
-                                                    Our Passion is Animals
+                                                    {slide.smallTitle || 'Our Passion is Animals'}
                                                 </PassionText>
                                             </PassionBadge>
                                         </motion.div>
@@ -304,14 +311,14 @@ const Banner = () => {
 
                                         <motion.div variants={descriptionVariants}>
                                             <SlideDescription variant="body1">
-                                                {slide.paragraph}
+                                                {slide.paragraph || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.'}
                                             </SlideDescription>
                                         </motion.div>
 
                                         <motion.div variants={buttonVariants}>
                                             <OrderButton
                                                 variant="contained"
-                                                href={slide.btnLink}
+                                                href={slide.btnLink || '#'}
                                                 size="large"
                                             >
                                                 {slide.btnText || 'Learn More'}

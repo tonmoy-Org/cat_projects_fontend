@@ -5,6 +5,9 @@ import HeroServiceSection from '../../components/shared/HeroServiceSection';
 import WhyChooseSectionComponent from '../../components/shared/WhyChooseSectionComponent';
 import Adoption from './Adoption';
 import Banner from './Banner';
+import FeaturedProducts from './FeaturedProducts';
+import FAQ from '../faq/faq';
+import BlogArticles from './BlogArticles';
 
 const Home = () => {
     return (
@@ -14,6 +17,9 @@ const Home = () => {
             <Services />
             <WhyChooseSectionComponent />
             <Adoption />
+            <FeaturedProducts />
+            <FAQ />
+            <BlogArticles />
         </>
     );
 };

@@ -7,13 +7,8 @@ import {
   Typography,
   Button,
   styled,
-  Card,
-  CardContent,
-  IconButton,
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 // Import real icons from MUI
 import HomeIcon from '@mui/icons-material/Home';
@@ -21,13 +16,12 @@ import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
-import PuppyIcon from '@mui/icons-material/Pets'; // Using PetsIcon as fallback
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import HotelIcon from '@mui/icons-material/Hotel';
 
 // Theme colors
-const iconColor = '#5C4D91';
-const primaryColor = '#5C4D91';
+const primaryColor = '#ff6b6b';
+const iconColor = '#db89ca';
 
 // Styled components
 const ServicesSection = styled(Box)({
@@ -42,43 +36,50 @@ const SectionHeaderWrapper = styled(Box)({
   marginBottom: '50px',
 });
 
+const HeaderTopRow = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '10px',
+  marginBottom: '15px',
+  flexWrap: 'wrap',
+});
+
 const SectionIconWrapper = styled(Box)({
-  width: 50,
-  height: 50,
+  width: '30px',
+  height: '30px',
   borderRadius: '50%',
   backgroundColor: iconColor,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  margin: '0 auto 15px',
 });
 
 const SectionSubtitle = styled(Typography)({
-  fontSize: '15px',
+  fontSize: '14px',
   fontWeight: 600,
   letterSpacing: '1px',
-  color: '#333',
-  marginBottom: '10px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '10px',
+  color: '#666',
+  textTransform: 'uppercase',
 });
 
 const SectionTitle = styled(Typography)({
-  fontSize: '36px',
+  fontSize: '38px',
   fontWeight: 700,
   color: '#1a1a1a',
   lineHeight: 1.2,
+  '@media (max-width: 900px)': {
+    fontSize: '32px',
+  },
   '@media (max-width: 600px)': {
     fontSize: '28px',
+    padding: '0 15px',
   },
 });
 
 const CarouselContainer = styled(Box)({
   position: 'relative',
   width: '100%',
-  padding: '0 40px',
   '@media (max-width: 600px)': {
     padding: '0 20px',
   },
@@ -148,6 +149,7 @@ const FlipCardBack = styled(Box)({
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
+  borderTop: `3px solid ${primaryColor}`,
 });
 
 const CardImage = styled('img')({
@@ -165,8 +167,8 @@ const CardContentBack = styled(Box)({
 });
 
 const IconWrapper = styled(Box)(({ bgcolor }) => ({
-  width: '80px',
-  height: '80px',
+  width: '70px',
+  height: '70px',
   borderRadius: '50%',
   backgroundColor: bgcolor || iconColor,
   display: 'flex',
@@ -174,7 +176,7 @@ const IconWrapper = styled(Box)(({ bgcolor }) => ({
   justifyContent: 'center',
   marginBottom: '20px',
   '& svg': {
-    fontSize: '40px',
+    fontSize: '32px',
     color: '#fff',
   },
 }));
@@ -184,6 +186,8 @@ const CardTitle = styled(Typography)({
   fontWeight: 600,
   color: '#1a1a1a',
   marginBottom: '15px',
+  position: 'relative',
+  display: 'inline-block',
   '& a': {
     color: 'inherit',
     textDecoration: 'none',
@@ -200,36 +204,19 @@ const CardText = styled(Typography)({
 const ReadMoreButton = styled(Button)({
   backgroundColor: primaryColor,
   color: '#fff',
-  padding: '8px 20px',
+  padding: '8px 60px',
   fontSize: '14px',
   fontWeight: 500,
   textTransform: 'none',
-  borderRadius: '30px',
+  borderRadius: '25px',
   boxShadow: 'none',
   marginTop: 'auto',
+  alignSelf: 'center',
+  minWidth: '110px',
   '&:hover': {
     backgroundColor: '#ff5252',
+    boxShadow: '0 5px 15px rgba(255,107,107,0.3)',
   },
-});
-
-const NavButton = styled(IconButton)({
-  position: 'absolute',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  backgroundColor: '#fff',
-  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-  '&:hover': {
-    backgroundColor: '#f5f5f5',
-  },
-  zIndex: 10,
-});
-
-const PrevButton = styled(NavButton)({
-  left: '0',
-});
-
-const NextButton = styled(NavButton)({
-  right: '0',
 });
 
 const DotsContainer = styled(Box)({
@@ -303,7 +290,7 @@ const services = [
     id: 6,
     title: 'Puppy Program',
     description: 'Lorem ipsum dolor sit amet consectetur erimen elitnam obortis rhoncus sapien.',
-    icon: <PuppyIcon />,
+    icon: <PetsIcon />,
     iconBg: '#9c27b0',
     image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/06-1.jpg',
     link: '/services/puppy-program',
@@ -356,12 +343,14 @@ const Services = () => {
         <Grid container justifyContent="center">
           <Grid size={{ xs: 12, md: 8 }}>
             <SectionHeaderWrapper>
-              <SectionIconWrapper>
-                <PetsIcon sx={{ color: '#fff', fontSize: 30 }} />
-              </SectionIconWrapper>
-              <SectionSubtitle>
-                We love animals
-              </SectionSubtitle>
+              <HeaderTopRow>
+                <SectionIconWrapper>
+                  <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
+                </SectionIconWrapper>
+                <SectionSubtitle>
+                  We love animals
+                </SectionSubtitle>
+              </HeaderTopRow>
               <SectionTitle>
                 Our pet care services
               </SectionTitle>

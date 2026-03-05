@@ -9,7 +9,7 @@ import {
 import PetsIcon from '@mui/icons-material/Pets';
 
 // Theme colors
-const iconColor = '#5C4D91';
+const iconColor = '#db89ca';
 
 // Styled components
 const WhyChooseSection = styled(Box)(({ theme }) => ({

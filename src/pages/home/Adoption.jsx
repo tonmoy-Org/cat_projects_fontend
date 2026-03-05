@@ -16,8 +16,8 @@ import CakeIcon from '@mui/icons-material/Cake';
 import HotelIcon from '@mui/icons-material/Hotel';
 
 // Theme colors
-const iconColor = '#5C4D91';
-const primaryColor = '#5C4D91';
+const primaryColor = '#ff6b6b';
+const iconColor = '#db89ca';
 
 // Styled components
 const AdoptionSection = styled(Box)({
@@ -45,31 +45,25 @@ const HeaderTopRow = styled(Box)({
 });
 
 const SectionIconWrapper = styled(Box)({
-  width: 45,
-  height: 45,
+  width: '30px',
+  height: '30px',
   borderRadius: '50%',
   backgroundColor: iconColor,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  '@media (max-width: 600px)': {
-    width: 40,
-    height: 40,
-  },
 });
 
 const SectionSubtitle = styled(Typography)({
-  fontSize: '16px',
+  fontSize: '14px',
   fontWeight: 600,
   letterSpacing: '1px',
-  color: '#333',
-  '@media (max-width: 600px)': {
-    fontSize: '14px',
-  },
+  color: '#666',
+  textTransform: 'uppercase',
 });
 
 const SectionTitle = styled(Typography)({
-  fontSize: '36px',
+  fontSize: '38px',
   fontWeight: 700,
   color: '#1a1a1a',
   lineHeight: 1.2,
@@ -77,7 +71,7 @@ const SectionTitle = styled(Typography)({
     fontSize: '32px',
   },
   '@media (max-width: 600px)': {
-    fontSize: '26px',
+    fontSize: '28px',
     padding: '0 15px',
   },
 });
@@ -107,6 +101,10 @@ const PetImage = styled('img')({
   height: '100%',
   objectFit: 'cover',
   display: 'block',
+  transition: 'transform 0.5s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+  },
 });
 
 const FrontHeader = styled(Box)({
@@ -114,20 +112,21 @@ const FrontHeader = styled(Box)({
   bottom: 0,
   left: 0,
   right: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  padding: '15px 20px',
+  background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
+  padding: '20px',
   textAlign: 'center',
   zIndex: 2,
   '@media (max-width: 600px)': {
-    padding: '12px 15px',
+    padding: '15px',
   },
 });
 
 const FrontTitle = styled(Typography)({
-  fontSize: '24px',
+  fontSize: '22px',
   fontWeight: 600,
   color: '#fff',
   margin: 0,
+  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
   '@media (max-width: 600px)': {
     fontSize: '20px',
   },
@@ -143,6 +142,7 @@ const BackWrap = styled(Box)({
   transition: 'bottom 0.3s ease',
   zIndex: 3,
   textAlign: 'center',
+  borderTop: `3px solid ${primaryColor}`,
   '& a': {
     textDecoration: 'none',
     color: 'inherit',
@@ -158,9 +158,21 @@ const BackTitle = styled(Typography)({
   fontWeight: 600,
   color: '#1a1a1a',
   marginBottom: '15px',
+  position: 'relative',
+  display: 'inline-block',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    bottom: '-5px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '40px',
+    height: '2px',
+    backgroundColor: primaryColor,
+  },
   '@media (max-width: 600px)': {
     fontSize: '18px',
-    marginBottom: '12px',
+    marginBottom: '15px',
   },
 });
 
@@ -176,17 +188,17 @@ const InfoItem = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '10px',
+  gap: '8px',
   fontSize: '14px',
   color: '#666',
-  padding: '8px 0',
+  padding: '6px 0',
   '& svg': {
     fontSize: '18px',
     color: iconColor,
   },
   '@media (max-width: 600px)': {
     fontSize: '13px',
-    padding: '6px 0',
+    padding: '4px 0',
     '& svg': {
       fontSize: '16px',
     },
@@ -198,45 +210,48 @@ const SectionInfo = styled(Box)({
   alignItems: 'center',
   justifyContent: 'center',
   marginTop: '50px',
-  gap: '20px',
+  gap: '30px',
   flexWrap: 'wrap',
   '@media (max-width: 600px)': {
     flexDirection: 'column',
-    gap: '15px',
+    gap: '20px',
     marginTop: '40px',
     padding: '0 20px',
   },
 });
 
 const AdoptButton = styled(Button)({
-  backgroundColor: iconColor,
-  borderRadius: '30px',
-  padding: '8px 25px',
+  backgroundColor: primaryColor,
+  color: '#fff',
+  padding: '10px 24px',
+  fontSize: '14px',
+  fontWeight: 500,
   textTransform: 'none',
-  fontWeight: 600,
-  fontSize: '16px',
+  borderRadius: '25px',
+  boxShadow: 'none',
   minWidth: '140px',
   whiteSpace: 'nowrap',
   '&:hover': {
-    backgroundColor: '#c774b6',
+    backgroundColor: '#ff5252',
+    boxShadow: '0 5px 15px rgba(255,107,107,0.3)',
   },
   '@media (max-width: 600px)': {
-    padding: '6px 20px',
-    fontSize: '14px',
+    padding: '8px 20px',
+    fontSize: '13px',
     minWidth: '120px',
   },
 });
 
 const InfoText = styled(Typography)({
-  fontSize: '18px',
-  color: '#333',
+  fontSize: '16px',
+  color: '#666',
   display: 'flex',
   alignItems: 'center',
   gap: '5px',
   flexWrap: 'wrap',
   justifyContent: 'center',
   '@media (max-width: 600px)': {
-    fontSize: '16px',
+    fontSize: '14px',
   },
   '& a': {
     color: iconColor,
@@ -315,7 +330,7 @@ const Adoption = () => {
             <SectionHeaderWrapper>
               <HeaderTopRow>
                 <SectionIconWrapper>
-                  <PetsIcon sx={{ color: '#fff', fontSize: 20 }} />
+                  <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
                 </SectionIconWrapper>
                 <SectionSubtitle>
                   Adopt a pet
@@ -370,25 +385,14 @@ const Adoption = () => {
         </Grid>
 
         {/* Bottom Info Section */}
-        <Grid container justifyContent="center">
-          <Grid size={{ xs: 12, md: 8 }}>
-            <SectionInfo>
-              <AdoptButton variant="contained">
-                Adopt a pet
-              </AdoptButton>
-              <InfoText>
-                Call us{' '}
-                <Link
-                  href="tel:+1234567890"
-                  underline="none"
-                >
-                  +123 456 7890
-                </Link>{' '}
-                for detailed information!
-              </InfoText>
-            </SectionInfo>
-          </Grid>
-        </Grid>
+        <SectionInfo>
+          <AdoptButton variant="contained">
+            View all pets
+          </AdoptButton>
+          <InfoText>
+            Can't adopt? <a href="/sponsor">Sponsor a pet</a>
+          </InfoText>
+        </SectionInfo>
       </Container>
     </AdoptionSection>
   );
