@@ -33,6 +33,8 @@ import About from '../pages/home/About/About';
 import Home from '../pages/home/Home';
 import BlogDetail from '../pages/home/Blog/BlogDetail';
 import Faq from '../pages/FAQ/faq';
+import Privacy from '../pages/Privacy/Privacy';
+import Cookies from '../pages/Cookies/Cookies';
 
 
 export const AppRoutes = () => {
@@ -146,6 +148,22 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="FAQ" description="Frequently asked questions about our services">
               <Faq />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/privacy"
+          element={
+            <PublicLayout title="Privacy Policy" description="Learn how we collect, use, and protect your information">
+              <Privacy />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/cookies"
+          element={
+            <PublicLayout title="Cookies Policy" description="Learn how we use cookies and similar technologies">
+              <Cookies />
             </PublicLayout>
           }
         />
