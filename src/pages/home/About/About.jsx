@@ -39,13 +39,13 @@ const SectionTitle = styled(Typography)({
 });
 
 const SectionIcon = styled(Box)({
-  width: 40,
-  height: 40,
-  borderRadius: "50%",
-  backgroundColor: PRIMARY_COLOR,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  width: 30,
+  height: 30,
+  borderRadius: '50%',
+  backgroundColor: '#db89ca',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 });
 
 const MainTitle = styled(Typography)({
@@ -127,21 +127,14 @@ const galleryImages = [
   },
 ];
 
-// Handle video play
-const handleVideoPlay = () => {
-  // You can customize this function based on your needs
-  // For example, open a modal with YouTube video
-  console.log("Play video clicked");
-  // window.open('https://www.youtube.com/watch?v=your-video-id', '_blank');
-};
 
 const About = () => {
   return (
     <Box>
       <SectionTile
-        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
+        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/4.jpg"
         subtitle="Our Services"
-        title="What We Offer"
+        title="About Father Of Meow"
         icon={true}
         iconClass="flaticon-custom-icon"
       />
@@ -165,7 +158,7 @@ const About = () => {
           <Box sx={{ textAlign: "center", mb: 6 }}>
             <SectionTitleWrapper>
               <SectionIcon>
-                <PetsIcon sx={{ color: "#fff", fontSize: 30 }} />
+                <PetsIcon sx={{ color: "#fff", fontSize: 18 }} />
               </SectionIcon>
               <SectionTitle>Pet gallery</SectionTitle>
             </SectionTitleWrapper>

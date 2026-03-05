@@ -179,9 +179,9 @@ const Contact = () => {
   return (
     <Box>
       <SectionTile
-        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-        subtitle="Our Services"
-        title="What We Offer"
+        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/2.jpg"
+        subtitle="Get in touch"
+        title="Contact us"
         icon={true}
         iconClass="flaticon-custom-icon"
       />

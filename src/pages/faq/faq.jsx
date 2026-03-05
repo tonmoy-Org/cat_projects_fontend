@@ -13,7 +13,7 @@ const lightBg = '#f9f9f9';
 
 // Styled components
 const FAQSection = styled(Box)({
-  padding: '80px 0',
+  paddingBottom: '80px 0',
   backgroundColor: '#fff',
 });
 

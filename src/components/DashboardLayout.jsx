@@ -25,7 +25,8 @@ import MenuItem from '@mui/material/MenuItem';
 import { useAuth } from '../auth/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import logo from '../public/logo.png';
+import logo from '../public/logo-1.png';
+import logo_single from '../public/logo-single.png';
 import { ExpandLess, ExpandMore, Menu as MenuIcon, MoreVert } from '@mui/icons-material';
 import DashboardFooter from './DashboardFooter';
 import Dialog from '@mui/material/Dialog';
@@ -538,47 +539,28 @@ export default function DashboardLayout({ children, title, menuItems }) {
         >
           {open ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <img
+              <Box
+                component="img"
                 src={logo}
-                alt="Logo"
-                style={{
-                  width: '40px',
-                  height: 'auto',
-                  filter: 'brightness(0) invert(1)',
+                alt="FatherOfMeow Logo"
+                sx={{
+                  height: { xs: 40, sm: 75 },
+                  width: { xs: 100, sm: 155 },
+                  display: "block",
                 }}
               />
-              <Typography
-                sx={{
-                  color: '#FFFFFF',
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                FatherOfMeow
-              </Typography>
             </Box>
           ) : (
             <Box
+              component="img"
+              src={logo_single}
+              alt="FatherOfMeow Logo"
               sx={{
-                width: 36,
-                height: 36,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                height: { xs: 40, sm: 60 },
+                width: { xs: 100, sm: 150 },
+                display: "block",
               }}
-            >
-              <img
-                src={logo}
-                alt="Logo"
-                style={{
-                  width: '30px',
-                  height: 'auto',
-                  filter: 'brightness(0) invert(1)',
-
-                }}
-              />
-            </Box>
+            />
           )}
         </Box>
       </DrawerHeader>

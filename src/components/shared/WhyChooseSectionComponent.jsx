@@ -32,9 +32,9 @@ const SubtitleText = styled(Typography)({
   textTransform: 'uppercase',
 });
 
-const IconWrapper = styled(Box)({
-  width: 40,
-  height: 40,
+const SectionIcon = styled(Box)({
+  width: 30,
+  height: 30,
   borderRadius: '50%',
   backgroundColor: '#db89ca',
   display: 'flex',
@@ -148,6 +148,9 @@ const WhyChooseSectionComponent = ({
           <Grid size={{ xs: 12, lg: 6, md: 12 }}>
             <Box className="content">
               <SectionSubtitle className="section-subtitle">
+                <SectionIcon>
+                  <PetsIcon sx={{ color: "#fff", fontSize: 18 }} />
+                </SectionIcon>
                 <SubtitleText>{subtitle}</SubtitleText>
               </SectionSubtitle>
 

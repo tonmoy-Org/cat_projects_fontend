@@ -254,8 +254,8 @@ export default function Video() {
 
   // Handle different response structures
   const videos = response?.data || response?.videos || response || [];
-  const pagination = response?.pagination || { 
-    totalPages: Math.ceil((response?.total || videos.length) / itemsPerPage) || 1 
+  const pagination = response?.pagination || {
+    totalPages: Math.ceil((response?.total || videos.length) / itemsPerPage) || 1
   };
 
   const handleVideoClick = (video) => {
@@ -277,9 +277,9 @@ export default function Video() {
     return (
       <Box>
         <SectionTile
-          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-          subtitle="Our Services"
-          title="What We Offer"
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/a.jpg"
+          subtitle="Video gallery"
+          title="Father Of Meow gallery"
           icon={true}
           iconClass="flaticon-custom-icon"
         />
@@ -298,9 +298,9 @@ export default function Video() {
     return (
       <Box>
         <SectionTile
-          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-          subtitle="Our Services"
-          title="What We Offer"
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/a.jpg"
+          subtitle="Video gallery"
+          title="Father Of Meow gallery"
           icon={true}
           iconClass="flaticon-custom-icon"
         />
@@ -318,9 +318,9 @@ export default function Video() {
   return (
     <Box>
       <SectionTile
-        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-        subtitle="Our Services"
-        title="What We Offer"
+        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/a.jpg"
+        subtitle="Video gallery"
+        title="Father Of Meow gallery"
         icon={true}
         iconClass="flaticon-custom-icon"
       />

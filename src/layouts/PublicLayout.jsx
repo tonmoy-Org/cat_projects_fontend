@@ -247,7 +247,7 @@ export const PublicLayout = ({ children, title, description }) => {
                     alt="FatherOfMeow Logo"
                     sx={{
                       height: 'auto',
-                      width: "150px",
+                      width: { xs: 100, sm: 150 },
                       display: "block",
                     }}
                   />

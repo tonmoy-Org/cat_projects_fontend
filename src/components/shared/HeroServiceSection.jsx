@@ -42,6 +42,7 @@ const SectionTitle = styled(Typography)({
   textTransform: 'uppercase',
 });
 
+
 const SectionIcon = styled(Box)({
   width: 30,
   height: 30,

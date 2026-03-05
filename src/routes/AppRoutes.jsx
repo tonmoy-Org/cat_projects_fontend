@@ -40,6 +40,8 @@ import VideoUpload from "../pages/superadmin/VideoUpload";
 import About from "../pages/home/About/About";
 import BlogDetail from "../pages/home/Blog/BlogDetail";
 import { SignUp } from "../pages/SignUp/SignUp";
+import CatsManagement from "../pages/superadmin/CatsManagement";
+import ProductsManagement from "../pages/superadmin/ProductsManagement";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -232,6 +234,8 @@ export const AppRoutes = () => {
           <Route path="carousel-management" element={<HomeCarousel />} />
           <Route path="blog-upload" element={<UploadBlog />} />
           <Route path="video-upload" element={<VideoUpload />} />
+          <Route path="cats-management" element={<CatsManagement />} />
+          <Route path="products-management" element={<ProductsManagement />} />
         </Route>
 
         {/* Member Routes */}

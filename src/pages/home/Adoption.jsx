@@ -79,7 +79,7 @@ const SectionTitle = styled(Typography)({
 const AdoptionCard = styled(Box)({
   position: 'relative',
   width: '100%',
-  height: '350px',
+  height: '300px',
   borderRadius: '10px',
   overflow: 'hidden',
   cursor: 'pointer',

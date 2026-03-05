@@ -32,7 +32,7 @@ const SlideContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '450px',
+        height: '400px',
     },
 });
 
@@ -50,8 +50,9 @@ const Overlay = styled(Box)({
     alignItems: 'center',
     '@media (max-width: 600px)': {
         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)',
-        alignItems: 'flex-end',
-        paddingBottom: '40px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingBottom: '20px',
     },
 });
 
@@ -61,6 +62,8 @@ const ContentWrapper = styled(motion.div)({
     '@media (max-width: 600px)': {
         textAlign: 'center',
         margin: '0 auto',
+        maxWidth: '100%',
+        padding: '0 20px',
     },
 });
 
@@ -69,8 +72,11 @@ const SectionTitleWrapper = styled(Box)({
     alignItems: 'center',
     gap: '10px',
     marginBottom: '15px',
+    '@media (max-width: 600px)': {
+        justifyContent: 'center',
+        marginBottom: '10px',
+    },
 });
-
 
 const SectionTitle = styled(Typography)({
     fontSize: '14px',
@@ -78,6 +84,9 @@ const SectionTitle = styled(Typography)({
     letterSpacing: '1px',
     color: '#666',
     textTransform: 'uppercase',
+    '@media (max-width: 600px)': {
+        fontSize: '12px',
+    },
 });
 
 const SectionIcon = styled(Box)({
@@ -88,6 +97,10 @@ const SectionIcon = styled(Box)({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    '@media (max-width: 600px)': {
+        width: 25,
+        height: 25,
+    },
 });
 
 const SlideTitle = styled(Typography)(({ theme }) => ({
@@ -101,8 +114,9 @@ const SlideTitle = styled(Typography)(({ theme }) => ({
         fontSize: '42px',
     },
     [theme.breakpoints.down('sm')]: {
-        fontSize: '36px',
+        fontSize: '28px',
         textAlign: 'center',
+        marginBottom: '15px',
     },
 }));
 
@@ -113,12 +127,16 @@ const SlideDescription = styled(Typography)(({ theme }) => ({
     lineHeight: 1.7,
     textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
     maxWidth: '550px',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
         fontSize: '15px',
+    },
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '14px',
         textAlign: 'center',
-        marginBottom: '25px',
+        marginBottom: '20px',
         marginLeft: 'auto',
         marginRight: 'auto',
+        maxWidth: '90%',
     },
 }));
 
@@ -136,9 +154,13 @@ const OrderButton = styled(Button)(({ theme }) => ({
         transform: 'translateY(-2px)',
         boxShadow: '0 6px 20px rgba(255,107,107,0.4)',
     },
-    [theme.breakpoints.down('sm')]: {
-        padding: '8px 24px',
+    [theme.breakpoints.down('md')]: {
+        padding: '9px 24px',
         fontSize: '13px',
+    },
+    [theme.breakpoints.down('sm')]: {
+        padding: '8px 20px',
+        fontSize: '12px',
         display: 'block',
         margin: '0 auto',
         width: 'fit-content',
@@ -156,7 +178,7 @@ const LoadingContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '450px',
+        height: '400px',
     },
 });
 
@@ -171,7 +193,7 @@ const ErrorContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '450px',
+        height: '400px',
     },
 });
 
@@ -281,9 +303,9 @@ const Banner = () => {
                                         <motion.div variants={badgeVariants}>
                                             <SectionTitleWrapper>
                                                 <SectionIcon>
-                                                    <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
+                                                    <PetsIcon sx={{ color: '#fff', fontSize: { xs: 16, sm: 18 } }} />
                                                 </SectionIcon>
-                                                <SectionTitle>Our Passion is Animals</SectionTitle>
+                                                <SectionTitle sx={{ color: '#fff' }}>Our Passion is Animals</SectionTitle>
                                             </SectionTitleWrapper>
                                         </motion.div>
 

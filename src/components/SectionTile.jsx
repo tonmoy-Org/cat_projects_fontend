@@ -4,7 +4,7 @@ import { styled } from "@mui/material/styles";
 import PetsIcon from '@mui/icons-material/Pets';
 
 // Theme colors
-const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_COLOR = '#db89ca';
 const PRIMARY_LIGHT = '#7B6BA8';
 
 const BannerHeader = styled(Box)(({ theme, bgimage }) => ({
@@ -36,8 +36,8 @@ const ContentWrapper = styled(Box)({
 
 const IconWrapper = styled(Box)(({ theme }) => ({
   marginRight: "10px",
-  width: "40px",
-  height: "40px",
+  width: "20px",
+  height: "20px",
   borderRadius: "50%",
   backgroundColor: PRIMARY_COLOR,
   display: "flex",
@@ -66,9 +66,8 @@ const SubtitleWrapper = styled(Box)({
 
 const Subtitle = styled(Typography)(({ theme }) => ({
   color: "#fff",
-  fontSize: "16px",
+  fontSize: "15px",
   fontWeight: 500,
-  textTransform: "uppercase",
   letterSpacing: "2px",
   display: "flex",
   alignItems: "center",
@@ -76,7 +75,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
 
 const Title = styled(Typography)({
   color: "#fff",
-  fontSize: "40px",
+  fontSize: "35px",
   fontWeight: 700,
   lineHeight: 1.2,
   textAlign: "left",
@@ -91,11 +90,10 @@ const Title = styled(Typography)({
 export default function SectionTile({
   bgImage = "https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg",
   subtitle = "Who are we",
-  title = "About Pepito",
+  title = "About Us",
   icon = true,
-  iconClass = "flaticon-prize-badge-with-paw-print",
-  iconColor = PRIMARY_COLOR, // Allow custom color if needed
-  iconSize = 40, // Allow custom size if needed
+  iconColor = PRIMARY_COLOR,
+  iconSize = 40,
 }) {
   return (
     <Box className="elementor-widget-container">

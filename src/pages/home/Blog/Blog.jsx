@@ -368,8 +368,8 @@ const Blog = () => {
       <Box>
         <SectionTile
           bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-          subtitle="Our Services"
-          title="What We Offer"
+          subtitle="Blog grid"
+          title="Latest news"
           icon={true}
           iconClass="flaticon-custom-icon"
         />
@@ -389,8 +389,8 @@ const Blog = () => {
       <Box>
         <SectionTile
           bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-          subtitle="Our Services"
-          title="What We Offer"
+          subtitle="Blog grid"
+          title="Latest news"
           icon={true}
           iconClass="flaticon-custom-icon"
         />
@@ -409,8 +409,8 @@ const Blog = () => {
     <Box>
       <SectionTile
         bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-        subtitle="Our Services"
-        title="What We Offer"
+        subtitle="Blog grid"
+        title="Latest news"
         icon={true}
         iconClass="flaticon-custom-icon"
       />
