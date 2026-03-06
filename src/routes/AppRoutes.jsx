@@ -42,6 +42,8 @@ import BlogDetail from "../pages/home/Blog/BlogDetail";
 import { SignUp } from "../pages/SignUp/SignUp";
 import Cat from "../pages/Cats/Cat";
 import PetDetail from "../pages/Cats/PetDetail";
+import Product from "../pages/Product/Product";
+import ProductDetail from "../pages/Product/ProductDetail";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -213,6 +215,22 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Pet Detail" description="Learn more about this pet">
               <PetDetail />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/Product"
+          element={
+            <PublicLayout title="Product" description="Learn more about our products">
+              <Product />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/Product-detail"
+          element={
+            <PublicLayout title="Product Detail" description="Learn more about this product">
+              <ProductDetail />
             </PublicLayout>
           }
         />
