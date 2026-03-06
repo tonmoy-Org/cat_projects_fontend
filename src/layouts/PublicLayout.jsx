@@ -40,7 +40,7 @@ import ContactMailIcon from '@mui/icons-material/ContactMail';
 import GradientButton from '../components/ui/GradientButton';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../auth/AuthProvider';
-import logo from '../public/logo.png';
+import logo from '../public/fina';
 
 // HideOnScroll component for hiding AppBar on scroll
 function HideOnScroll(props) {
