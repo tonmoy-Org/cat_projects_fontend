@@ -42,6 +42,7 @@ import BlogDetail from "../pages/home/Blog/BlogDetail";
 import { SignUp } from "../pages/SignUp/SignUp";
 import CatsManagement from "../pages/superadmin/CatsManagement";
 import ProductsManagement from "../pages/superadmin/ProductsManagement";
+import Cat from "../pages/Cats/Cat";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -189,6 +190,14 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Videos" description="Latest videos about pets">
               <Video />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/cats"
+          element={
+            <PublicLayout title="Cats" description="Learn more about our cats">
+              <Cat />
             </PublicLayout>
           }
         />
