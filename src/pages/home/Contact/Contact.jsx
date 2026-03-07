@@ -179,7 +179,7 @@ const Contact = () => {
   return (
     <Box>
       <SectionTile
-        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/2.jpg"
+        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/4.jpg"
         subtitle="Get in touch"
         title="Contact us"
         icon={true}

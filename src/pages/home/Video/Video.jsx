@@ -1,12 +1,8 @@
 import { useState } from "react";
 import {
   Container,
-  Grid,
   Box,
   Typography,
-  Card,
-  CardContent,
-  IconButton,
   Dialog,
   DialogContent,
   Pagination,
@@ -15,100 +11,116 @@ import {
   useTheme,
   useMediaQuery,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../../api/axios";
 import SectionTile from "../../../components/SectionTile";
 
-// Theme colors
-const PRIMARY_COLOR = '#5C4D91';
-const PRIMARY_DARK = '#4A3D75';
+const PRIMARY_COLOR = "#5C4D91";
+const PRIMARY_DARK = "#4A3D75";
+const VIDEO_ICON_COLOR = "#db89ca";
+const VIDEO_ICON_DARK = "#c06bb0";
 
 const VideoSection = styled(Box)({
   backgroundColor: "#ffffff",
   width: "100%",
   display: "flex",
   justifyContent: "center",
-  py: 6,
 });
 
-const VideoCard = styled(Card)(({ theme }) => ({
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-  transition: "all 0.3s ease",
-  borderRadius: "12px",
-  overflow: "hidden",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-  border: "1px solid #f0f0f0",
-  cursor: "pointer",
-  "&:hover": {
-    transform: "translateY(-5px)",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-    "& .play-icon": {
-      opacity: 1,
-      transform: "translate(-50%, -50%) scale(1)",
-    },
-    "& .video-thumbnail": {
-      transform: "scale(1.05)",
-    },
-  },
-}));
-
-const ThumbnailWrapper = styled(Box)({
+const VideoItem = styled(Box)({
   position: "relative",
+  width: "100%",
+  height: "100%",
   overflow: "hidden",
-  paddingTop: "56.25%",
-  backgroundColor: "#f5f5f5",
+  borderRadius: "16px",
+  cursor: "pointer",
+  transition: "box-shadow 0.3s ease",
+  boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+  "&:hover": {
+    boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+    "& .play-icon": { backgroundColor: VIDEO_ICON_DARK },
+    "& img": { transform: "scale(1.08)" },
+    "& .video-title-overlay": { opacity: 1, transform: "translateY(0)" },
+  },
+  "& img": {
+    width: "100%",
+    height: "100%",
+    display: "block",
+    objectFit: "cover",
+    transition: "transform 0.6s ease",
+  },
 });
 
-const VideoThumbnail = styled("img")({
+const TitleOverlay = styled(Box)({
   position: "absolute",
   top: 0,
   left: 0,
-  width: "100%",
-  height: "100%",
-  objectFit: "cover",
-  transition: "transform 0.5s ease",
+  right: 0,
+  padding: "16px 20px",
+  background: "linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)",
+  color: "#ffffff",
+  zIndex: 5,
+  opacity: 0,
+  transform: "translateY(-10px)",
+  transition: "opacity 0.3s ease, transform 0.3s ease",
+  "& .title-text": {
+    fontWeight: 600,
+    fontSize: "1.1rem",
+    lineHeight: 1.3,
+    textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+  },
 });
 
-const PlayButton = styled(IconButton)(({ theme }) => ({
+const PlayButton = styled(Box)({
   position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%) scale(0.8)",
-  backgroundColor: "rgba(255, 255, 255, 0.9)",
-  opacity: 0,
-  transition: "all 0.3s ease",
-  "&:hover": {
-    backgroundColor: "#ffffff",
+  bottom: "20px",
+  left: "20px",
+  zIndex: 10,
+  "& .vid": { display: "inline-block", textDecoration: "none" },
+  "& .icon": {
+    width: "60px",
+    height: "60px",
+    backgroundColor: VIDEO_ICON_COLOR,
+    borderRadius: "50%",
+    padding: "20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background-color 0.3s ease",
+    "& svg": { fontSize: "40px", color: "#ffffff" },
+    "&:hover": { backgroundColor: "#5c4d91" },
   },
-  "& .MuiSvgIcon-root": {
-    fontSize: "48px",
-    color: PRIMARY_COLOR,
-  },
+});
+
+const StyledGrid = styled(Box)({ display: "flex", flexDirection: "column", gap: "40px" });
+
+const Row = styled(Box)({ display: "grid", gap: "30px", width: "100%" });
+
+const FirstRow = styled(Row)(({ theme }) => ({
+  gridTemplateColumns: "repeat(4, 1fr)",
+  [theme.breakpoints.down("lg")]: { gridTemplateColumns: "repeat(2, 1fr)" },
+  [theme.breakpoints.down("sm")]: { gridTemplateColumns: "repeat(1, 1fr)" },
 }));
 
-const VideoTitle = styled(Typography)({
-  fontSize: "16px",
-  fontWeight: 600,
-  lineHeight: 1.4,
-  marginBottom: "8px",
-  display: "-webkit-box",
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: "vertical",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-});
+const SecondRow = styled(Row)(({ theme }) => ({
+  gridTemplateColumns: "repeat(3, 1fr)",
+  [theme.breakpoints.down("lg")]: { gridTemplateColumns: "repeat(2, 1fr)" },
+  [theme.breakpoints.down("sm")]: { gridTemplateColumns: "repeat(1, 1fr)" },
+}));
 
-const VideoMeta = styled(Typography)({
-  color: "#999",
-  fontSize: "13px",
-});
+const FirstRowCard = styled(Box)({ aspectRatio: "4/3", width: "100%" });
+const SecondRowCard = styled(Box)({ aspectRatio: "16/9", width: "100%" });
 
 const StyledDialog = styled(Dialog)({
   "& .MuiDialog-paper": {
@@ -118,10 +130,7 @@ const StyledDialog = styled(Dialog)({
     backgroundColor: "#000",
     position: "relative",
   },
-  "& .MuiDialogContent-root": {
-    padding: 0,
-    backgroundColor: "#000",
-  },
+  "& .MuiDialogContent-root": { padding: 0, backgroundColor: "#000" },
 });
 
 const CloseButton = styled(IconButton)({
@@ -130,19 +139,17 @@ const CloseButton = styled(IconButton)({
   right: "10px",
   zIndex: 10,
   backgroundColor: "rgba(255, 255, 255, 0.8)",
-  "&:hover": {
-    backgroundColor: "#ffffff",
-  },
+  color: "#000",
+  "&:hover": { backgroundColor: "#ffffff" },
 });
 
+// ── Pagination matching Blog page exactly ──
 const PaginationWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
   marginTop: "50px",
   width: "100%",
-  [theme.breakpoints.down("sm")]: {
-    marginTop: "30px",
-  },
+  [theme.breakpoints.down("sm")]: { marginTop: "30px" },
 }));
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
@@ -172,18 +179,14 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
       backgroundColor: PRIMARY_COLOR,
       color: "#fff",
       borderColor: PRIMARY_COLOR,
-      "&:hover": {
-        backgroundColor: PRIMARY_DARK,
-      },
+      "&:hover": { backgroundColor: PRIMARY_DARK },
     },
   },
   "& .MuiPaginationItem-previousNext": {
     fontSize: "18px",
     "& svg": {
       fontSize: "20px",
-      [theme.breakpoints.down("sm")]: {
-        fontSize: "18px",
-      },
+      [theme.breakpoints.down("sm")]: { fontSize: "18px" },
     },
   },
 }));
@@ -192,33 +195,16 @@ const LoadingContainer = styled(Box)({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  minHeight: "400px",
+  minHeight: "500px",
   width: "100%",
 });
 
-// Simple date formatter without date-fns
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now - date);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-  return `${Math.floor(diffDays / 365)} years ago`;
-};
-
-// Function to extract YouTube video ID from URL
 const getYouTubeId = (url) => {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
+  const match = url?.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
 };
 
-// Function to get YouTube thumbnail
 const getYouTubeThumbnail = (url) => {
   const videoId = getYouTubeId(url);
   return videoId
@@ -226,11 +212,12 @@ const getYouTubeThumbnail = (url) => {
     : "https://via.placeholder.com/640x360?text=No+Thumbnail";
 };
 
-// Function to get embed URL
 const getEmbedUrl = (url) => {
   const videoId = getYouTubeId(url);
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
 };
+
+const sectionBg = "https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/2.jpg";
 
 export default function Video() {
   const theme = useTheme();
@@ -238,56 +225,45 @@ export default function Video() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 7;
 
-  const {
-    data: response,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: response, isLoading, error } = useQuery({
     queryKey: ["videos", page],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/videos?page=${page}&limit=${itemsPerPage}`);
-      return response.data;
+      const res = await axiosInstance.get(`/videos?page=${page}&limit=${itemsPerPage}`);
+      return res.data;
     },
   });
 
-  // Handle different response structures
   const videos = response?.data || response?.videos || response || [];
   const pagination = response?.pagination || {
-    totalPages: Math.ceil((response?.total || videos.length) / itemsPerPage) || 1
+    totalPages: Math.ceil((response?.total || videos.length) / itemsPerPage) || 1,
   };
 
-  const handleVideoClick = (video) => {
-    setSelectedVideo(video);
-    setOpen(true);
-  };
+  const handleVideoClick = (video) => { setSelectedVideo(video); setOpen(true); };
+  const handleClose = () => { setOpen(false); setSelectedVideo(null); };
+  const handlePageChange = (_, value) => { setPage(value); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedVideo(null);
-  };
+  const firstRowVideos = videos.slice(0, 4);
+  const secondRowVideos = videos.slice(4, 7);
 
-  const handlePageChange = (event, value) => {
-    setPage(value);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const header = (
+    <SectionTile
+      bgImage={sectionBg}
+      subtitle="Our Services"
+      title="What We Offer"
+      icon={true}
+      iconClass="flaticon-custom-icon"
+    />
+  );
 
   if (isLoading) {
     return (
       <Box>
-        <SectionTile
-          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/a.jpg"
-          subtitle="Video gallery"
-          title="Father Of Meow gallery"
-          icon={true}
-          iconClass="flaticon-custom-icon"
-        />
+        {header}
         <VideoSection sx={{ py: { xs: 5, md: 12 } }}>
           <Container maxWidth="lg">
-            <LoadingContainer>
-              <CircularProgress sx={{ color: PRIMARY_COLOR }} />
-            </LoadingContainer>
+            <LoadingContainer><CircularProgress sx={{ color: PRIMARY_COLOR }} /></LoadingContainer>
           </Container>
         </VideoSection>
       </Box>
@@ -297,18 +273,10 @@ export default function Video() {
   if (error) {
     return (
       <Box>
-        <SectionTile
-          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/a.jpg"
-          subtitle="Video gallery"
-          title="Father Of Meow gallery"
-          icon={true}
-          iconClass="flaticon-custom-icon"
-        />
+        {header}
         <VideoSection sx={{ py: { xs: 5, md: 12 } }}>
           <Container maxWidth="lg">
-            <Typography textAlign="center" color="error">
-              Error loading videos: {error.message}
-            </Typography>
+            <Typography textAlign="center" color="error">Error loading videos: {error.message}</Typography>
           </Container>
         </VideoSection>
       </Box>
@@ -317,49 +285,65 @@ export default function Video() {
 
   return (
     <Box>
-      <SectionTile
-        bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/a.jpg"
-        subtitle="Video gallery"
-        title="Father Of Meow gallery"
-        icon={true}
-        iconClass="flaticon-custom-icon"
-      />
+      {header}
       <VideoSection sx={{ py: { xs: 5, md: 12 } }}>
         <Container maxWidth="lg">
           {!videos || videos.length === 0 ? (
-            <Typography textAlign="center" variant="h6" color="text.secondary">
-              No videos found
-            </Typography>
+            <Typography textAlign="center" variant="h6" color="text.secondary">No videos found</Typography>
           ) : (
             <>
-              <Grid container spacing={isMobile ? 2 : 3}>
-                {videos.map((video) => (
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={video._id}>
-                    <VideoCard onClick={() => handleVideoClick(video)}>
-                      <ThumbnailWrapper>
-                        <VideoThumbnail
-                          src={getYouTubeThumbnail(video.url)}
-                          alt={video.title}
-                          className="video-thumbnail"
-                          onError={(e) => {
-                            e.target.src =
-                              "https://via.placeholder.com/640x360?text=Video+Thumbnail";
-                          }}
-                        />
-                        <PlayButton className="play-icon">
-                          <PlayCircleOutlineIcon />
-                        </PlayButton>
-                      </ThumbnailWrapper>
-                      <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                        <VideoTitle>{video.title}</VideoTitle>
-                        <VideoMeta>{formatDate(video.createdAt)}</VideoMeta>
-                      </CardContent>
-                    </VideoCard>
-                  </Grid>
-                ))}
-              </Grid>
+              <StyledGrid>
+                {firstRowVideos.length > 0 && (
+                  <FirstRow>
+                    {firstRowVideos.map((video) => (
+                      <FirstRowCard key={video._id}>
+                        <VideoItem onClick={() => handleVideoClick(video)}>
+                          <TitleOverlay className="video-title-overlay">
+                            <Typography className="title-text">{video.title || "Untitled Video"}</Typography>
+                          </TitleOverlay>
+                          <img
+                            decoding="async"
+                            src={getYouTubeThumbnail(video.url)}
+                            alt={video.title}
+                            onError={(e) => { e.target.src = "https://via.placeholder.com/640x360?text=Video+Thumbnail"; }}
+                          />
+                          <PlayButton>
+                            <a href="#" className="vid" onClick={(e) => e.preventDefault()}>
+                              <div className="icon play-icon"><PlayArrowIcon /></div>
+                            </a>
+                          </PlayButton>
+                        </VideoItem>
+                      </FirstRowCard>
+                    ))}
+                  </FirstRow>
+                )}
 
-              {/* Show pagination only if total items > 9 */}
+                {secondRowVideos.length > 0 && (
+                  <SecondRow>
+                    {secondRowVideos.map((video) => (
+                      <SecondRowCard key={video._id}>
+                        <VideoItem onClick={() => handleVideoClick(video)}>
+                          <TitleOverlay className="video-title-overlay">
+                            <Typography className="title-text">{video.title || "Untitled Video"}</Typography>
+                          </TitleOverlay>
+                          <img
+                            decoding="async"
+                            src={getYouTubeThumbnail(video.url)}
+                            alt={video.title}
+                            onError={(e) => { e.target.src = "https://via.placeholder.com/640x360?text=Video+Thumbnail"; }}
+                          />
+                          <PlayButton>
+                            <a href="#" className="vid" onClick={(e) => e.preventDefault()}>
+                              <div className="icon play-icon"><PlayArrowIcon /></div>
+                            </a>
+                          </PlayButton>
+                        </VideoItem>
+                      </SecondRowCard>
+                    ))}
+                  </SecondRow>
+                )}
+              </StyledGrid>
+
               {pagination.totalPages > 1 && (
                 <PaginationWrapper>
                   <StyledPagination
@@ -372,10 +356,7 @@ export default function Video() {
                     renderItem={(item) => (
                       <PaginationItem
                         {...item}
-                        components={{
-                          next: ChevronRightIcon,
-                          previous: ChevronLeftIcon,
-                        }}
+                        components={{ next: ChevronRightIcon, previous: ChevronLeftIcon }}
                       />
                     )}
                   />
@@ -384,15 +365,8 @@ export default function Video() {
             </>
           )}
 
-          <StyledDialog
-            open={open}
-            onClose={handleClose}
-            maxWidth="lg"
-            fullWidth
-          >
-            <CloseButton onClick={handleClose}>
-              <CloseIcon />
-            </CloseButton>
+          <StyledDialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
+            <CloseButton onClick={handleClose}><CloseIcon /></CloseButton>
             <DialogContent>
               {selectedVideo && (
                 <iframe
@@ -403,13 +377,7 @@ export default function Video() {
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                  }}
+                  style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
                 />
               )}
             </DialogContent>

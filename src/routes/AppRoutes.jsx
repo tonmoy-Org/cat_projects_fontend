@@ -43,6 +43,9 @@ import { SignUp } from "../pages/SignUp/SignUp";
 import CatsManagement from "../pages/superadmin/CatsManagement";
 import ProductsManagement from "../pages/superadmin/ProductsManagement";
 import Cat from "../pages/Cats/Cat";
+import PetDetail from "../pages/Cats/PetDetail";
+import Product from "../pages/Product/Product";
+import ProductDetail from "../pages/Product/ProductDetail";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -202,10 +205,34 @@ export const AppRoutes = () => {
           }
         />
         <Route
+          path="/adoption/:title_id"
+          element={
+            <PublicLayout title="Pet Detail" description="Detailed information about our pets">
+              <PetDetail />
+            </PublicLayout>
+          }
+        />
+        <Route
           path="/about"
           element={
             <PublicLayout title="About Us" description="Learn more about our company">
               <About />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/product"
+          element={
+            <PublicLayout title="Product" description="Product page">
+              <Product />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/shop/:title_id"
+          element={
+            <PublicLayout title="Shop" description="Shop page">
+              <ProductDetail />
             </PublicLayout>
           }
         />
