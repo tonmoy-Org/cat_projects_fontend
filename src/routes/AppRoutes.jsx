@@ -46,6 +46,8 @@ import Cat from "../pages/Cats/Cat";
 import PetDetail from "../pages/Cats/PetDetail";
 import Product from "../pages/Product/Product";
 import ProductDetail from "../pages/Product/ProductDetail";
+import CartRoute from "./CartRoute";
+
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -221,7 +223,7 @@ export const AppRoutes = () => {
           }
         />
         <Route
-          path="/product"
+          path="/shop"
           element={
             <PublicLayout title="Product" description="Product page">
               <Product />
@@ -233,6 +235,14 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Shop" description="Shop page">
               <ProductDetail />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <PublicLayout title="Cart" description="Cart page">
+              <CartRoute  />
             </PublicLayout>
           }
         />

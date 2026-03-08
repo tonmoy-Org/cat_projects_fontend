@@ -115,7 +115,7 @@ export const PublicLayout = ({ children, title, description }) => {
     { label: "Cats", path: "/cats", icon: <PetsIcon fontSize="small" /> },
     {
       label: "Product",
-      path: "/product",
+      path: "/shop",
       icon: <ShoppingBagIcon fontSize="small" />,
     },
     { label: "Blog", path: "/blog", icon: <ArticleIcon fontSize="small" /> },

@@ -9,6 +9,7 @@ import {
 import CustomTheme from './styles/theme';
 import { HelmetProvider } from 'react-helmet-async';
 import { AlertProvider } from './components/ui/AlertProvider';
+import { CartProvider } from './context/CartContext'; // ← ADD THIS
 
 // Create a client
 const queryClient = new QueryClient()
@@ -20,7 +21,9 @@ function App() {
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
             <AlertProvider>
-              <AppRoutes />
+              <CartProvider>
+                <AppRoutes />
+              </CartProvider>
             </AlertProvider>
           </QueryClientProvider>
         </AuthProvider>
