@@ -8,7 +8,6 @@ import {
   styled,
   Button,
 } from '@mui/material';
-import PetsIcon from '@mui/icons-material/Pets';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import CakeIcon from '@mui/icons-material/Cake';
