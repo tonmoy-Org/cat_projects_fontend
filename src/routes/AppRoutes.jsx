@@ -35,7 +35,6 @@ import { HomeCarousel } from "../pages/superadmin/HomeCarousel";
 import Blog from "../pages/home/Blog/Blog";
 import Contact from "../pages/home/Contact/Contact";
 import Video from "../pages/home/Video/Video";
-import UploadBlog from "../pages/superadmin/UploadBlog";
 import VideoUpload from "../pages/superadmin/VideoUpload";
 import About from "../pages/home/About/About";
 import BlogDetail from "../pages/home/Blog/BlogDetail";
@@ -47,6 +46,7 @@ import PetDetail from "../pages/Cats/PetDetail";
 import Product from "../pages/Product/Product";
 import ProductDetail from "../pages/Product/ProductDetail";
 import CartRoute from "./CartRoute";
+import UploadBlog from "../pages/superadmin/UploadBlog";
 
 
 export const AppRoutes = () => {
