@@ -38,12 +38,12 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
         {
           text: "Blog Management",
           icon: <ArticleIcon />,
-          path: "/superadmin-dashboard/blog-upload",
+          path: "/superadmin-dashboard/blogs-management",
         },
         {
           text: "Video Management",
           icon: <VideoIcon />,
-          path: "/superadmin-dashboard/video-upload",
+          path: "/superadmin-dashboard/videos-management",
         },
       ],
     },
@@ -74,13 +74,11 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
     },
   ];
 
-  const processedMenuItems = menuItems.map((section) => ({
+  return menuItems.map((section) => ({
     ...section,
     items: section.items.map((item) => ({
       ...item,
       onClick: () => onMenuItemClick(item.path),
     })),
   }));
-
-  return processedMenuItems;
 };

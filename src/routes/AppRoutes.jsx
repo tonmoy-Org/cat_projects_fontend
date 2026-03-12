@@ -278,8 +278,8 @@ export const AppRoutes = () => {
           <Route path="users" element={<UserManagement />} />
           <Route path="profile" element={<SuperAdminProfile />} />
           <Route path="carousel-management" element={<HomeCarousel />} />
-          <Route path="blog-upload" element={<UploadBlog />} />
-          <Route path="video-upload" element={<VideoUpload />} />
+          <Route path="blogs-management" element={<UploadBlog />} />
+          <Route path="videos-management" element={<VideoUpload />} />
           <Route path="cats-management" element={<CatsManagement />} />
           <Route path="products-management" element={<ProductsManagement />} />
         </Route>
