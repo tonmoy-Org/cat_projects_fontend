@@ -68,7 +68,39 @@ const formats = [
   "code-block", "color", "background", "align",
 ];
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+// ✅ INCREASED: 50MB max file size (was 5MB)
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+// ✅ IMAGE COMPRESSION FUNCTION (NEW)
+const compressImage = (file) => {
+  return new Promise((resolve, reject) => {
+    // Dynamic import for Compressor.js
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/compressorjs@1.10.1/dist/compressor.min.js';
+    script.onload = () => {
+      // eslint-disable-next-line no-undef
+      new Compressor(file, {
+        quality: 0.8,           // 80% quality
+        maxWidth: 1920,
+        maxHeight: 1920,
+        width: 1200,
+        height: 630,
+        minWidth: 200,
+        minHeight: 200,
+        convertSize: 5000000,   // Convert to WebP if > 5MB
+        success: (result) => {
+          resolve(new File([result], file.name, { type: result.type }));
+        },
+        error: (err) => {
+          console.error('Compression error:', err);
+          reject(err);
+        },
+      });
+    };
+    script.onerror = () => reject(new Error('Failed to load Compressor library'));
+    document.head.appendChild(script);
+  });
+};
 
 export default function UploadBlog() {
   const theme = useTheme();
@@ -87,8 +119,8 @@ export default function UploadBlog() {
   const [blogToDelete, setBlogToDelete] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [isCompressing, setIsCompressing] = useState(false);  // ✅ NEW: compression state
 
-  // No more upload progress since backend handles it
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [content, setContent] = useState("");
@@ -119,14 +151,40 @@ export default function UploadBlog() {
   const handleChangePage = (_, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); };
 
-  const handleFileChange = useCallback((file) => {
+  // ✅ UPDATED: handleFileChange with compression
+  const handleFileChange = useCallback(async (file) => {
     if (!file) return;
-    if (file.size > MAX_FILE_SIZE) { addAlert("error", "File size exceeds 5MB limit"); return; }
-    if (!file.type.match("image.*")) { addAlert("error", "Only image files are allowed"); return; }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-    markDirty();
-  }, [modalMode]);
+
+    // First check original size
+    if (file.size > MAX_FILE_SIZE) {
+      addAlert('error', 'File size exceeds 50MB limit');
+      return;
+    }
+
+    if (!file.type.match('image.*')) {
+      addAlert('error', 'Only image files are allowed');
+      return;
+    }
+
+    try {
+      setIsCompressing(true);
+      console.log(`Original file: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
+      // Compress the image
+      const compressedFile = await compressImage(file);
+      console.log(`Compressed file: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+
+      setImageFile(compressedFile);
+      setImagePreview(URL.createObjectURL(compressedFile));
+      markDirty();
+      addAlert('success', `Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+    } catch (error) {
+      console.error('Compression error:', error);
+      addAlert('error', 'Failed to compress image: ' + error.message);
+    } finally {
+      setIsCompressing(false);
+    }
+  }, [modalMode, addAlert]);
 
   const handleRemoveImage = () => {
     if (imagePreview && imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
@@ -138,13 +196,15 @@ export default function UploadBlog() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [".jpeg", ".jpg", ".png", ".webp", ".gif"] },
     maxFiles: 1,
-    maxSize: MAX_FILE_SIZE,
+    maxSize: MAX_FILE_SIZE,  // ✅ Updated to 50MB
     onDrop: (acceptedFiles) => handleFileChange(acceptedFiles[0]),
     onDropRejected: (rejectedFiles) => {
       const file = rejectedFiles[0];
       let message = "File rejected";
-      if (file.errors.some(e => e.code === "file-too-large")) message = "File is too large (max 5MB)";
-      else if (file.errors.some(e => e.code === "file-invalid-type")) message = "Invalid file type. Please upload an image.";
+      if (file.errors.some(e => e.code === "file-too-large"))
+        message = "File is too large (max 50MB)";  // ✅ Updated message
+      else if (file.errors.some(e => e.code === "file-invalid-type"))
+        message = "Invalid file type. Please upload an image.";
       addAlert("error", message);
     },
   });
@@ -260,7 +320,7 @@ export default function UploadBlog() {
   };
 
   const isSubmitDisabled = () => {
-    if (createBlogMutation.isPending || updateBlogMutation.isPending) return true;
+    if (createBlogMutation.isPending || updateBlogMutation.isPending || isCompressing) return true;  // ✅ Added isCompressing check
     if (modalMode === "create") return !isValid || !content || content === "<p><br></p>" || !category || !petType || !imageFile;
     return !editFormDirty;
   };
@@ -438,6 +498,13 @@ export default function UploadBlog() {
                       <Typography component="span" variant="body2" sx={{ fontWeight: 500, color: TEXT_PRIMARY }}>Featured Image</Typography>
                       {modalMode === "create" && <RequiredAsterisk>*</RequiredAsterisk>}
                     </Box>
+                    {/* ✅ SHOW COMPRESSION STATUS */}
+                    {isCompressing && (
+                      <Box sx={{ mb: 2, p: 2, backgroundColor: alpha(BLUE_COLOR, 0.05), borderRadius: 1, display: "flex", alignItems: "center", gap: 1 }}>
+                        <CircularProgress size={20} sx={{ color: BLUE_COLOR }} />
+                        <Typography variant="body2" sx={{ color: TEXT_PRIMARY }}>Compressing image...</Typography>
+                      </Box>
+                    )}
                     <DropzoneWrapper {...getRootProps()} className={isDragActive ? "active" : ""}>
                       <input {...getInputProps()} />
                       <CloudUpload sx={{ fontSize: 40, color: BLUE_COLOR, mb: 1 }} />
@@ -445,7 +512,7 @@ export default function UploadBlog() {
                         {isDragActive ? "Drop the image here" : "Drag & drop your image here, or click to select"}
                       </Typography>
                       <Typography variant="caption" sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}>
-                        Recommended: 1200x630px • Max: 5MB (JPG, PNG, GIF)
+                        Recommended: 1200x630px • Max: 50MB (JPG, PNG, GIF)
                       </Typography>
                     </DropzoneWrapper>
 
@@ -551,7 +618,7 @@ export default function UploadBlog() {
             <OutlineButton onClick={handleCloseModal} size="small">{modalMode === "view" ? "Close" : "Cancel"}</OutlineButton>
             {modalMode !== "view" && (
               <GradientButton type="submit" size="small" disabled={isSubmitDisabled()}>
-                {createBlogMutation.isPending || updateBlogMutation.isPending
+                {createBlogMutation.isPending || updateBlogMutation.isPending || isCompressing
                   ? <CircularProgress size={18} sx={{ color: "white" }} />
                   : modalMode === "create" ? "Create Post" : "Update Post"}
               </GradientButton>
