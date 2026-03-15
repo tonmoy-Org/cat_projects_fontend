@@ -44,6 +44,7 @@ import Cat from "../pages/Cats/Cat";
 import PetDetail from "../pages/Cats/PetDetail";
 import Product from "../pages/Product/Product";
 import ProductDetail from "../pages/Product/ProductDetail";
+import Order from "../pages/OrderDetail/Order";
 
 export const AppRoutes = () => {
   const { user } = useAuth();
@@ -231,6 +232,14 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Product Detail" description="Learn more about this product">
               <ProductDetail />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/order-detail"
+          element={
+            <PublicLayout title="Order Detail" description="Learn more about this order">
+              <Order />
             </PublicLayout>
           }
         />
