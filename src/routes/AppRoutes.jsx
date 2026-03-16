@@ -46,7 +46,7 @@ import PetDetail from "../pages/Cats/PetDetail";
 import Product from "../pages/Product/Product";
 import ProductDetail from "../pages/Product/ProductDetail";
 import CartRoute from "./CartRoute";
-import UploadBlog from "../pages/superadmin/UploadBlog";
+import BlogManagement from "../pages/superadmin/BlogManagement";
 
 
 export const AppRoutes = () => {
@@ -242,7 +242,7 @@ export const AppRoutes = () => {
           path="/cart"
           element={
             <PublicLayout title="Cart" description="Cart page">
-              <CartRoute  />
+              <CartRoute />
             </PublicLayout>
           }
         />
@@ -278,7 +278,7 @@ export const AppRoutes = () => {
           <Route path="users" element={<UserManagement />} />
           <Route path="profile" element={<SuperAdminProfile />} />
           <Route path="carousel-management" element={<HomeCarousel />} />
-          <Route path="blogs" element={<UploadBlog />} />
+          <Route path="blogs" element={<BlogManagement />} />
           <Route path="videos-management" element={<VideoUpload />} />
           <Route path="cats-management" element={<CatsManagement />} />
           <Route path="products-management" element={<ProductsManagement />} />

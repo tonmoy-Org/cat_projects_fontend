@@ -21,6 +21,7 @@ import {
   Pets as PetsIcon,
   Recycling as RecyclingIcon,
   Favorite as FavoriteIcon,
+  ShoppingCart as ShoppingCartIcon,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -115,9 +116,9 @@ const PetDescription = styled(Typography)({
 });
 
 const PetPrice = styled(Typography)({
-  fontSize: '36px',
+  fontSize: '30px',
   fontWeight: 700,
-  color: primaryColor,
+  color: '#ff6b6b',
   marginBottom: '15px',
   '@media (max-width: 600px)': { fontSize: '32px' },
 });
@@ -198,10 +199,10 @@ const Badge = styled(Box)(({ variant }) => ({
   fontWeight: 600,
   backgroundColor:
     variant === 'stock' ? '#e8f5e9' :
-    variant === 'category' ? '#f3e5f5' : '#e3f2fd',
+      variant === 'category' ? '#f3e5f5' : '#e3f2fd',
   color:
     variant === 'stock' ? '#388e3c' :
-    variant === 'category' ? '#7b1fa2' : '#1565c0',
+      variant === 'category' ? '#7b1fa2' : '#1565c0',
 }));
 
 const TabsWrapper = styled(Box)({ marginTop: '50px' });
@@ -328,6 +329,55 @@ const InfoValue = styled(Box)({
   '& svg': { fontSize: '18px', color: iconColor },
 });
 
+// 🔥 NEW: Related Cats Section Styles
+const RelatedCatsWrapper = styled(Box)({ marginTop: '60px' });
+const RelatedTitle = styled(Typography)({ fontSize: '24px', fontWeight: 700, color: textColor, marginBottom: '30px', textAlign: 'center' });
+
+const RelatedCatCard = styled(Box)({
+  cursor: 'pointer', borderRadius: '10px', overflow: 'hidden', transition: 'all 0.3s ease',
+  '&:hover': { transform: 'translateY(-5px)' },
+});
+
+const RelatedImageWrapper = styled(Box)({
+  position: 'relative', width: '100%', aspectRatio: '1 / 1', overflow: 'hidden', borderRadius: '10px',
+  boxShadow: '0 5px 15px rgba(0,0,0,0.08)', transition: 'all 0.3s ease',
+  '& img': { width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' },
+  '&:hover': { boxShadow: '0 10px 30px rgba(0,0,0,0.15)' },
+  '&:hover img': { transform: 'scale(1.05)' },
+});
+
+const RelatedPriceOverlay = styled(Box)({
+  position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
+  backgroundColor: 'rgba(255,255,255,0.95)', padding: '6px 16px', borderRadius: '25px',
+  boxShadow: '0 4px 15px rgba(0,0,0,0.1)', zIndex: 2, whiteSpace: 'nowrap',
+  '& h4': { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500, color: textColor, margin: 0 },
+  '& .hot': { color: primaryColor, fontWeight: 600, fontSize: '13px' },
+  '& .price': { color: '#555', fontWeight: 600, fontSize: '14px' },
+});
+
+const QuickActionsOverlay = styled(Box)({
+  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+  background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  gap: 1, opacity: 0, transition: 'opacity 0.3s ease', zIndex: 10,
+  '@media (max-width: 600px)': { opacity: 1, background: 'rgba(0,0,0,0.2)' },
+});
+
+const RelatedCatInfo = styled(Box)({
+  padding: '15px 0', display: 'flex', flexDirection: 'column', gap: '8px',
+});
+
+const RelatedCatTitle = styled(Typography)({
+  fontSize: '14px', fontWeight: 600, color: textColor, lineHeight: 1.4,
+  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+  '&:hover': { color: primaryColor },
+});
+
+const QuickAddButton = styled(Button)({
+  backgroundColor: primaryColor, color: '#fff', fontSize: '12px', fontWeight: 600,
+  textTransform: 'none', borderRadius: '6px', padding: '6px 12px', minWidth: '80px',
+  '&:hover': { backgroundColor: '#c06bb0' },
+});
+
 // ─── HELPER FUNCTIONS ────────────────────────────────────────────────────────
 
 const stripHtml = (html) => {
@@ -348,6 +398,36 @@ const getAgeLabel = (age) => {
   return `${age} ${n === 1 ? 'year' : 'years'}`;
 };
 
+// 🔥 NEW: Smart related cats selection
+const getSmartRelatedCats = (currentCat, allCats, limit = 4) => {
+  if (!currentCat || !allCats || allCats.length === 0) return [];
+
+  // Priority 1: Same breed, in stock, with good rating
+  const sameBreed = allCats
+    .filter((cat) =>
+      cat._id !== currentCat._id &&
+      cat.inStock &&
+      cat.breed === currentCat.breed &&
+      (cat.averageRating || 0) >= 3
+    )
+    .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+    .slice(0, limit);
+
+  if (sameBreed.length >= limit) return sameBreed;
+
+  // Priority 2: Any breed, in stock, with rating
+  const fallback = allCats
+    .filter((cat) =>
+      !sameBreed.find((sb) => sb._id === cat._id) &&
+      cat._id !== currentCat._id &&
+      cat.inStock
+    )
+    .sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0))
+    .slice(0, limit - sameBreed.length);
+
+  return [...sameBreed, ...fallback];
+};
+
 // ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 const PetDetail = () => {
@@ -360,6 +440,7 @@ const PetDetail = () => {
   const [activeTab, setActiveTab] = useState('details');
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [hoveredCatId, setHoveredCatId] = useState(null); // 🔥 NEW: Track hovered cat
 
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', comment: '', rating: 0 });
   const [formError, setFormError] = useState('');
@@ -373,6 +454,15 @@ const PetDetail = () => {
       return res.data;
     },
     enabled: !!title_id,
+  });
+
+  // 🔥 NEW: Load all cats for smart selection
+  const { data: allCatsRes } = useQuery({
+    queryKey: ['cats-all'],
+    queryFn: async () => {
+      const res = await axiosInstance.get('/cats');
+      return res.data;
+    },
   });
 
   const { data: reviewsData, isLoading: reviewsLoading } = useQuery({
@@ -403,6 +493,8 @@ const PetDetail = () => {
   });
 
   const pet = petRes?.data || petRes;
+  const allCats = allCatsRes?.data || []; // 🔥 NEW
+  const relatedCats = pet ? getSmartRelatedCats(pet, allCats, 4) : []; // 🔥 NEW
   const mainImage = activeImage || pet?.featuredImage;
   const allImages = pet ? [pet.featuredImage, ...(pet.gallery || [])].filter(Boolean) : [];
 
@@ -417,6 +509,12 @@ const PetDetail = () => {
     addToCart(pet, quantity);
     setAddedToCart(true);
     setSnackbar({ open: true, message: `${pet.name} added to cart!`, severity: 'success' });
+  };
+
+  // 🔥 NEW: Quick add for related cats
+  const handleQuickAddToCart = (relatedCat) => {
+    addToCart(relatedCat, 1);
+    setSnackbar({ open: true, message: `${relatedCat.name} added to cart!`, severity: 'success' });
   };
 
   const handleReviewSubmit = () => {
@@ -735,6 +833,103 @@ const PetDetail = () => {
               )}
             </TabContent>
           </TabsWrapper>
+
+          {/* 🔥 NEW: RELATED CATS SECTION */}
+          {relatedCats.length > 0 && (
+            <RelatedCatsWrapper>
+              <RelatedTitle variant="h4">Other cats you might like</RelatedTitle>
+              <Grid container spacing={3}>
+                {relatedCats.map((rc) => (
+                  <Grid size={{ xs: 12, sm: 6, lg: 4, xl: 3 }} key={rc._id}>
+                    <RelatedCatCard
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigate(`/cats/${rc.title_id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          navigate(`/cats/${rc.title_id}`);
+                        }
+                      }}
+                      onMouseEnter={() => setHoveredCatId(rc._id)}
+                      onMouseLeave={() => setHoveredCatId(null)}
+                    >
+                      <RelatedImageWrapper>
+                        <img
+                          src={rc.featuredImage}
+                          alt={rc.name}
+                          loading="lazy"
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/300x300?text=No+Image'; }}
+                        />
+
+                        {/* Price Overlay */}
+                        <RelatedPriceOverlay>
+                          <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '15px', color: '#ff6b6b' }}>
+                            ৳{rc.price}
+                          </Typography>
+                        </RelatedPriceOverlay>
+
+                        {/* Quick Actions */}
+                        <QuickActionsOverlay
+                          sx={{
+                            opacity: hoveredCatId === rc._id ? 1 : 0,
+                            '@media (max-width: 600px)': { opacity: 1 },
+                          }}
+                        >
+                          <QuickAddButton
+                            variant="contained"
+                            startIcon={<ShoppingCartIcon />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleQuickAddToCart(rc);
+                            }}
+                          >
+                            Add
+                          </QuickAddButton>
+                        </QuickActionsOverlay>
+                      </RelatedImageWrapper>
+
+                      {/* Cat Info */}
+                      <RelatedCatInfo>
+                        <RelatedCatTitle title={rc.name}>
+                          {rc.name}
+                        </RelatedCatTitle>
+
+                        {/* Breed & Gender */}
+                        <Typography sx={{ fontSize: '12px', color: darkGray }}>
+                          {rc.breed && `${rc.breed}`}
+                          {rc.breed && rc.gender && ' • '}
+                          {rc.gender && <span style={{ textTransform: 'capitalize' }}>{rc.gender}</span>}
+                        </Typography>
+
+                        {/* Rating */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <StyledRating
+                            value={rc.averageRating || 0}
+                            readOnly
+                            size="small"
+                            icon={<StarIcon fontSize="inherit" sx={{ fontSize: '14px' }} />}
+                            emptyIcon={<StarBorderIcon fontSize="inherit" sx={{ fontSize: '14px' }} />}
+                          />
+                          <Typography sx={{ fontSize: '12px', color: darkGray }}>
+                            ({rc.reviewCount || 0})
+                          </Typography>
+                        </Box>
+
+                        {/* Stock Status */}
+                        <Typography sx={{
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: rc.inStock ? '#388e3c' : '#d32f2f',
+                        }}>
+                          {rc.inStock ? '✓ Available' : '✗ Not Available'}
+                        </Typography>
+                      </RelatedCatInfo>
+                    </RelatedCatCard>
+                  </Grid>
+                ))}
+              </Grid>
+            </RelatedCatsWrapper>
+          )}
 
         </Container>
       </PetDetailSection>

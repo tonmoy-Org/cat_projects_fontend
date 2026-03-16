@@ -11,17 +11,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../../api/axios';
 import SectionTile from '../../components/SectionTile';
-import { useCart } from '../../context/CartContext'; // ← ADDED
+import { useCart } from '../../context/CartContext';
 
-// ─── Theme ───────────────────────────────────────────────────────────────────
 const primaryColor = '#db89ca';
 const iconColor = '#db89ca';
 const textColor = '#1a1a1a';
 const lightGray = '#f5f5f5';
 const mediumGray = '#e0e0e0';
 const darkGray = '#666666';
-
-// ─── Styled Components ───────────────────────────────────────────────────────
 
 const ProductDetailSection = styled(Box)({
   backgroundColor: '#ffffff',
@@ -76,7 +73,7 @@ const ProductDescription = styled(Typography)({
 });
 
 const ProductPrice = styled(Typography)({
-  fontSize: '36px', fontWeight: 700, color: primaryColor, marginBottom: '15px',
+  fontSize: '30px', fontWeight: 700, color: '#ff6b6b', marginBottom: '15px',
   '@media (max-width: 600px)': { fontSize: '32px' },
 });
 
@@ -108,7 +105,6 @@ const AddToCartButton = styled(Button)({
   '@media (max-width: 600px)': { width: '100%', padding: '8px 16px' },
 });
 
-// ← ADDED: "View Cart" button shown after item is added
 const ViewCartButton = styled(Button)({
   backgroundColor: 'transparent', color: primaryColor, fontSize: '14px', fontWeight: 600,
   textTransform: 'none', borderRadius: '8px', padding: '6px 16px', minWidth: '120px',
@@ -205,14 +201,12 @@ const RelatedPriceOverlay = styled(Box)({
   boxShadow: '0 4px 15px rgba(0,0,0,0.1)', zIndex: 2, whiteSpace: 'nowrap',
   '& h4': { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500, color: textColor, margin: 0 },
   '& .hot': { color: primaryColor, fontWeight: 600, fontSize: '13px' },
-  '& .price': { color: '#555', fontWeight: 600, fontSize: '14px' },
+  // '& .price': { color: '#555', fontWeight: 600, fontSize: '14px' },
 });
 const RelatedProductTitle = styled(Box)({
   marginTop: '15px',
   '& h5': { fontSize: '16px', fontWeight: 600, color: textColor, margin: 0, '& a': { color: 'inherit', textDecoration: 'none', transition: 'color 0.2s ease', '&:hover': { color: primaryColor } } },
 });
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const stripHtml = (html) => {
   if (!html) return '';
@@ -227,25 +221,21 @@ const getRandomFour = (arr, excludeId) => {
 const getInitials = (name = '') =>
   name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 const ProductDetail = () => {
   const { title_id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { addToCart } = useCart(); // ← ADDED
+  const { addToCart } = useCart();
 
   const [activeImage, setActiveImage] = useState(null);
   const [activeTab, setActiveTab] = useState('features');
   const [quantity, setQuantity] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false); // ← ADDED
+  const [addedToCart, setAddedToCart] = useState(false);
 
-  // Review form state
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', comment: '', rating: 0 });
   const [formError, setFormError] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // ── Queries ────────────────────────────────────────────────────────────────
   const { data: productRes, isLoading, error } = useQuery({
     queryKey: ['product', title_id],
     queryFn: async () => {
@@ -276,7 +266,6 @@ const ProductDetail = () => {
     enabled: !!title_id && activeTab === 'reviews',
   });
 
-  // ── Mutations ──────────────────────────────────────────────────────────────
   const submitReviewMutation = useMutation({
     mutationFn: async (reviewData) => {
       const res = await axiosInstance.post(`/products/${title_id}/reviews`, reviewData);
@@ -302,7 +291,6 @@ const ProductDetail = () => {
     if (val > 0) setQuantity(val);
   };
 
-  // ← ADDED: add to cart handler
   const handleAddToCart = () => {
     addToCart(product, quantity);
     setAddedToCart(true);
@@ -330,7 +318,6 @@ const ProductDetail = () => {
     }
   };
 
-  // ── Loading / Error ────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <ProductDetailSection>
@@ -353,7 +340,6 @@ const ProductDetail = () => {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <Box>
       <SectionTile
@@ -369,7 +355,6 @@ const ProductDetail = () => {
 
           <Grid container spacing={4} justifyContent="center" alignItems="flex-start">
 
-            {/* Image Gallery */}
             <Grid size={{ xs: 12, md: 6 }}>
               <ImageGalleryWrapper>
                 <MainImageWrapper>
@@ -394,7 +379,6 @@ const ProductDetail = () => {
               </ImageGalleryWrapper>
             </Grid>
 
-            {/* Product Info */}
             <Grid size={{ xs: 12, md: 6 }}>
               <ProductInfoWrapper>
                 <ProductTitle variant="h3">{product.title}</ProductTitle>
@@ -407,7 +391,7 @@ const ProductDetail = () => {
 
                 <ProductDescription>{stripHtml(product.description)}</ProductDescription>
 
-                <ProductPrice>${product.price}</ProductPrice>
+                <ProductPrice>৳{product.price}</ProductPrice>
 
                 <RatingWrapper>
                   <StyledRating
@@ -423,18 +407,11 @@ const ProductDetail = () => {
                   </Typography>
                 </RatingWrapper>
 
-                {/* ── Add to Cart / View Cart ── */}
                 <AddToCartWrapper>
                   <QuantityInput
                     type="number" value={quantity} onChange={handleQuantityChange}
                     inputProps={{ min: 1 }} size="small"
                   />
-
-                  {/*
-                    ← CHANGED from original:
-                    - Calls handleAddToCart on click
-                    - After adding, swaps to "View Cart" button that navigates to /cart
-                  */}
                   {addedToCart ? (
                     <ViewCartButton variant="outlined" onClick={() => navigate('/cart')}>
                       View Cart
@@ -464,7 +441,6 @@ const ProductDetail = () => {
             </Grid>
           </Grid>
 
-          {/* ── Tabs ──────────────────────────────────────────────────────── */}
           <TabsWrapper>
             <TabHeaders>
               <TabHeader active={activeTab === 'features' ? 1 : 0} onClick={() => handleTabChange('features')}>
@@ -570,7 +546,6 @@ const ProductDetail = () => {
             </TabContent>
           </TabsWrapper>
 
-          {/* ── Related Products ──────────────────────────────────────────── */}
           {relatedProducts.length > 0 && (
             <RelatedProductsWrapper>
               <RelatedTitle variant="h4">Related products</RelatedTitle>
@@ -585,10 +560,9 @@ const ProductDetail = () => {
                             onError={(e) => { e.target.src = 'https://via.placeholder.com/300x300?text=No+Image'; }}
                           />
                           <RelatedPriceOverlay>
-                            <h4>
-                              <span className="hot">Hot</span>
-                              <span className="price">${rp.price}</span>
-                            </h4>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '15px', color: '#ff6b6b' }}>
+                              ৳{product.price}
+                            </Typography>
                           </RelatedPriceOverlay>
                         </RelatedImageWrapper>
                         <RelatedProductTitle>
@@ -605,7 +579,6 @@ const ProductDetail = () => {
         </Container>
       </ProductDetailSection>
 
-      {/* Toast */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

@@ -11,7 +11,7 @@ import {
   Visibility as VisibilityIcon, Pets as PetsIcon, Female as FemaleIcon,
   Male as MaleIcon, CloudUpload, Image as ImageIcon, AddPhotoAlternate,
   Star as StarIcon, RateReview as RateReviewIcon, Check as CheckIcon,
-  Close as CloseIcon,
+  Close as CloseIcon, Favorite as FavoriteIcon,
 } from "@mui/icons-material";
 import { useForm, Controller } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
@@ -62,7 +62,7 @@ const RequiredAsterisk = styled("span")(({ theme }) => ({
 
 const defaultFormValues = {
   name: "", age: "", breed: "", about: "", gender: "", price: "",
-  neutered: false, vaccinated: false, size: "medium", inStock: true,
+  neutered: false, vaccinated: false, size: "medium", inStock: true, isFeatured: false,
 };
 
 const quillModules = {
@@ -89,6 +89,7 @@ export default function CatsManagement() {
   const RED_COLOR = theme.palette.error.main;
   const GREEN_COLOR = theme.palette.success.main;
   const TEXT_PRIMARY = theme.palette.text.primary;
+  const PINK_COLOR = "#ec407a";
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [openModal, setOpenModal] = useState(false);
@@ -122,6 +123,16 @@ export default function CatsManagement() {
       return Array.isArray(response.data) ? response.data : (response.data.data || []);
     },
   });
+
+  // 🔥 UPDATE selectedCat when cats data changes
+  React.useEffect(() => {
+    if (selectedCat && openModal && modalMode !== "create") {
+      const updatedCat = cats.find(cat => cat._id === selectedCat._id);
+      if (updatedCat) {
+        setSelectedCat(updatedCat);
+      }
+    }
+  }, [cats, selectedCat, openModal, modalMode]);
 
   const paginatedCats = cats.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   const handleChangePage = (_, newPage) => setPage(newPage);
@@ -211,6 +222,7 @@ export default function CatsManagement() {
         vaccinated: cat.vaccinated || false,
         size: cat.size || "medium",
         inStock: cat.inStock !== undefined ? cat.inStock : true,
+        isFeatured: cat.isFeatured || false,
       });
       setFeatures(cat.features || "");
       setFeaturedPreview(cat.featuredImage || null);
@@ -260,6 +272,7 @@ export default function CatsManagement() {
     formData.append("vaccinated", data.vaccinated);
     formData.append("size", data.size);
     formData.append("inStock", data.inStock);
+    formData.append("isFeatured", data.isFeatured);
     if (featuredImageFile) formData.append("featuredImage", featuredImageFile);
     const existingGalleryUrls = galleryItems.filter((i) => i.isExisting).map((i) => i.preview);
     formData.append("gallery", JSON.stringify(existingGalleryUrls));
@@ -308,10 +321,11 @@ export default function CatsManagement() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cats"] });
       addAlert("success", "Cat profile deleted successfully!");
       setDeleteDialogOpen(false);
       setCatToDelete(null);
+      queryClient.invalidateQueries({ queryKey: ["cats"] });
+      queryClient.refetchQueries({ queryKey: ["cats"], type: "active" });
     },
     onError: (error) => {
       addAlert("error", error.response?.data?.message || "Failed to delete cat profile.");
@@ -326,8 +340,18 @@ export default function CatsManagement() {
       return response.data;
     },
     onSuccess: () => {
+      addAlert("success", "Review deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["cats"] });
-      addAlert("success", "Review deleted.");
+      queryClient.refetchQueries({ queryKey: ["cats"], type: "active" });
+      setTimeout(() => {
+        const updatedCats = queryClient.getQueryData(["cats"]);
+        if (updatedCats && selectedCat) {
+          const freshCat = updatedCats.find(c => c._id === selectedCat._id);
+          if (freshCat) {
+            setSelectedCat(freshCat);
+          }
+        }
+      }, 100);
     },
     onError: () => { 
       addAlert("error", "Failed to delete review."); 
@@ -340,8 +364,18 @@ export default function CatsManagement() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cats"] });
       addAlert("success", "Review approval status updated.");
+      queryClient.invalidateQueries({ queryKey: ["cats"] });
+      queryClient.refetchQueries({ queryKey: ["cats"], type: "active" });
+      setTimeout(() => {
+        const updatedCats = queryClient.getQueryData(["cats"]);
+        if (updatedCats && selectedCat) {
+          const freshCat = updatedCats.find(c => c._id === selectedCat._id);
+          if (freshCat) {
+            setSelectedCat(freshCat);
+          }
+        }
+      }, 100);
     },
     onError: () => { 
       addAlert("error", "Failed to update review approval."); 
@@ -428,7 +462,7 @@ export default function CatsManagement() {
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: alpha(BLUE_COLOR, 0.05) }}>
-              {["Image", "Name", "Gender", "Price", "Breed", "Status", "Gallery", "Reviews"].map((label) => (
+              {["Image", "Name", "Gender", "Price", "Breed", "Featured", "Status", "Gallery", "Reviews"].map((label) => (
                 <TableCell key={label} sx={{ fontWeight: 600, color: TEXT_PRIMARY, borderBottom: `1px solid ${theme.palette.divider}`, py: 1.5 }}>
                   {label}
                 </TableCell>
@@ -440,10 +474,10 @@ export default function CatsManagement() {
           </TableHead>
           <TableBody>
             {catsLoading ? (
-              <TableRow><TableCell colSpan={9} align="center" sx={{ py: 4 }}><CircularProgress size={32} sx={{ color: BLUE_COLOR }} /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={10} align="center" sx={{ py: 4 }}><CircularProgress size={32} sx={{ color: BLUE_COLOR }} /></TableCell></TableRow>
             ) : paginatedCats.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
                   <PetsIcon sx={{ fontSize: 48, color: alpha(TEXT_PRIMARY, 0.2), mb: 1 }} />
                   <Typography variant="body2" sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}>No cat profiles found. Add one to get started.</Typography>
                 </TableCell>
@@ -471,10 +505,17 @@ export default function CatsManagement() {
                     </Box>
                   </TableCell>
                   <TableCell sx={{ py: 1 }}>
-                    <Chip label={`$${parseFloat(cat.price || 0).toFixed(2)}`} size="small"
+                    <Chip label={`৳${parseFloat(cat.price || 0).toFixed(2)}`} size="small"
                       sx={{ fontWeight: 600, fontSize: "0.75rem", height: 22, backgroundColor: alpha(GREEN_COLOR, 0.1), color: GREEN_COLOR }} />
                   </TableCell>
                   <TableCell sx={{ py: 1 }}><Typography variant="body2">{cat.breed}</Typography></TableCell>
+                  <TableCell sx={{ py: 1 }}>
+                    {cat.isFeatured ? (
+                      <FavoriteIcon sx={{ fontSize: 18, color: PINK_COLOR }} />
+                    ) : (
+                      <Typography variant="caption" sx={{ color: alpha(TEXT_PRIMARY, 0.4) }}>—</Typography>
+                    )}
+                  </TableCell>
                   <TableCell sx={{ py: 1 }}>
                     <Chip label={cat.status} size="small" sx={{ fontSize: "0.7rem", height: 20, backgroundColor: alpha(BLUE_COLOR, 0.1), color: BLUE_COLOR }} />
                   </TableCell>
@@ -650,7 +691,7 @@ export default function CatsManagement() {
 
                       <Grid size={{ xs: 6 }}>
                         <Box sx={{ mb: 0.5 }}>
-                          <Typography component="span" variant="body2" sx={{ fontWeight: 500, color: TEXT_PRIMARY }}>Price ($)</Typography>
+                          <Typography component="span" variant="body2" sx={{ fontWeight: 500, color: TEXT_PRIMARY }}>Price (৳)</Typography>
                           {modalMode === "create" && <RequiredAsterisk>*</RequiredAsterisk>}
                         </Box>
                         <Controller name="price" control={control}
@@ -733,6 +774,18 @@ export default function CatsManagement() {
                             <FormControlLabel control={<Switch {...field} checked={field.value} onChange={(e) => { field.onChange(e.target.checked); markDirty(); }} disabled={modalMode === "view"} color="primary" size="small" />}
                               label={field.value ? "Yes" : "No"} />
                           )} />
+                      </Grid>
+
+                      <Grid size={{ xs: 12 }}>
+                        <Box sx={{ mb: 0.5 }}>
+                          <Typography component="span" variant="body2" sx={{ fontWeight: 500, color: TEXT_PRIMARY }}>Featured</Typography>
+                        </Box>
+                        <Controller name="isFeatured" control={control}
+                          render={({ field }) => (
+                            <FormControlLabel control={<Switch {...field} checked={field.value} onChange={(e) => { field.onChange(e.target.checked); markDirty(); }} disabled={modalMode === "view"} color="primary" size="small" />}
+                              label={field.value ? "Mark as Featured" : "Not Featured"} />
+                          )} />
+                        <FormHelperText sx={{ color: alpha(TEXT_PRIMARY, 0.6) }}>Mark this cat as featured to highlight it on the homepage</FormHelperText>
                       </Grid>
 
                       <Grid size={{ xs: 12 }}>

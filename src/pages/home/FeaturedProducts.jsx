@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
-import { Container, Grid, Box, Typography, styled } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {
+  Container, Grid, Box, Typography, styled, CircularProgress
+} from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
+import { useQuery } from '@tanstack/react-query';
+import axiosInstance from '../../api/axios';
 
 // Colors
 const primaryColor = '#ff6b6b';
@@ -166,39 +170,134 @@ const ProductTitle = styled(Box)({
   },
 });
 
-const products = [
-  {
-    id: 1,
-    title: 'Small dog dish',
-    price: '25.00',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/01-1.png',
-    alt: 'Small dog dish',
-  },
-  {
-    id: 2,
-    title: 'Cat ball',
-    price: '35.00',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1-1.jpg',
-    alt: 'Cat ball',
-  },
-  {
-    id: 3,
-    title: 'Sand shovel',
-    price: '40.00',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/03-1.png',
-    alt: 'Sand shovel',
-  },
-  {
-    id: 4,
-    title: '3 toy dog bones',
-    price: '45.00',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/06-1.png',
-    alt: '3 toy dog bones',
-  },
-];
+const FeaturedBadge = styled(Box)({
+  position: 'absolute',
+  top: '10px',
+  right: '10px',
+  backgroundColor: '#ec407a',
+  color: '#fff',
+  padding: '6px 12px',
+  borderRadius: '20px',
+  fontSize: '12px',
+  fontWeight: 600,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  zIndex: 10,
+  boxShadow: '0 2px 8px rgba(236,64,122,0.3)',
+});
+
+const LoadingContainer = styled(Box)({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '400px',
+});
+
+const NoProductsContainer = styled(Box)({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '300px',
+  textAlign: 'center',
+});
+
+// Helper function to shuffle array
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 const FeaturedProducts = () => {
   const [hoveredId, setHoveredId] = useState(null);
+  const [displayProducts, setDisplayProducts] = useState([]);
+
+  // Fetch products from API
+  const { data: productsData, isLoading, error } = useQuery({
+    queryKey: ['products-featured'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/products');
+      const products = response.data.data || response.data || [];
+      return { data: Array.isArray(products) ? products : [] };
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Process products data to display featured first, then random
+  useEffect(() => {
+    const products = productsData?.data || [];
+
+    if (products.length > 0) {
+      const featuredProducts = products.filter(product => product.isFeatured === true);
+      const nonFeaturedProducts = products.filter(product => product.isFeatured !== true);
+      const shuffledNonFeatured = shuffleArray(nonFeaturedProducts);
+
+      let selected = [...featuredProducts];
+      const remainingSlots = 4 - selected.length;
+
+      if (remainingSlots > 0) {
+        selected = [...selected, ...shuffledNonFeatured.slice(0, remainingSlots)];
+      }
+
+      setDisplayProducts(selected.slice(0, 4));
+    }
+  }, [productsData]);
+
+  if (isLoading) {
+    return (
+      <ShopSection>
+        <Container maxWidth="lg">
+          <Grid container justifyContent="center">
+            <Grid size={{ xs: 12, md: 8 }}>
+              <SectionHeaderWrapper>
+                <HeaderTopRow>
+                  <SectionIconWrapper>
+                    <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
+                  </SectionIconWrapper>
+                  <SectionSubtitle>Pet Shop</SectionSubtitle>
+                </HeaderTopRow>
+                <SectionTitle>Our featured products</SectionTitle>
+              </SectionHeaderWrapper>
+            </Grid>
+          </Grid>
+          <LoadingContainer>
+            <CircularProgress sx={{ color: primaryColor }} />
+          </LoadingContainer>
+        </Container>
+      </ShopSection>
+    );
+  }
+
+  if (error) {
+    return (
+      <ShopSection>
+        <Container maxWidth="lg">
+          <Grid container justifyContent="center">
+            <Grid size={{ xs: 12, md: 8 }}>
+              <SectionHeaderWrapper>
+                <HeaderTopRow>
+                  <SectionIconWrapper>
+                    <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
+                  </SectionIconWrapper>
+                  <SectionSubtitle>Pet Shop</SectionSubtitle>
+                </HeaderTopRow>
+                <SectionTitle>Our featured products</SectionTitle>
+              </SectionHeaderWrapper>
+            </Grid>
+          </Grid>
+          <NoProductsContainer>
+            <Typography variant="body1" sx={{ color: '#666' }}>
+              Unable to load products at the moment. Please try again later.
+            </Typography>
+          </NoProductsContainer>
+        </Container>
+      </ShopSection>
+    );
+  }
 
   return (
     <ShopSection>
@@ -210,52 +309,64 @@ const FeaturedProducts = () => {
                 <SectionIconWrapper>
                   <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
                 </SectionIconWrapper>
-                <SectionSubtitle>
-                  Pet Shop
-                </SectionSubtitle>
+                <SectionSubtitle>Pet Shop</SectionSubtitle>
               </HeaderTopRow>
-              <SectionTitle>
-                Our featured products
-              </SectionTitle>
+              <SectionTitle>Our featured products</SectionTitle>
             </SectionHeaderWrapper>
           </Grid>
         </Grid>
 
         <Grid container spacing={3}>
-          {products.map((product) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
-              <ProductCard
-                onMouseEnter={() => setHoveredId(product.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                <ProductItem>
-                  <ImageWrapper>
-                    <a href={`#product-${product.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-                      <ProductImage
-                        src={product.image}
-                        alt={product.alt}
-                      />
-                    </a>
-                    <PriceOverlay isVisible={hoveredId === product.id}>
-                      <a href={`#product-${product.id}`} style={{ textDecoration: 'none' }}>
-                        <h4>
-                          <span className="hot">Hot</span>
-                          <span className="price">${product.price}</span>
-                        </h4>
+          {displayProducts.length > 0 ? (
+            displayProducts.map((product) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product._id}>
+                <ProductCard
+                  onMouseEnter={() => setHoveredId(product._id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <ProductItem>
+                    <ImageWrapper>
+                      {product.isFeatured && (
+                        <FeaturedBadge>♡ Featured</FeaturedBadge>
+                      )}
+                      <a
+                        href={`/shop/${product.title_id}`}
+                        style={{ textDecoration: 'none', display: 'block' }}
+                      >
+                        <ProductImage
+                          src={product.featuredImage}
+                          alt={product.title}
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/300x300?text=Product+Image';
+                          }}
+                        />
                       </a>
-                    </PriceOverlay>
-                  </ImageWrapper>
-                  <ProductTitle>
-                    <h5>
-                      <a href={`#product-${product.id}`}>
-                        {product.title}
-                      </a>
-                    </h5>
-                  </ProductTitle>
-                </ProductItem>
-              </ProductCard>
+                      <PriceOverlay isVisible={hoveredId === product._id}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '15px', color: '#ff6b6b' }}>
+                          ৳{product.price}
+                        </Typography>
+                      </PriceOverlay>
+                    </ImageWrapper>
+                    <ProductTitle>
+                      <h5>
+                        <a href={`/shop/${product.title_id}`}>
+                          {product.title}
+                        </a>
+                      </h5>
+                    </ProductTitle>
+                  </ProductItem>
+                </ProductCard>
+              </Grid>
+            ))
+          ) : (
+            <Grid size={{ xs: 12 }}>
+              <NoProductsContainer>
+                <Typography variant="body1" sx={{ color: '#666' }}>
+                  No products available at the moment.
+                </Typography>
+              </NoProductsContainer>
             </Grid>
-          ))}
+          )}
         </Grid>
       </Container>
     </ShopSection>

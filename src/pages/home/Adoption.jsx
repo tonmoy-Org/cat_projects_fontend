@@ -1,11 +1,12 @@
-// Home.jsx - Adoption Section
-import React from 'react';
+// Home.jsx - Adoption Section with Featured Cats
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Grid,
   Box,
   Typography,
   styled,
+  CircularProgress,
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
 import { Button } from '@mui/material';
@@ -14,6 +15,8 @@ import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import CakeIcon from '@mui/icons-material/Cake';
 import HotelIcon from '@mui/icons-material/Hotel';
+import { useQuery } from '@tanstack/react-query';
+import axiosInstance from '../../api/axios';
 
 // Theme colors
 const primaryColor = '#ff6b6b';
@@ -130,6 +133,23 @@ const FrontTitle = styled(Typography)({
   '@media (max-width: 600px)': {
     fontSize: '20px',
   },
+});
+
+const FeaturedBadge = styled(Box)({
+  position: 'absolute',
+  top: '10px',
+  right: '10px',
+  backgroundColor: '#ec407a',
+  color: '#fff',
+  padding: '6px 12px',
+  borderRadius: '20px',
+  fontSize: '12px',
+  fontWeight: 600,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  zIndex: 10,
+  boxShadow: '0 2px 8px rgba(236,64,122,0.3)',
 });
 
 const BackWrap = styled(Box)({
@@ -275,52 +295,100 @@ const InfoText = styled(Typography)({
   },
 });
 
-// Adoption data
-const adoptionPets = [
-  {
-    id: 1,
-    name: 'Missy',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/01-2.jpg',
-    gender: 'Male',
-    neutered: 'No',
-    age: '5 years',
-    link: '/adoption/missy',
-  },
-  {
-    id: 2,
-    name: 'Bella',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/02-2.jpg',
-    gender: 'Female',
-    neutered: 'Yes',
-    age: '3 years',
-    link: '/adoption/bella',
-  },
-  {
-    id: 3,
-    name: 'Kitty',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/03-2.jpg',
-    gender: 'Female',
-    neutered: 'No',
-    age: '2 years',
-    link: '/adoption/kitty',
-  },
-  {
-    id: 4,
-    name: 'Penny',
-    image: 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/04-2.jpg',
-    gender: 'Male',
-    neutered: 'Yes',
-    age: '4 years',
-    link: '/adoption/penny',
-  },
-];
+const LoadingContainer = styled(Box)({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '400px',
+});
 
 // Helper function to get gender icon
 const getGenderIcon = (gender) => {
-  return gender === 'Male' ? <MaleIcon /> : <FemaleIcon />;
+  return gender === 'male' ? <MaleIcon /> : <FemaleIcon />;
+};
+
+// Helper function to shuffle array
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 };
 
 const Adoption = () => {
+  const [displayPets, setDisplayPets] = useState([]);
+
+  // Fetch cats from API
+  const { data: catsData = [], isLoading } = useQuery({
+    queryKey: ['cats-adoption'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/cats?status=available');
+      return Array.isArray(response.data) ? response.data : (response.data.data || []);
+    },
+  });
+
+  // Process cats data to display featured first, then random
+  useEffect(() => {
+    if (catsData.length > 0) {
+      // Separate featured and non-featured cats
+      const featuredCats = catsData.filter(cat => cat.isFeatured);
+      const nonFeaturedCats = catsData.filter(cat => !cat.isFeatured);
+
+      // Shuffle non-featured cats to get random ones
+      const shuffledNonFeatured = shuffleArray(nonFeaturedCats);
+
+      // Combine: featured first, then random non-featured to fill up to 4
+      let selected = [...featuredCats];
+      const remainingSlots = 4 - selected.length;
+      
+      if (remainingSlots > 0) {
+        selected = [...selected, ...shuffledNonFeatured.slice(0, remainingSlots)];
+      }
+
+      // Take only the first 4
+      setDisplayPets(selected.slice(0, 4));
+    }
+  }, [catsData]);
+
+  // Format cat data to match expected format
+  const formatCats = (cats) => {
+    return cats.map(cat => ({
+      id: cat._id,
+      name: cat.name,
+      image: cat.featuredImage,
+      gender: cat.gender,
+      neutered: cat.neutered ? 'Yes' : 'No',
+      age: cat.age,
+      isFeatured: cat.isFeatured,
+      link: `/adoption/${cat.title_id || cat._id}`,
+    }));
+  };
+
+  const formattedPets = formatCats(displayPets);
+
+  if (isLoading) {
+    return (
+      <AdoptionSection>
+        <Container maxWidth="lg">
+          <SectionHeaderWrapper>
+            <HeaderTopRow>
+              <SectionIconWrapper>
+                <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
+              </SectionIconWrapper>
+              <SectionSubtitle>Adopt a pet</SectionSubtitle>
+            </HeaderTopRow>
+            <SectionTitle>Find a new furry friend</SectionTitle>
+          </SectionHeaderWrapper>
+          <LoadingContainer>
+            <CircularProgress sx={{ color: primaryColor }} />
+          </LoadingContainer>
+        </Container>
+      </AdoptionSection>
+    );
+  }
+
   return (
     <AdoptionSection>
       <Container maxWidth="lg">
@@ -345,52 +413,67 @@ const Adoption = () => {
 
         {/* Adoption Cards */}
         <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
-          {adoptionPets.map((pet) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={pet.id}>
-              <AdoptionCard>
-                <PetImage src={pet.image} alt={pet.name} />
-                <FrontHeader>
-                  <FrontTitle>{pet.name}</FrontTitle>
-                </FrontHeader>
-                <BackWrap className="back-wrap">
-                  <a href={pet.link}>
-                    <BackTitle>{pet.name}</BackTitle>
-                    <InfoList>
-                      <ul>
-                        <li>
-                          <InfoItem>
-                            {getGenderIcon(pet.gender)}
-                            <span>Gender: {pet.gender}</span>
-                          </InfoItem>
-                        </li>
-                        <li>
-                          <InfoItem>
-                            <HotelIcon />
-                            <span>Neutered: {pet.neutered}</span>
-                          </InfoItem>
-                        </li>
-                        <li>
-                          <InfoItem>
-                            <CakeIcon />
-                            <span>Age: {pet.age}</span>
-                          </InfoItem>
-                        </li>
-                      </ul>
-                    </InfoList>
-                  </a>
-                </BackWrap>
-              </AdoptionCard>
+          {formattedPets.length > 0 ? (
+            formattedPets.map((pet) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={pet.id}>
+                <AdoptionCard>
+                  {pet.isFeatured && (
+                    <FeaturedBadge>
+                      ♡ Featured
+                    </FeaturedBadge>
+                  )}
+                  <PetImage src={pet.image} alt={pet.name} />
+                  <FrontHeader>
+                    <FrontTitle>{pet.name}</FrontTitle>
+                  </FrontHeader>
+                  <BackWrap className="back-wrap">
+                    <Link href={pet.link} sx={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                      <BackTitle>{pet.name}</BackTitle>
+                      <InfoList>
+                        <ul>
+                          <li>
+                            <InfoItem>
+                              {getGenderIcon(pet.gender)}
+                              <span>Gender: {pet.gender === 'male' ? 'Male' : 'Female'}</span>
+                            </InfoItem>
+                          </li>
+                          <li>
+                            <InfoItem>
+                              <HotelIcon />
+                              <span>Neutered: {pet.neutered}</span>
+                            </InfoItem>
+                          </li>
+                          <li>
+                            <InfoItem>
+                              <CakeIcon />
+                              <span>Age: {pet.age}</span>
+                            </InfoItem>
+                          </li>
+                        </ul>
+                      </InfoList>
+                    </Link>
+                  </BackWrap>
+                </AdoptionCard>
+              </Grid>
+            ))
+          ) : (
+            <Grid size={{ xs: 12 }}>
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="body1" sx={{ color: '#666' }}>
+                  No cats available for adoption at the moment.
+                </Typography>
+              </Box>
             </Grid>
-          ))}
+          )}
         </Grid>
 
         {/* Bottom Info Section */}
         <SectionInfo>
-          <AdoptButton variant="contained">
+          <AdoptButton variant="contained" href="/adoption">
             View all pets
           </AdoptButton>
           <InfoText>
-            Can't adopt? <a href="/sponsor">Sponsor a pet</a>
+            Can't adopt? <Link href="/sponsor" sx={{ color: iconColor, textDecoration: 'none', fontWeight: 600 }}>Sponsor a pet</Link>
           </InfoText>
         </SectionInfo>
       </Container>

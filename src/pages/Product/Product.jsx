@@ -11,7 +11,6 @@ import {
   useMediaQuery,
   CircularProgress,
 } from '@mui/material';
-import PetsIcon from '@mui/icons-material/Pets';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useQuery } from '@tanstack/react-query';
@@ -31,7 +30,6 @@ const ProductSection = styled(Box)({
   '@media (max-width: 900px)': { padding: '60px 0' },
   '@media (max-width: 600px)': { padding: '40px 0' },
 });
-
 
 const ProductCard = styled(Box)({
   marginBottom: '30px',
@@ -137,7 +135,6 @@ const ProductTitle = styled(Box)({
   },
 });
 
-// ── Pagination matching Blog page exactly ──
 const PaginationWrapper = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
@@ -260,7 +257,9 @@ const Product = () => {
                             onError={(e) => { e.target.src = 'https://via.placeholder.com/400x400?text=No+Image'; }}
                           />
                           <PriceOverlay isVisible={hoveredId === product._id}>
-                            <span className="price">${product.price}</span>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '20px', color: '#ff6b6b' }}>
+                              ৳{product.price}
+                            </Typography>
                           </PriceOverlay>
                         </ImageWrapper>
                         <ProductTitle>

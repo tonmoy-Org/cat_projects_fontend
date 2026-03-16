@@ -8,6 +8,7 @@ import {
   VideoLibrary as VideoIcon,
   Pets as PetsIcon,
   Inventory as InventoryIcon,
+  Home as HomeIcon,
 } from "@mui/icons-material";
 
 export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
@@ -15,6 +16,11 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
     {
       sectionName: "Main",
       items: [
+        {
+          text: "Home",
+          icon: <HomeIcon />,
+          path: "/",
+        },
         {
           text: "Dashboard",
           icon: <DashboardIcon />,

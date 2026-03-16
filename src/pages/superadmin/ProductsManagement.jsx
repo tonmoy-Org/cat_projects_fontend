@@ -426,7 +426,7 @@ export default function ProductsManagement() {
                   </TableCell>
 
                   <TableCell sx={{ py: 1 }}>
-                    <Chip label={`$${parseFloat(product.price).toFixed(2)}`} size="small"
+                    <Chip label={`৳${parseFloat(product.price).toFixed(2)}`} size="small"
                       sx={{ fontWeight: 600, fontSize: "0.75rem", height: 22, backgroundColor: alpha(GREEN_COLOR, 0.1), color: GREEN_COLOR }} />
                   </TableCell>
 
@@ -609,7 +609,7 @@ export default function ProductsManagement() {
 
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Box sx={{ mb: 0.5 }}>
-                          <Typography component="span" variant="body2" sx={{ fontWeight: 500, color: TEXT_PRIMARY }}>Price ($)</Typography>
+                          <Typography component="span" variant="body2" sx={{ fontWeight: 500, color: TEXT_PRIMARY }}>Price (৳)</Typography>
                           {modalMode === "create" && <RequiredAsterisk>*</RequiredAsterisk>}
                         </Box>
                         <Controller name="price" control={control}
