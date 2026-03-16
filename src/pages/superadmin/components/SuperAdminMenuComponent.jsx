@@ -36,14 +36,14 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
           path: "/superadmin-dashboard/carousel-management",
         },
         {
-          text: "Blog Management",
-          icon: <ArticleIcon />,
-          path: "/superadmin-dashboard/blogs-management",
-        },
-        {
           text: "Video Management",
           icon: <VideoIcon />,
           path: "/superadmin-dashboard/videos-management",
+        },
+        {
+          text: "Blogs",
+          icon: <ArticleIcon />,
+          path: "/superadmin-dashboard/blogs",
         },
       ],
     },
