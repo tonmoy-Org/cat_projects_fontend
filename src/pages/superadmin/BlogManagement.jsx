@@ -107,13 +107,16 @@ export default function BlogManagement() {
     defaultValues: { title: "", excerpt: "" },
   });
 
-  const { data: blogs = [], isLoading } = useQuery({
+  const { data: blogsData = [], isLoading } = useQuery({
     queryKey: ["blogs"],
     queryFn: async () => {
       const response = await axiosInstance.get("/blogs");
-      return response.data.blogs || response.data.data || response.data;
+      return response.data.blogs || response.data.data || response.data || [];
     },
   });
+
+  // ✅ FIXED: Ensure blogs is always an array
+  const blogs = Array.isArray(blogsData) ? blogsData : [];
 
   const paginatedBlogs = blogs.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   const handleChangePage = (_, newPage) => setPage(newPage);
@@ -315,7 +318,7 @@ export default function BlogManagement() {
           <TableBody>
             {isLoading ? (
               <TableRow><TableCell colSpan={7} align="center" sx={{ py: 4 }}><CircularProgress size={32} sx={{ color: BLUE_COLOR }} /></TableCell></TableRow>
-            ) : paginatedBlogs.length === 0 ? (
+            ) : blogs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                   <PetsIcon sx={{ fontSize: 48, color: alpha(TEXT_PRIMARY, 0.2), mb: 1 }} />

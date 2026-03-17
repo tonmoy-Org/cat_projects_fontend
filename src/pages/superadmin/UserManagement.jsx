@@ -278,7 +278,7 @@ export const UserManagement = () => {
 
             <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2} mb={3}>
                 <Box>
-                    <Typography sx={{ fontWeight: 600, mb: 0.5, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: TEXT_PRIMARY }}>
                         User Management
                     </Typography>
                     <Typography variant="caption" sx={{ fontSize: '0.75rem', color: TEXT_PRIMARY }}>

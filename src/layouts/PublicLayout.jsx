@@ -522,20 +522,11 @@ export const PublicLayout = ({ children, title, description }) => {
                 src={logo}
                 alt="FatherOfMeow Logo"
                 sx={{
-                  height: 28,
-                  width: "auto",
+                  height: 50,
+                  width: "100%",
                 }}
               />
-              <Typography
-                sx={{
-                  fontWeight: 700,
-                  fontSize: "1rem",
-                  color: ACTIVE_COLOR,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                FatherOfMeow
-              </Typography>
+             
             </Box>
             <IconButton
               onClick={handleMobileDrawerClose}
