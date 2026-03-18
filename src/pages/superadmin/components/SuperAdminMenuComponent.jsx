@@ -9,6 +9,10 @@ import {
   Pets as PetsIcon,
   Inventory as InventoryIcon,
   Home as HomeIcon,
+  ShoppingCart as OrdersIcon,
+  LocalShipping as ShippingIcon,
+  Receipt as ReceiptIcon,
+  Payments as PaymentsIcon,
 } from "@mui/icons-material";
 
 export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
@@ -66,6 +70,31 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
           icon: <InventoryIcon />,
           path: "/superadmin-dashboard/products-management",
         },
+      ],
+    },
+    {
+      sectionName: "Order Management",
+      items: [
+        {
+          text: "All Orders",
+          icon: <OrdersIcon />,
+          path: "/superadmin-dashboard/order-management",
+        },
+        // {
+        //   text: "Shipping",
+        //   icon: <ShippingIcon />,
+        //   path: "/superadmin-dashboard/shipping-management",
+        // },
+        // {
+        //   text: "Transactions",
+        //   icon: <ReceiptIcon />,
+        //   path: "/superadmin-dashboard/transactions",
+        // },
+        // {
+        //   text: "Payments",
+        //   icon: <PaymentsIcon />,
+        //   path: "/superadmin-dashboard/payments",
+        // },
       ],
     },
     {

@@ -179,6 +179,7 @@ const CheckoutBtn = styled(Button)({
   display: 'flex',
   gap: '8px',
   alignItems: 'center',
+  justifyContent: 'center',
   '&:hover': { backgroundColor: '#c06bb0' },
 });
 
@@ -190,11 +191,11 @@ const EmptyCartBox = styled(Box)({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const fmt = (n) => `$${parseFloat(n).toFixed(2)}`;
+const fmt = (n) => `৳${parseFloat(n).toFixed(0)}`;
 
 // ─── Cart Context / Hook ──────────────────────────────────────────────────────
 // This component receives cart state as props. Wire it to your global cart state
-// (Context, Redux, Zustand, etc.). See "Integration" note at the bottom.
+// (Context, Redux, Zustand, etc.).
 
 const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
   const navigate = useNavigate();
@@ -241,6 +242,21 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * (localQtys[item._id] ?? item.quantity), 0);
   const discountAmt = subtotal * discount;
   const total = subtotal - discountAmt;
+
+  // Pass cart data to checkout via navigation state
+  const handleProceedToCheckout = () => {
+    navigate('/checkout', {
+      state: {
+        cartItems,
+        localQtys,
+        subtotal,
+        discountAmt,
+        total,
+        couponApplied,
+        discount,
+      },
+    });
+  };
 
   return (
     <Box>
@@ -354,9 +370,8 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
                 </TableContainer>
 
                 {/* ── Actions Row ──────────────────────────────────────────── */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mt: 3 }}>
-                  {/* Coupon */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', flexWrap: 'wrap', gap: 2, mt: 3 }}>
+                  {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
                     <CouponIcon sx={{ color: darkGray, fontSize: '20px' }} />
                     <CouponInput
                       placeholder="Coupon code"
@@ -369,7 +384,7 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
                       <Chip label="10% off applied!" size="small"
                         sx={{ backgroundColor: '#e8f5e9', color: '#388e3c', fontWeight: 600, fontSize: '12px' }} />
                     )}
-                  </Box>
+                  </Box> */}
 
                   {/* Update cart */}
                   <UpdateBtn onClick={handleUpdateCart} disabled={!isDirty}>
@@ -408,7 +423,7 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
                   <Typography sx={{ fontSize: '22px', fontWeight: 800, color: primaryColor }}>{fmt(total)}</Typography>
                 </TotalsRow>
 
-                <CheckoutBtn onClick={() => navigate('/checkout')}>
+                <CheckoutBtn onClick={handleProceedToCheckout}>
                   Proceed to Checkout <ArrowForwardIcon sx={{ fontSize: '18px' }} />
                 </CheckoutBtn>
 

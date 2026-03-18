@@ -12,18 +12,11 @@ import { PrivateRoute } from "../auth/PrivateRoute";
 import { ErrorPage } from "../pages/error/ErrorPage";
 
 import { SuperAdminLayout } from "../pages/superadmin/components/SuperAdminLayout";
-import { MemberLayout } from "../pages/member/components/MemberLayout";
 import { ClientLayout } from "../pages/client/components/ClientLayout";
 
 import { SuperAdminDashboard } from "../pages/superadmin/SuperAdminDashboard";
 import { SuperAdminProfile } from "../pages/superadmin/Profile";
 import { UserManagement } from "../pages/superadmin/UserManagement";
-
-import { MemberDashboard } from "../pages/member/MemberDashboard";
-import { MemberProfile } from "../pages/member/Profile";
-import RMEReports from "../pages/member/HMIS/RMEReports";
-import RSSReports from "../pages/member/HMIS/RSSReports";
-import TOSReports from "../pages/member/HMIS/TOSReports";
 
 import { ClientDashboard } from "../pages/client/ClientDashboard";
 import { ClientProfile } from "../pages/client/Profile";
@@ -47,6 +40,9 @@ import Product from "../pages/Product/Product";
 import ProductDetail from "../pages/Product/ProductDetail";
 import CartRoute from "./CartRoute";
 import BlogManagement from "../pages/superadmin/BlogManagement";
+import Checkout from "../pages/cart/Checkout";
+import PaymentSuccess from "../pages/cart/PaymentSuccess";
+import OrderManagement from "../pages/superadmin/Ordermanagement";
 
 
 export const AppRoutes = () => {
@@ -155,7 +151,7 @@ export const AppRoutes = () => {
           }
         />
 
-        {/* Blog Routes - Fixed the syntax error */}
+        {/* Blog Routes */}
         <Route
           path="/blog"
           element={
@@ -246,6 +242,22 @@ export const AppRoutes = () => {
             </PublicLayout>
           }
         />
+        <Route
+          path="/checkout"
+          element={
+            <PublicLayout title="checkout" description="Checkout page">
+              <Checkout />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/payment/success"
+          element={
+            <PublicLayout title="Payment success" description="Payment success page">
+              <PaymentSuccess />
+            </PublicLayout>
+          }
+        />
 
         {/* Dashboard Redirect */}
         <Route
@@ -254,9 +266,6 @@ export const AppRoutes = () => {
             <PrivateRoute>
               {user?.role === "superadmin" && (
                 <Navigate to="/superadmin-dashboard" replace />
-              )}
-              {user?.role === "member" && (
-                <Navigate to="/member-dashboard" replace />
               )}
               {user?.role === "client" && (
                 <Navigate to="/client-dashboard" replace />
@@ -282,36 +291,10 @@ export const AppRoutes = () => {
           <Route path="videos-management" element={<VideoUpload />} />
           <Route path="cats-management" element={<CatsManagement />} />
           <Route path="products-management" element={<ProductsManagement />} />
+          <Route path="order-management" element={<OrderManagement  />} />
         </Route>
 
-        {/* Member Routes */}
-        <Route
-          path="/member-dashboard"
-          element={
-            <PrivateRoute requiredRoles={["member"]}>
-              <MemberLayout />
-            </PrivateRoute>
-          }
-        >
-          <Route index element={<MemberDashboard />} />
-          <Route path="profile" element={<MemberProfile />} />
-
-          {/* Health Department Reports */}
-          <Route
-            path="health-department-reports/rme"
-            element={<RMEReports />}
-          />
-          <Route
-            path="health-department-reports/rss"
-            element={<RSSReports />}
-          />
-          <Route
-            path="health-department-reports/tos"
-            element={<TOSReports />}
-          />
-        </Route>
-
-        {/* Tech Routes */}
+        {/* Client Routes */}
         <Route
           path="/client-dashboard"
           element={
