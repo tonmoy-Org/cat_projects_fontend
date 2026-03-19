@@ -7,19 +7,22 @@ import {
   Typography,
   styled,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
 import { Button } from '@mui/material';
-import { Link } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
-import CakeIcon from '@mui/icons-material/Cake';
-import HotelIcon from '@mui/icons-material/Hotel';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '../../api/axios';
+import { useCart } from '../../context/CartContext';
 
 // Theme colors
-const primaryColor = '#ff6b6b';
+const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_DARK = '#4A3D75';
 const iconColor = '#db89ca';
 
 // Styled components
@@ -27,6 +30,8 @@ const AdoptionSection = styled(Box)({
   backgroundColor: '#f9f9f9',
   padding: '80px 0',
   width: '100%',
+  '@media (max-width: 900px)': { padding: '60px 0' },
+  '@media (max-width: 600px)': { padding: '40px 0' },
 });
 
 const SectionHeaderWrapper = styled(Box)({
@@ -79,67 +84,45 @@ const SectionTitle = styled(Typography)({
   },
 });
 
+// Styled components matching the cart page design
 const AdoptionCard = styled(Box)({
-  position: 'relative',
   width: '100%',
-  height: '300px',
   borderRadius: '10px',
   overflow: 'hidden',
   cursor: 'pointer',
   boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
   transition: 'all 0.3s ease',
-  '&:hover': {
-    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+  backgroundColor: '#ffffff',
+  border: '1px solid #f0f0f0',
+  '&:hover': { 
+    boxShadow: '0 10px 30px rgba(0,0,0,0.15)' 
   },
-  '&:hover .back-wrap': {
-    bottom: 0,
+  '&:hover .pet-image': { 
+    transform: 'scale(1.05)' 
   },
-  '@media (max-width: 600px)': {
-    height: '320px',
-  },
+});
+
+const ImageWrapper = styled(Box)({ 
+  width: '100%', 
+  overflow: 'hidden',
+  position: 'relative',
 });
 
 const PetImage = styled('img')({
   width: '100%',
-  height: '100%',
+  height: '280px',
   objectFit: 'cover',
   display: 'block',
   transition: 'transform 0.5s ease',
-  '&:hover': {
-    transform: 'scale(1.05)',
-  },
-});
-
-const FrontHeader = styled(Box)({
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
-  padding: '20px',
-  textAlign: 'center',
-  zIndex: 2,
-  '@media (max-width: 600px)': {
-    padding: '15px',
-  },
-});
-
-const FrontTitle = styled(Typography)({
-  fontSize: '22px',
-  fontWeight: 600,
-  color: '#fff',
-  margin: 0,
-  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-  '@media (max-width: 600px)': {
-    fontSize: '20px',
-  },
+  '@media (max-width: 900px)': { height: '240px' },
+  '@media (max-width: 600px)': { height: '220px' },
 });
 
 const FeaturedBadge = styled(Box)({
   position: 'absolute',
   top: '10px',
   right: '10px',
-  backgroundColor: '#ec407a',
+  backgroundColor: PRIMARY_COLOR,
   color: '#fff',
   padding: '6px 12px',
   borderRadius: '20px',
@@ -149,79 +132,73 @@ const FeaturedBadge = styled(Box)({
   alignItems: 'center',
   gap: '4px',
   zIndex: 10,
-  boxShadow: '0 2px 8px rgba(236,64,122,0.3)',
+  boxShadow: '0 2px 8px rgba(92,77,145,0.3)',
 });
 
-const BackWrap = styled(Box)({
-  position: 'absolute',
-  bottom: '-100%',
-  left: 0,
-  right: 0,
-  backgroundColor: '#fff',
-  padding: '25px 20px',
-  transition: 'bottom 0.3s ease',
-  zIndex: 3,
-  textAlign: 'center',
-  borderTop: `3px solid ${primaryColor}`,
-  '& a': {
-    textDecoration: 'none',
-    color: 'inherit',
-    display: 'block',
-  },
-  '@media (max-width: 600px)': {
-    padding: '20px 15px',
+const CardBody = styled(Box)({ 
+  padding: '14px 12px', 
+  textAlign: 'center' 
+});
+
+const PetName = styled(Typography)({
+  fontSize: '16px', 
+  fontWeight: 600, 
+  color: '#1a1a1a', 
+  marginBottom: '6px',
+});
+
+const PetGender = styled(Typography)({
+  fontSize: '13px', 
+  color: '#888', 
+  marginBottom: '8px',
+  display: 'flex', 
+  alignItems: 'center', 
+  justifyContent: 'center', 
+  gap: '4px',
+  '& svg': { 
+    fontSize: '16px', 
+    color: iconColor 
   },
 });
 
-const BackTitle = styled(Typography)({
-  fontSize: '20px',
+const PetPrice = styled(Typography)({
+  fontSize: '16px', 
+  fontWeight: 700, 
+  color: PRIMARY_COLOR, 
+  marginBottom: '12px',
+});
+
+const AddToCartBtn = styled(Button)({
+  backgroundColor: iconColor, 
+  color: '#fff', 
+  fontSize: '13px', 
   fontWeight: 600,
-  color: '#1a1a1a',
-  marginBottom: '15px',
-  position: 'relative',
-  display: 'inline-block',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: '-5px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '40px',
-    height: '2px',
-    backgroundColor: primaryColor,
-  },
-  '@media (max-width: 600px)': {
-    fontSize: '18px',
-    marginBottom: '15px',
+  textTransform: 'none', 
+  borderRadius: '8px', 
+  padding: '7px 16px', 
+  width: '100%',
+  gap: '6px', 
+  transition: 'all 0.3s ease',
+  '&:hover': { 
+    backgroundColor: '#c06bb0' 
   },
 });
 
-const InfoList = styled(Box)({
-  '& ul': {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-  },
-});
-
-const InfoItem = styled(Box)({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '8px',
-  fontSize: '14px',
-  color: '#666',
-  padding: '6px 0',
-  '& svg': {
-    fontSize: '18px',
-    color: iconColor,
-  },
-  '@media (max-width: 600px)': {
-    fontSize: '13px',
-    padding: '4px 0',
-    '& svg': {
-      fontSize: '16px',
-    },
+const ViewCartBtn = styled(Button)({
+  backgroundColor: 'transparent', 
+  color: iconColor, 
+  fontSize: '13px', 
+  fontWeight: 600,
+  textTransform: 'none', 
+  borderRadius: '8px', 
+  padding: '7px 16px', 
+  width: '100%',
+  gap: '6px', 
+  border: `2px solid ${iconColor}`, 
+  transition: 'all 0.3s ease',
+  '&:hover': { 
+    backgroundColor: iconColor, 
+    color: '#fff' 
   },
 });
 
@@ -240,8 +217,8 @@ const SectionInfo = styled(Box)({
   },
 });
 
-const AdoptButton = styled(Button)({
-  backgroundColor: primaryColor,
+const ViewAllBtn = styled(Button)({
+  backgroundColor: PRIMARY_COLOR,
   color: '#fff',
   padding: '10px 24px',
   fontSize: '14px',
@@ -252,46 +229,13 @@ const AdoptButton = styled(Button)({
   minWidth: '140px',
   whiteSpace: 'nowrap',
   '&:hover': {
-    backgroundColor: '#ff5252',
-    boxShadow: '0 5px 15px rgba(255,107,107,0.3)',
+    backgroundColor: PRIMARY_DARK,
+    boxShadow: '0 5px 15px rgba(92,77,145,0.3)',
   },
   '@media (max-width: 600px)': {
     padding: '8px 20px',
     fontSize: '13px',
     minWidth: '120px',
-  },
-});
-
-const InfoText = styled(Typography)({
-  fontSize: '16px',
-  color: '#666',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '5px',
-  flexWrap: 'wrap',
-  justifyContent: 'center',
-  '@media (max-width: 600px)': {
-    fontSize: '14px',
-  },
-  '& a': {
-    color: iconColor,
-    textDecoration: 'none',
-    fontWeight: 600,
-    position: 'relative',
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      bottom: '-2px',
-      left: 0,
-      width: '100%',
-      height: '1px',
-      backgroundColor: iconColor,
-      transform: 'scaleX(0)',
-      transition: 'transform 0.3s ease',
-    },
-    '&:hover::after': {
-      transform: 'scaleX(1)',
-    },
   },
 });
 
@@ -304,7 +248,7 @@ const LoadingContainer = styled(Box)({
 
 // Helper function to get gender icon
 const getGenderIcon = (gender) => {
-  return gender === 'male' ? <MaleIcon /> : <FemaleIcon />;
+  return gender?.toLowerCase() === 'male' ? <MaleIcon /> : <FemaleIcon />;
 };
 
 // Helper function to shuffle array
@@ -317,17 +261,79 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
+// Cat Card Component matching cart page design - Only showing name, gender, and price
+const CatCard = ({ cat, onAddToCart }) => {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    addToCart(cat, 1);
+    setAddedToCart(true);
+    onAddToCart(cat.name);
+  };
+
+  const handleViewCart = (e) => {
+    e.stopPropagation();
+    navigate('/cart');
+  };
+
+  const handleCardClick = () => {
+    navigate(`/adoption/${cat.title_id || cat._id}`);
+  };
+
+  return (
+    <AdoptionCard onClick={handleCardClick}>
+      <ImageWrapper>
+        {cat.isFeatured && (
+          <FeaturedBadge>
+            ♡ Featured
+          </FeaturedBadge>
+        )}
+        <PetImage className="pet-image" src={cat.featuredImage} alt={cat.name} />
+      </ImageWrapper>
+      <CardBody>
+        <PetName>Name : {cat.name}</PetName>
+        <PetGender>
+          Gender :
+          {getGenderIcon(cat.gender)}
+          {cat.gender}
+        </PetGender>
+        
+        <PetPrice>Price : ৳ {cat.price || 0}</PetPrice>
+        
+        {addedToCart ? (
+          <ViewCartBtn variant="outlined" onClick={handleViewCart}>
+            <ShoppingCartIcon sx={{ fontSize: '16px' }} />
+            View Cart
+          </ViewCartBtn>
+        ) : (
+          <AddToCartBtn variant="contained" onClick={handleAddToCart}>
+            <ShoppingCartIcon sx={{ fontSize: '16px' }} />
+            Add to Cart
+          </AddToCartBtn>
+        )}
+      </CardBody>
+    </AdoptionCard>
+  );
+};
+
 const Adoption = () => {
   const [displayPets, setDisplayPets] = useState([]);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const navigate = useNavigate();
 
   // Fetch cats from API
-  const { data: catsData = [], isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['cats-adoption'],
     queryFn: async () => {
       const response = await axiosInstance.get('/cats?status=available');
-      return Array.isArray(response.data) ? response.data : (response.data.data || []);
+      return response.data;
     },
   });
+
+  const catsData = data?.data || [];
 
   // Process cats data to display featured first, then random
   useEffect(() => {
@@ -352,21 +358,17 @@ const Adoption = () => {
     }
   }, [catsData]);
 
-  // Format cat data to match expected format
-  const formatCats = (cats) => {
-    return cats.map(cat => ({
-      id: cat._id,
-      name: cat.name,
-      image: cat.featuredImage,
-      gender: cat.gender,
-      neutered: cat.neutered ? 'Yes' : 'No',
-      age: cat.age,
-      isFeatured: cat.isFeatured,
-      link: `/adoption/${cat.title_id || cat._id}`,
-    }));
+  const handleAddToCart = (catName) => {
+    setSnackbar({ open: true, message: `${catName} added to cart!`, severity: 'success' });
   };
 
-  const formattedPets = formatCats(displayPets);
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleViewAllPets = () => {
+    navigate('/cats');
+  };
 
   if (isLoading) {
     return (
@@ -382,7 +384,7 @@ const Adoption = () => {
             <SectionTitle>Find a new furry friend</SectionTitle>
           </SectionHeaderWrapper>
           <LoadingContainer>
-            <CircularProgress sx={{ color: primaryColor }} />
+            <CircularProgress sx={{ color: PRIMARY_COLOR }} />
           </LoadingContainer>
         </Container>
       </AdoptionSection>
@@ -411,72 +413,46 @@ const Adoption = () => {
           </Grid>
         </Grid>
 
-        {/* Adoption Cards */}
-        <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
-          {formattedPets.length > 0 ? (
-            formattedPets.map((pet) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={pet.id}>
-                <AdoptionCard>
-                  {pet.isFeatured && (
-                    <FeaturedBadge>
-                      ♡ Featured
-                    </FeaturedBadge>
-                  )}
-                  <PetImage src={pet.image} alt={pet.name} />
-                  <FrontHeader>
-                    <FrontTitle>{pet.name}</FrontTitle>
-                  </FrontHeader>
-                  <BackWrap className="back-wrap">
-                    <Link href={pet.link} sx={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                      <BackTitle>{pet.name}</BackTitle>
-                      <InfoList>
-                        <ul>
-                          <li>
-                            <InfoItem>
-                              {getGenderIcon(pet.gender)}
-                              <span>Gender: {pet.gender === 'male' ? 'Male' : 'Female'}</span>
-                            </InfoItem>
-                          </li>
-                          <li>
-                            <InfoItem>
-                              <HotelIcon />
-                              <span>Neutered: {pet.neutered}</span>
-                            </InfoItem>
-                          </li>
-                          <li>
-                            <InfoItem>
-                              <CakeIcon />
-                              <span>Age: {pet.age}</span>
-                            </InfoItem>
-                          </li>
-                        </ul>
-                      </InfoList>
-                    </Link>
-                  </BackWrap>
-                </AdoptionCard>
+        {/* Adoption Cards - Using CatCard component - 4 cards in a row */}
+        <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
+          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} justifyContent="center">
+            {displayPets.length > 0 ? (
+              displayPets.map((pet) => (
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={pet._id}>
+                  <CatCard cat={pet} onAddToCart={handleAddToCart} />
+                </Grid>
+              ))
+            ) : (
+              <Grid size={{ xs: 12 }}>
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body1" sx={{ color: '#666' }}>
+                    No cats available for adoption at the moment.
+                  </Typography>
+                </Box>
               </Grid>
-            ))
-          ) : (
-            <Grid size={{ xs: 12 }}>
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography variant="body1" sx={{ color: '#666' }}>
-                  No cats available for adoption at the moment.
-                </Typography>
-              </Box>
-            </Grid>
-          )}
-        </Grid>
+            )}
+          </Grid>
+        </Box>
 
         {/* Bottom Info Section */}
         <SectionInfo>
-          <AdoptButton variant="contained" href="/adoption">
+          <ViewAllBtn variant="contained" onClick={handleViewAllPets}>
             View all pets
-          </AdoptButton>
-          <InfoText>
-            Can't adopt? <Link href="/sponsor" sx={{ color: iconColor, textDecoration: 'none', fontWeight: 600 }}>Sponsor a pet</Link>
-          </InfoText>
+          </ViewAllBtn>
         </SectionInfo>
       </Container>
+
+      {/* Snackbar for cart notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} onClose={handleCloseSnackbar}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </AdoptionSection>
   );
 };

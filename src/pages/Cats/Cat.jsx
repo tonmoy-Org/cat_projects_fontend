@@ -250,25 +250,6 @@ const ViewCartBtn = styled(Button)({
   '&:hover': { backgroundColor: iconColor, color: '#fff' },
 });
 
-const BottomInfoWrapper = styled(Box)({
-  display: 'flex', gap: '30px', alignItems: 'center', justifyContent: 'center',
-  marginTop: '50px', textAlign: 'center',
-  '@media (max-width: 900px)': { gap: '25px', marginTop: '45px', flexDirection: 'column' },
-  '@media (max-width: 600px)': { gap: '20px', marginTop: '40px', padding: '0 20px' },
-});
-
-const InfoText = styled(Typography)({
-  fontSize: '18px', color: '#333', fontWeight: 500,
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap',
-  '& .phone-number': { color: iconColor, fontWeight: 700, fontSize: '20px' },
-});
-
-const AdoptButton = styled(Button)({
-  backgroundColor: PRIMARY_COLOR, color: '#fff', fontSize: '16px', fontWeight: 600,
-  textTransform: 'none', borderRadius: '30px',
-  boxShadow: '0 5px 15px rgba(92, 77, 145, 0.3)', minWidth: '120px', padding: '10px 25px',
-  '&:hover': { backgroundColor: '#4A3D75', boxShadow: '0 8px 20px rgba(92, 77, 145, 0.4)' },
-});
 
 const PaginationWrapper = styled(Box)(({ theme }) => ({
   display: 'flex', justifyContent: 'center', marginTop: '50px', width: '100%',
@@ -829,15 +810,6 @@ const Cat = () => {
               )}
             </>
           )}
-
-          <BottomInfoWrapper>
-            <AdoptButton variant="contained">Adopt a pet</AdoptButton>
-            <InfoText>
-              <span>Call us</span>
-              <span className="phone-number">+123 456 7890</span>
-              <span>for detailed information!</span>
-            </InfoText>
-          </BottomInfoWrapper>
         </Container>
       </AdoptionSection>
 

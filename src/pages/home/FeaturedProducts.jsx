@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container, Grid, Box, Typography, styled, CircularProgress
+  Container, Grid, Box, Typography, styled, CircularProgress, Button, Snackbar, Alert,
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
+import { useCart } from '../../context/CartContext';
 
-// Colors
-const primaryColor = '#ff6b6b';
+// ── Colors ────────────────────────────────────────────────────────────────────
+const PRIMARY_COLOR = '#5C4D91';
+const PRIMARY_DARK = '#4A3D75';
 const iconColor = '#db89ca';
+const primaryColor = '#ff6b6b';
 const textColor = '#1a1a1a';
 
-// Styled components
+// ── Styled Components ─────────────────────────────────────────────────────────
+
 const ShopSection = styled(Box)({
   padding: '80px 0',
   backgroundColor: '#fff',
@@ -54,121 +60,62 @@ const SectionTitle = styled(Typography)({
   fontWeight: 700,
   color: textColor,
   lineHeight: 1.2,
-  '@media (max-width: 900px)': {
-    fontSize: '32px',
-  },
-  '@media (max-width: 600px)': {
-    fontSize: '28px',
-    padding: '0 15px',
-  },
+  '@media (max-width: 900px)': { fontSize: '32px' },
+  '@media (max-width: 600px)': { fontSize: '28px', padding: '0 15px' },
 });
+
+// ── Product Card ───────────────────────────────────────────────────────────────
 
 const ProductCard = styled(Box)({
-  marginBottom: '30px',
+  width: '100%',
+  borderRadius: '10px',
+  overflow: 'hidden',
   cursor: 'pointer',
-});
-
-const ProductItem = styled(Box)({
-  textAlign: 'center',
-  position: 'relative',
+  boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+  transition: 'all 0.3s ease',
+  backgroundColor: '#ffffff',
+  border: '1px solid #f0f0f0',
+  '&:hover': { boxShadow: '0 10px 30px rgba(0,0,0,0.15)' },
+  '&:hover .product-image': { transform: 'scale(1.05)' },
 });
 
 const ImageWrapper = styled(Box)({
   position: 'relative',
   width: '100%',
   overflow: 'hidden',
-  borderRadius: '10px',
-  boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
-  transition: 'all 0.3s ease',
-  '& img': {
-    width: '100%',
-    height: 'auto',
-    display: 'block',
-    transition: 'transform 0.5s ease',
-  },
-  '&:hover': {
-    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-  },
-  '&:hover img': {
-    transform: 'scale(1.05)',
-  },
 });
 
 const ProductImage = styled('img')({
   width: '100%',
-  height: 'auto',
+  height: '280px',
+  objectFit: 'cover',
   display: 'block',
+  transition: 'transform 0.5s ease',
+  '@media (max-width: 900px)': { height: '240px' },
+  '@media (max-width: 600px)': { height: '220px' },
 });
 
 const PriceOverlay = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'isVisible'
+  shouldForwardProp: (prop) => prop !== 'isVisible',
 })(({ isVisible }) => ({
   position: 'absolute',
-  bottom: '20px',
+  top: '50%',
   left: '50%',
-  transform: 'translateX(-50%)',
+  transform: 'translate(-50%, -50%)',
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  padding: '6px 16px',
-  borderRadius: '25px',
-  boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+  width: '100px',
+  height: '100px',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
   opacity: isVisible ? 1 : 0,
   visibility: isVisible ? 'visible' : 'hidden',
   transition: 'all 0.3s ease',
   zIndex: 2,
-  '& h4': {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: textColor,
-    margin: 0,
-  },
-  '& .hot': {
-    color: primaryColor,
-    fontWeight: 600,
-    fontSize: '13px',
-  },
-  '& .price': {
-    color: '#555',
-    fontWeight: 600,
-    fontSize: '14px',
-  },
+  '@media (max-width: 600px)': { width: '70px', height: '70px' },
 }));
-
-const ProductTitle = styled(Box)({
-  marginTop: '15px',
-  '& h5': {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: textColor,
-    margin: 0,
-    '& a': {
-      color: 'inherit',
-      textDecoration: 'none',
-      transition: 'color 0.2s ease',
-      position: 'relative',
-      display: 'inline-block',
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        bottom: '-2px',
-        left: '0',
-        width: '100%',
-        height: '1px',
-        backgroundColor: primaryColor,
-        transform: 'scaleX(0)',
-        transition: 'transform 0.3s ease',
-      },
-      '&:hover': {
-        color: primaryColor,
-      },
-      '&:hover::after': {
-        transform: 'scaleX(1)',
-      },
-    },
-  },
-});
 
 const FeaturedBadge = styled(Box)({
   position: 'absolute',
@@ -187,11 +134,109 @@ const FeaturedBadge = styled(Box)({
   boxShadow: '0 2px 8px rgba(236,64,122,0.3)',
 });
 
+const CardBody = styled(Box)({
+  padding: '14px 12px 16px',
+  textAlign: 'center',
+});
+
+const ProductName = styled(Typography)({
+  fontSize: '16px',
+  fontWeight: 600,
+  color: '#1a1a1a',
+  marginBottom: '6px',
+});
+
+const ProductCategory = styled(Typography)({
+  fontSize: '13px',
+  color: '#888',
+  marginBottom: '8px',
+});
+
+const ProductPrice = styled(Typography)({
+  fontSize: '16px',
+  fontWeight: 700,
+  color: PRIMARY_COLOR,
+  marginBottom: '12px',
+});
+
+const AddToCartBtn = styled(Button)({
+  backgroundColor: iconColor,
+  color: '#fff',
+  fontSize: '13px',
+  fontWeight: 600,
+  textTransform: 'none',
+  borderRadius: '30px',
+  padding: '7px 18px',
+  width: '100%',
+  gap: '6px',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    backgroundColor: '#c96db8',
+    boxShadow: '0 4px 12px rgba(219,137,202,0.4)',
+  },
+});
+
+const ViewCartBtn = styled(Button)({
+  backgroundColor: 'transparent',
+  color: iconColor,
+  fontSize: '13px',
+  fontWeight: 600,
+  textTransform: 'none',
+  borderRadius: '30px',
+  padding: '7px 18px',
+  width: '100%',
+  gap: '6px',
+  border: `2px solid ${iconColor}`,
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    backgroundColor: iconColor,
+    color: '#fff',
+    boxShadow: '0 4px 12px rgba(219,137,202,0.4)',
+  },
+});
+
 const LoadingContainer = styled(Box)({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
   minHeight: '400px',
+});
+
+const SectionInfo = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: '50px',
+  gap: '30px',
+  flexWrap: 'wrap',
+  '@media (max-width: 600px)': {
+    flexDirection: 'column',
+    gap: '20px',
+    marginTop: '40px',
+    padding: '0 20px',
+  },
+});
+
+const ViewAllBtn = styled(Button)({
+  backgroundColor: PRIMARY_COLOR,
+  color: '#fff',
+  padding: '10px 24px',
+  fontSize: '14px',
+  fontWeight: 500,
+  textTransform: 'none',
+  borderRadius: '25px',
+  boxShadow: 'none',
+  minWidth: '140px',
+  whiteSpace: 'nowrap',
+  '&:hover': {
+    backgroundColor: PRIMARY_DARK,
+    boxShadow: '0 5px 15px rgba(92,77,145,0.3)',
+  },
+  '@media (max-width: 600px)': {
+    padding: '8px 20px',
+    fontSize: '13px',
+    minWidth: '120px',
+  },
 });
 
 const NoProductsContainer = styled(Box)({
@@ -202,7 +247,8 @@ const NoProductsContainer = styled(Box)({
   textAlign: 'center',
 });
 
-// Helper function to shuffle array
+// ── Helper ────────────────────────────────────────────────────────────────────
+
 const shuffleArray = (array) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -212,11 +258,101 @@ const shuffleArray = (array) => {
   return shuffled;
 };
 
-const FeaturedProducts = () => {
-  const [hoveredId, setHoveredId] = useState(null);
-  const [displayProducts, setDisplayProducts] = useState([]);
+// ── ProductCardItem ───────────────────────────────────────────────────────────
 
-  // Fetch products from API
+const ProductCardItem = ({ product, onAddToCart }) => {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const [hovered, setHovered] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    addToCart(product, 1);
+    setAddedToCart(true);
+    onAddToCart(product.title);
+  };
+
+  const handleViewCart = (e) => {
+    e.stopPropagation();
+    navigate('/cart');
+  };
+
+  const handleCardClick = () => {
+    navigate(`/shop/${product.title_id}`);
+  };
+
+  return (
+    <ProductCard
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={handleCardClick}
+    >
+      <ImageWrapper>
+        {product.isFeatured && (
+          <FeaturedBadge>♡ Featured</FeaturedBadge>
+        )}
+        <ProductImage
+          className="product-image"
+          src={product.featuredImage}
+          alt={product.title}
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
+          }}
+        />
+        <PriceOverlay isVisible={hovered}>
+          <Typography sx={{ fontWeight: 600, fontSize: '20px', color: primaryColor }}>
+            ৳{product.price}
+          </Typography>
+        </PriceOverlay>
+      </ImageWrapper>
+
+      <CardBody>
+        <ProductName>Name : {product.title}</ProductName>
+        <ProductCategory>Category : {product.category}</ProductCategory>
+        <ProductPrice>Price : ৳ {product.price}</ProductPrice>
+
+        {addedToCart ? (
+          <ViewCartBtn variant="outlined" onClick={handleViewCart}>
+            <ShoppingCartIcon sx={{ fontSize: '17px' }} />
+            View Cart
+          </ViewCartBtn>
+        ) : (
+          <AddToCartBtn onClick={handleAddToCart}>
+            <ShoppingCartIcon sx={{ fontSize: '17px' }} />
+            Add to Cart
+          </AddToCartBtn>
+        )}
+      </CardBody>
+    </ProductCard>
+  );
+};
+
+// ── Section Header ────────────────────────────────────────────────────────────
+
+const SectionHeader = () => (
+  <Grid container justifyContent="center">
+    <Grid size={{ xs: 12, md: 8 }}>
+      <SectionHeaderWrapper>
+        <HeaderTopRow>
+          <SectionIconWrapper>
+            <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
+          </SectionIconWrapper>
+          <SectionSubtitle>Pet Shop</SectionSubtitle>
+        </HeaderTopRow>
+        <SectionTitle>Our featured products</SectionTitle>
+      </SectionHeaderWrapper>
+    </Grid>
+  </Grid>
+);
+
+// ── Main Component ────────────────────────────────────────────────────────────
+
+const FeaturedProducts = () => {
+  const navigate = useNavigate(); // ✅ FIXED: moved here from ProductCardItem
+  const [displayProducts, setDisplayProducts] = useState([]);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products-featured'],
     queryFn: async () => {
@@ -227,43 +363,30 @@ const FeaturedProducts = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Process products data to display featured first, then random
   useEffect(() => {
     const products = productsData?.data || [];
-
     if (products.length > 0) {
-      const featuredProducts = products.filter(product => product.isFeatured === true);
-      const nonFeaturedProducts = products.filter(product => product.isFeatured !== true);
-      const shuffledNonFeatured = shuffleArray(nonFeaturedProducts);
-
-      let selected = [...featuredProducts];
-      const remainingSlots = 4 - selected.length;
-
-      if (remainingSlots > 0) {
-        selected = [...selected, ...shuffledNonFeatured.slice(0, remainingSlots)];
-      }
-
-      setDisplayProducts(selected.slice(0, 4));
+      const featured = products.filter((p) => p.isFeatured === true);
+      const nonFeatured = shuffleArray(products.filter((p) => p.isFeatured !== true));
+      const selected = [...featured, ...nonFeatured].slice(0, 4);
+      setDisplayProducts(selected);
     }
   }, [productsData]);
+
+  const handleAddToCart = (productName) => {
+    setSnackbar({ open: true, message: `${productName} added to cart!`, severity: 'success' });
+  };
+
+  // ✅ FIXED: moved here from ProductCardItem so ViewAllBtn can access it
+  const handleViewAllPets = () => {
+    navigate('/shop');
+  };
 
   if (isLoading) {
     return (
       <ShopSection>
         <Container maxWidth="lg">
-          <Grid container justifyContent="center">
-            <Grid size={{ xs: 12, md: 8 }}>
-              <SectionHeaderWrapper>
-                <HeaderTopRow>
-                  <SectionIconWrapper>
-                    <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
-                  </SectionIconWrapper>
-                  <SectionSubtitle>Pet Shop</SectionSubtitle>
-                </HeaderTopRow>
-                <SectionTitle>Our featured products</SectionTitle>
-              </SectionHeaderWrapper>
-            </Grid>
-          </Grid>
+          <SectionHeader />
           <LoadingContainer>
             <CircularProgress sx={{ color: primaryColor }} />
           </LoadingContainer>
@@ -276,19 +399,7 @@ const FeaturedProducts = () => {
     return (
       <ShopSection>
         <Container maxWidth="lg">
-          <Grid container justifyContent="center">
-            <Grid size={{ xs: 12, md: 8 }}>
-              <SectionHeaderWrapper>
-                <HeaderTopRow>
-                  <SectionIconWrapper>
-                    <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
-                  </SectionIconWrapper>
-                  <SectionSubtitle>Pet Shop</SectionSubtitle>
-                </HeaderTopRow>
-                <SectionTitle>Our featured products</SectionTitle>
-              </SectionHeaderWrapper>
-            </Grid>
-          </Grid>
+          <SectionHeader />
           <NoProductsContainer>
             <Typography variant="body1" sx={{ color: '#666' }}>
               Unable to load products at the moment. Please try again later.
@@ -302,60 +413,13 @@ const FeaturedProducts = () => {
   return (
     <ShopSection>
       <Container maxWidth="lg">
-        <Grid container justifyContent="center">
-          <Grid size={{ xs: 12, md: 8 }}>
-            <SectionHeaderWrapper>
-              <HeaderTopRow>
-                <SectionIconWrapper>
-                  <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
-                </SectionIconWrapper>
-                <SectionSubtitle>Pet Shop</SectionSubtitle>
-              </HeaderTopRow>
-              <SectionTitle>Our featured products</SectionTitle>
-            </SectionHeaderWrapper>
-          </Grid>
-        </Grid>
+        <SectionHeader />
 
         <Grid container spacing={3}>
           {displayProducts.length > 0 ? (
             displayProducts.map((product) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product._id}>
-                <ProductCard
-                  onMouseEnter={() => setHoveredId(product._id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                >
-                  <ProductItem>
-                    <ImageWrapper>
-                      {product.isFeatured && (
-                        <FeaturedBadge>♡ Featured</FeaturedBadge>
-                      )}
-                      <a
-                        href={`/shop/${product.title_id}`}
-                        style={{ textDecoration: 'none', display: 'block' }}
-                      >
-                        <ProductImage
-                          src={product.featuredImage}
-                          alt={product.title}
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/300x300?text=Product+Image';
-                          }}
-                        />
-                      </a>
-                      <PriceOverlay isVisible={hoveredId === product._id}>
-                        <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '15px', color: '#ff6b6b' }}>
-                          ৳{product.price}
-                        </Typography>
-                      </PriceOverlay>
-                    </ImageWrapper>
-                    <ProductTitle>
-                      <h5>
-                        <a href={`/shop/${product.title_id}`}>
-                          {product.title}
-                        </a>
-                      </h5>
-                    </ProductTitle>
-                  </ProductItem>
-                </ProductCard>
+                <ProductCardItem product={product} onAddToCart={handleAddToCart} />
               </Grid>
             ))
           ) : (
@@ -368,7 +432,28 @@ const FeaturedProducts = () => {
             </Grid>
           )}
         </Grid>
+
+        <SectionInfo>
+          {/* ✅ FIXED: handleViewAllPets is now in scope */}
+          <ViewAllBtn variant="contained" onClick={handleViewAllPets}>
+            View all products
+          </ViewAllBtn>
+        </SectionInfo>
       </Container>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((p) => ({ ...p, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar((p) => ({ ...p, open: false }))}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </ShopSection>
   );
 };
