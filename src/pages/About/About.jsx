@@ -11,11 +11,11 @@ import {
 } from "@mui/material";
 import PetsIcon from "@mui/icons-material/Pets";
 import { useQuery } from "@tanstack/react-query";
-import HeroServiceSection from "../../../components/shared/HeroServiceSection";
-import WhyChooseSection from "../../../components/shared/WhyChooseSectionComponent";
-import SectionTile from "../../../components/SectionTile";
-import VideoSection from "../../../components/shared/VideoSection";
-import axiosInstance from "../../../api/axios";
+import HeroServiceSection from "../../components/shared/HeroServiceSection";
+import WhyChooseSection from "../../components/shared/WhyChooseSectionComponent";
+import SectionTile from "../../components/SectionTile";
+import VideoSection from "../../components/shared/VideoSection";
+import axiosInstance from "../../api/axios";
 
 // Theme colors
 const PRIMARY_COLOR = '#5C4D91';
@@ -231,7 +231,7 @@ const About = () => {
           <Grid container spacing={3}>
             {displayGallery.length > 0 ? (
               displayGallery.map((item) => (
-                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item.id}>
+                <Grid size={{ xs: 6, sm: 6, md: 3 }} key={item.id}>
                   <GalleryCard>
                     <GalleryImage
                       src={item.image}

@@ -67,11 +67,12 @@ export const UserManagement = () => {
     const [userToDelete, setUserToDelete] = useState(null);
     const [userToToggle, setUserToToggle] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        role: 'member',
+        role: 'client',  // default changed from 'member' to 'client'
         isActive: true,
     });
 
@@ -189,18 +190,20 @@ export const UserManagement = () => {
                 name: user.name || '',
                 email: user.email || '',
                 password: '',
-                role: user.role || 'member',
+                role: user.role || 'client',
                 isActive: user.isActive !== undefined ? user.isActive : true,
             });
         } else {
             resetForm();
         }
+        setEmailError('');
         setOpenDialog(true);
     };
 
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setSelectedUser(null);
+        setEmailError('');
         resetForm();
     };
 
@@ -223,12 +226,28 @@ export const UserManagement = () => {
     };
 
     const resetForm = () => {
-        setFormData({ name: '', email: '', password: '', role: 'member', isActive: true });
+        setFormData({ name: '', email: '', password: '', role: 'client', isActive: true });
+        setEmailError('');
+    };
+
+    // RFC 5322 compliant email validation — supports dots, plus signs, etc.
+    const validateEmail = (email) => {
+        const re = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+        return re.test(email);
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Live email validation
+        if (name === 'email') {
+            if (value && !validateEmail(value)) {
+                setEmailError('Please enter a valid email address');
+            } else {
+                setEmailError('');
+            }
+        }
     };
 
     const handleSwitchChange = (e) => {
@@ -236,6 +255,10 @@ export const UserManagement = () => {
     };
 
     const handleSubmit = () => {
+        if (!validateEmail(formData.email)) {
+            setEmailError('Please enter a valid email address');
+            return;
+        }
         if (selectedUser) {
             const updateData = { ...formData };
             if (!updateData.password) delete updateData.password;
@@ -249,8 +272,6 @@ export const UserManagement = () => {
         switch (role) {
             case 'superadmin':
                 return { backgroundColor: alpha(RED_COLOR, theme.palette.mode === 'dark' ? 0.2 : 0.1), color: RED_COLOR, borderColor: RED_COLOR };
-            case 'member':
-                return { backgroundColor: alpha(BLUE_COLOR, theme.palette.mode === 'dark' ? 0.2 : 0.1), color: BLUE_COLOR, borderColor: BLUE_COLOR };
             case 'client':
                 return { backgroundColor: alpha(GREEN_COLOR, theme.palette.mode === 'dark' ? 0.2 : 0.1), color: GREEN_COLOR, borderColor: GREEN_COLOR };
             default:
@@ -278,7 +299,7 @@ export const UserManagement = () => {
 
             <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2} mb={3}>
                 <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: TEXT_PRIMARY }}>
+                    <Typography  sx={{ fontWeight: 600, color: TEXT_PRIMARY, fontSize: '1rem' }}>
                         User Management
                     </Typography>
                     <Typography variant="caption" sx={{ fontSize: '0.75rem', color: TEXT_PRIMARY }}>
@@ -482,7 +503,18 @@ export const UserManagement = () => {
                 <DialogContent sx={{ px: 3, py: 2 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
                         <StyledTextField fullWidth label="Name" name="name" value={formData.name} onChange={handleInputChange} size="small" placeholder="Enter full name" />
-                        <StyledTextField fullWidth label="Email" name="email" type="email" value={formData.email} onChange={handleInputChange} size="small" placeholder="Enter email address" />
+                        <StyledTextField
+                            fullWidth
+                            label="Email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            size="small"
+                            placeholder="Enter email address"
+                            error={!!emailError}
+                            helperText={emailError}
+                        />
                         <StyledTextField
                             fullWidth
                             label={selectedUser ? 'Password (leave blank to keep current)' : 'Password'}
@@ -492,7 +524,6 @@ export const UserManagement = () => {
                         <FormControl fullWidth size="small">
                             <InputLabel sx={{ fontSize: '0.85rem' }}>Role</InputLabel>
                             <Select name="role" value={formData.role} onChange={handleInputChange} label="Role" sx={{ fontSize: '0.85rem' }}>
-                                <MenuItem value="member" sx={{ fontSize: '0.85rem' }}>Member</MenuItem>
                                 <MenuItem value="superadmin" sx={{ fontSize: '0.85rem' }}>Admin</MenuItem>
                                 <MenuItem value="client" sx={{ fontSize: '0.85rem' }}>Client</MenuItem>
                             </Select>
@@ -511,7 +542,14 @@ export const UserManagement = () => {
                     </OutlineButton>
                     <GradientButton
                         onClick={handleSubmit} variant="contained"
-                        disabled={createUserMutation.isPending || updateUserMutation.isPending || !formData.name || !formData.email || (!selectedUser && !formData.password)}
+                        disabled={
+                            createUserMutation.isPending ||
+                            updateUserMutation.isPending ||
+                            !formData.name ||
+                            !formData.email ||
+                            !!emailError ||
+                            (!selectedUser && !formData.password)
+                        }
                         size="medium" sx={{ fontSize: '0.85rem', px: 2 }}
                     >
                         {createUserMutation.isPending || updateUserMutation.isPending

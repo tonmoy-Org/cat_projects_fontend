@@ -24,12 +24,16 @@ const primaryColor = '#ff6b6b';
 const iconColor = '#db89ca';
 
 // Styled components
-const ServicesSection = styled(Box)({
+const ServicesSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#f9f9f9',
   padding: '80px 0',
   width: '100%',
   overflow: 'hidden',
-});
+
+  [theme.breakpoints.down('sm')]: {
+    padding: '20px 0',
+  },
+}));
 
 const SectionHeaderWrapper = styled(Box)({
   textAlign: 'center',

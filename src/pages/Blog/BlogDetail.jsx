@@ -12,20 +12,21 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import PetsIcon from '@mui/icons-material/Pets';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import SectionTile from '../../../components/SectionTile';
+import SectionTile from '../../components/SectionTile';
 
-// Theme colors
 const primaryColor = '#ff6b6b';
 const textColor = '#666';
 
-// Styled components for main content
-const BlogDetailSection = styled(Box)({
+const BlogDetailSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#ffffff',
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
   padding: '80px 0',
-});
+  [theme.breakpoints.down('sm')]: {
+    padding: '20px 0',
+  },
+}));
 
 const ContentText = styled(Typography)({
   fontSize: '16px',
@@ -41,14 +42,35 @@ const GalleryWrapper = styled(Box)({
 const GalleryImage = styled('img')({
   width: '100%',
   height: 'auto',
+  maxHeight: '620px',
+  objectFit: 'cover',
   borderRadius: '8px',
+  display: 'block',
+  margin: '0 auto',
   transition: 'transform 0.3s ease',
   '&:hover': {
     transform: 'scale(1.02)',
   },
+  '@media (max-width: 900px)': {
+    maxHeight: '400px',
+  },
+  '@media (max-width: 600px)': {
+    maxHeight: '220px',
+    borderRadius: '6px',
+  },
 });
 
-// Latest News Section Styled Components
+const GalleryImageContainer = styled(Box)({
+  width: '100%',
+  maxWidth: '100%',
+  margin: '0 auto',
+  overflow: 'hidden',
+  borderRadius: '8px',
+  '@media (max-width: 600px)': {
+    borderRadius: '6px',
+  },
+});
+
 const LatestNewsSection = styled(Box)({
   marginTop: '80px',
   padding: '60px 0',
@@ -132,25 +154,11 @@ const BlogCard = styled(Box)(({ theme }) => ({
   '&:hover': {
     transform: 'translateY(-5px)',
     boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-    '& .blog-image': {
-      transform: 'scale(1.05)',
-    },
-    '& .blog-category': {
-      opacity: 1,
-      visibility: 'visible',
-      transform: 'translateY(0)',
-    },
-    '& .date-only': {
-      opacity: 0,
-      visibility: 'hidden',
-      display: 'none',
-    },
-    '& .author-info': {
-      opacity: 1,
-      visibility: 'visible',
-      display: 'flex',
-    }
-  }
+    '& .blog-image': { transform: 'scale(1.05)' },
+    '& .blog-category': { opacity: 1, visibility: 'visible', transform: 'translateY(0)' },
+    '& .date-only': { opacity: 0, visibility: 'hidden', display: 'none' },
+    '& .author-info': { opacity: 1, visibility: 'visible', display: 'flex' },
+  },
 }));
 
 const CardImageWrapper = styled(Box)({
@@ -182,14 +190,10 @@ const CardCategory = styled(Box)(({ theme }) => ({
   visibility: 'hidden',
   transform: 'translateY(-10px)',
   transition: 'all 0.3s ease',
-  '&:hover': {
-    backgroundColor: '#ff5252',
-  }
+  '&:hover': { backgroundColor: '#ff5252' },
 }));
 
-const CardContent = styled(Box)({
-  padding: '20px 18px',
-});
+const CardContent = styled(Box)({ padding: '20px 18px' });
 
 const CardTitle = styled(Typography)({
   fontSize: '18px',
@@ -246,9 +250,7 @@ const CardAuthor = styled('span')({
     backgroundColor: primaryColor,
     transition: 'width 0.3s ease',
   },
-  '&:hover::after': {
-    width: '100%',
-  }
+  '&:hover::after': { width: '100%' },
 });
 
 const NavButton = styled(IconButton)({
@@ -257,19 +259,12 @@ const NavButton = styled(IconButton)({
   transform: 'translateY(-50%)',
   backgroundColor: '#fff',
   boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-  '&:hover': {
-    backgroundColor: '#f5f5f5',
-  },
+  '&:hover': { backgroundColor: '#f5f5f5' },
   zIndex: 10,
 });
 
-const PrevButton = styled(NavButton)({
-  left: '0',
-});
-
-const NextButton = styled(NavButton)({
-  right: '0',
-});
+const PrevButton = styled(NavButton)({ left: '0' });
+const NextButton = styled(NavButton)({ right: '0' });
 
 const DotsContainer = styled(Box)({
   display: 'flex',
@@ -286,23 +281,15 @@ const Dot = styled(Box)(({ active }) => ({
   backgroundColor: active ? primaryColor : '#ddd',
   cursor: 'pointer',
   transition: 'all 0.3s ease',
-  '&:hover': {
-    backgroundColor: active ? primaryColor : '#ccc',
-  },
+  '&:hover': { backgroundColor: active ? primaryColor : '#ccc' },
 }));
 
-// Helper function to format date
 const formatDate = (dateString) => {
-  if (!dateString) return "";
+  if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
-// Helper function to strip HTML tags and get plain text
 const stripHtmlTags = (html) => {
   if (!html) return '';
   const tmp = document.createElement('DIV');
@@ -312,15 +299,12 @@ const stripHtmlTags = (html) => {
 
 const BlogDetail = () => {
   const location = useLocation();
-  const { title_id } = useParams(); // Changed from slug to title_id to match route param
+  const { title_id } = useParams();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Get post from state (when coming from card click)
   let post = location.state?.post;
 
-  // If no post in state (direct URL access), you might want to fetch it by ID
-  // For now, we'll use a placeholder or show error
   if (!post) {
     return (
       <BlogDetailSection>
@@ -333,39 +317,24 @@ const BlogDetail = () => {
     );
   }
 
-  // Parse content - split by paragraphs or use as is
   const contentParagraphs = post.content
     ? post.content.split('</p>').map(p => p.replace(/<[^>]*>/g, '')).filter(p => p.trim())
     : [post.excerpt || ''];
 
-  // For gallery, since we only have one image from API, we'll use the main image
   const galleryImages = post.imageUrl ? [post.imageUrl] : [];
-
-  // Get other posts for carousel - you might want to fetch these from API
-  // For now, we'll use empty array
   const otherPosts = [];
-
   const cardsPerView = 3;
   const totalSlides = Math.ceil(otherPosts.length / cardsPerView);
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
-  };
-
-  const handleDotClick = (index) => {
-    setCurrentIndex(index);
-  };
+  const handlePrev = () => setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
+  const handleNext = () => setCurrentIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
+  const handleDotClick = (index) => setCurrentIndex(index);
 
   const handleCardClick = (post) => {
     navigate(`/blog/${post.title_id}`, { state: { post } });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Get current cards to display
   const startIndex = currentIndex * cardsPerView;
   const visibleCards = otherPosts.slice(startIndex, startIndex + cardsPerView);
 
@@ -380,16 +349,31 @@ const BlogDetail = () => {
       />
       <BlogDetailSection>
         <Container>
-          <Grid justifyContent="center">
-            <Grid size={{ xs: 12, md: 10 }}>
+          <Grid container justifyContent="center">
+            <Grid size={{ lg: 12, md: 8 }}>
               <Box className="post-content">
+
                 {/* Blog Title */}
-                <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    mb: 3,
+                    fontWeight: 700,
+                    fontSize: { xs: '22px', sm: '26px', md: '32px' },
+                  }}
+                >
                   {post.title}
                 </Typography>
 
                 {/* Blog Meta Info */}
-                <Box sx={{ display: 'flex', gap: 2, mb: 4, color: '#999', flexWrap: 'wrap' }}>
+                <Box sx={{
+                  display: 'flex',
+                  gap: 2,
+                  mb: 4,
+                  color: '#999',
+                  flexWrap: 'wrap',
+                  fontSize: { xs: '13px', sm: '14px' },
+                }}>
                   <Typography>By {post.author || 'Admin'}</Typography>
                   <Typography>•</Typography>
                   <Typography>{formatDate(post.publishedAt || post.date)}</Typography>
@@ -397,7 +381,7 @@ const BlogDetail = () => {
                   <Typography>{post.category}</Typography>
                 </Box>
 
-                {/* Blog Content */}
+                {/* ── Blog Content FIRST ── */}
                 <Box className="col-md-12" sx={{ mb: 4 }}>
                   {contentParagraphs.map((paragraph, index) => (
                     <ContentText key={index} paragraph>
@@ -406,7 +390,7 @@ const BlogDetail = () => {
                   ))}
                 </Box>
 
-                {/* Gallery Section - Show single image */}
+                {/* ── Gallery / Image AFTER content ── */}
                 {galleryImages.length > 0 && (
                   <GalleryWrapper>
                     <Grid container spacing={3}>
@@ -416,11 +400,13 @@ const BlogDetail = () => {
                             <a href={image} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                               <Box className="gallery-box">
                                 <Box className="gallery-img">
-                                  <GalleryImage
-                                    src={image}
-                                    alt={`Gallery ${index + 1}`}
-                                    className="img-fluid"
-                                  />
+                                  <GalleryImageContainer>
+                                    <GalleryImage
+                                      src={image}
+                                      alt={`Gallery ${index + 1}`}
+                                      className="img-fluid"
+                                    />
+                                  </GalleryImageContainer>
                                 </Box>
                               </Box>
                             </a>
@@ -430,33 +416,28 @@ const BlogDetail = () => {
                     </Grid>
                   </GalleryWrapper>
                 )}
+
               </Box>
             </Grid>
           </Grid>
         </Container>
 
-        {/* Latest News Section with Carousel - Only show if there are other posts */}
+        {/* Latest News Carousel */}
         {otherPosts.length > 0 && (
           <LatestNewsSection>
             <Container maxWidth="lg">
-              {/* Section Header */}
               <Grid container justifyContent="center">
                 <Grid size={{ xs: 12, md: 8 }}>
                   <SectionHeaderWrapper>
                     <SectionIconWrapper>
                       <PetsIcon sx={{ color: '#fff', fontSize: 20 }} />
                     </SectionIconWrapper>
-                    <SectionSubtitle>
-                      Latest News
-                    </SectionSubtitle>
-                    <SectionTitle>
-                      Browse articles & news.
-                    </SectionTitle>
+                    <SectionSubtitle>Latest News</SectionSubtitle>
+                    <SectionTitle>Browse articles & news.</SectionTitle>
                   </SectionHeaderWrapper>
                 </Grid>
               </Grid>
 
-              {/* Carousel */}
               <CarouselContainer>
                 <Box sx={{ overflow: 'hidden' }}>
                   <CardsWrapper>
@@ -464,40 +445,27 @@ const BlogDetail = () => {
                       <CardWrapper key={post._id || post.id}>
                         <BlogCard onClick={() => handleCardClick(post)}>
                           <CardImageWrapper>
-                            <CardImage
-                              src={post.imageUrl || post.image}
-                              alt={post.title}
-                              className="blog-image"
-                            />
-                            <CardCategory className="blog-category">
-                              {post.category}
-                            </CardCategory>
+                            <CardImage src={post.imageUrl || post.image} alt={post.title} className="blog-image" />
+                            <CardCategory className="blog-category">{post.category}</CardCategory>
                           </CardImageWrapper>
                           <CardContent>
-                            <CardTitle>
-                              {post.title}
-                            </CardTitle>
+                            <CardTitle>{post.title}</CardTitle>
                             <CardDescription>
                               {post.excerpt || stripHtmlTags(post.content).substring(0, 100) + '...'}
                             </CardDescription>
                             <CardMeta>
-                              {/* Initially visible - only date */}
                               <CardDate className="date-only">
                                 {formatDate(post.publishedAt || post.date)}
                               </CardDate>
-
-                              {/* Shown on hover - full author info */}
                               <Box className="author-info" sx={{
                                 display: 'none',
                                 alignItems: 'center',
                                 gap: '4px',
                                 opacity: 0,
-                                transition: 'all 0.3s ease'
+                                transition: 'all 0.3s ease',
                               }}>
                                 <Typography sx={{ color: '#999', fontSize: '13px' }}>by</Typography>
-                                <CardAuthor>
-                                  {post.author || 'Admin'}
-                                </CardAuthor>
+                                <CardAuthor>{post.author || 'Admin'}</CardAuthor>
                               </Box>
                             </CardMeta>
                           </CardContent>
@@ -507,28 +475,18 @@ const BlogDetail = () => {
                   </CardsWrapper>
                 </Box>
 
-                {/* Navigation Buttons - Only show if there are multiple slides */}
                 {totalSlides > 1 && (
                   <>
-                    <PrevButton onClick={handlePrev}>
-                      <ChevronLeftIcon />
-                    </PrevButton>
-                    <NextButton onClick={handleNext}>
-                      <ChevronRightIcon />
-                    </NextButton>
+                    <PrevButton onClick={handlePrev}><ChevronLeftIcon /></PrevButton>
+                    <NextButton onClick={handleNext}><ChevronRightIcon /></NextButton>
                   </>
                 )}
               </CarouselContainer>
 
-              {/* Carousel Dots */}
               {totalSlides > 1 && (
                 <DotsContainer>
                   {Array.from({ length: totalSlides }).map((_, index) => (
-                    <Dot
-                      key={index}
-                      active={currentIndex === index}
-                      onClick={() => handleDotClick(index)}
-                    />
+                    <Dot key={index} active={currentIndex === index} onClick={() => handleDotClick(index)} />
                   ))}
                 </DotsContainer>
               )}

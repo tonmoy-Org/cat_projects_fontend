@@ -17,6 +17,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 import Tooltip from '@mui/material/Tooltip';
@@ -26,6 +28,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import logo from '../public/logo-1.png';
+import client_logo from '../public/High-quality logo of.png';
 import logo_single from '../public/logo-single.png';
 import { ExpandLess, ExpandMore, Menu as MenuIcon, MoreVert } from '@mui/icons-material';
 import DashboardFooter from './DashboardFooter';
@@ -38,22 +41,27 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { useCart } from '../context/CartContext';
 
 const drawerWidth = 240;
 const closedDrawerWidth = 68;
 const mobileDrawerWidth = 240;
 const primaryColor = '#5C4D91';
-const sidebarColor = '#43376A';
+const sidebarColorAdmin = '#43376A';
+const sidebarColorClient = '#FFFFFF';
+const textColorAdmin = '#FFFFFF';
+const textColorClient = '#43376A';
+const borderColorClient = '#E5E7EB';
 
-const openedMixin = (theme) => ({
+const openedMixin = (theme, isClient) => ({
   width: drawerWidth,
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: sidebarColor,
-  borderRight: `1px solid ${alpha('#000000', 0.12)}`,
+  backgroundColor: isClient ? sidebarColorClient : sidebarColorAdmin,
+  borderRight: `1px solid ${isClient ? borderColorClient : alpha('#000000', 0.12)}`,
   '&::-webkit-scrollbar': {
     display: 'none',
   },
@@ -61,15 +69,15 @@ const openedMixin = (theme) => ({
   scrollbarWidth: 'none',
 });
 
-const closedMixin = (theme) => ({
+const closedMixin = (theme, isClient) => ({
   width: closedDrawerWidth,
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: sidebarColor,
-  borderRight: `1px solid ${alpha('#000000', 0.12)}`,
+  backgroundColor: isClient ? sidebarColorClient : sidebarColorAdmin,
+  borderRight: `1px solid ${isClient ? borderColorClient : alpha('#000000', 0.12)}`,
   '&::-webkit-scrollbar': {
     display: 'none',
   },
@@ -84,7 +92,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 0.5),
   minHeight: 56,
   flexShrink: 0,
-  backgroundColor: sidebarColor,
 }));
 
 const AppBar = styled(MuiAppBar, {
@@ -110,19 +117,19 @@ const AppBar = styled(MuiAppBar, {
 
 // Permanent drawer for desktop
 const PermanentDrawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
+  ({ theme, open, isClient }) => ({
     width: drawerWidth,
     flexShrink: 0,
     whiteSpace: 'nowrap',
     boxSizing: 'border-box',
     ...(open
       ? {
-        ...openedMixin(theme),
-        '& .MuiDrawer-paper': openedMixin(theme),
+        ...openedMixin(theme, isClient),
+        '& .MuiDrawer-paper': openedMixin(theme, isClient),
       }
       : {
-        ...closedMixin(theme),
-        '& .MuiDrawer-paper': closedMixin(theme),
+        ...closedMixin(theme, isClient),
+        '& .MuiDrawer-paper': closedMixin(theme, isClient),
       }),
   })
 );
@@ -150,6 +157,15 @@ export default function DashboardLayout({ children, title, menuItems }) {
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width:600px)');
 
+  // Cart context
+  const { cartItems } = useCart();
+  const cartItemCount = cartItems?.reduce((total, item) => total + (item.quantity || 0), 0) || 0;
+
+  const isClient = user?.role === 'client';
+  const sidebarColor = isClient ? sidebarColorClient : sidebarColorAdmin;
+  const textColor = isClient ? textColorClient : textColorAdmin;
+  const borderColor = isClient ? borderColorClient : alpha('#000000', 0.12);
+
   const [open, setOpen] = React.useState(!isMobile);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [drawerAnchorEl, setDrawerAnchorEl] = React.useState(null);
@@ -157,7 +173,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
   const [tabValue, setTabValue] = React.useState(0);
   const [expandedItems, setExpandedItems] = React.useState({});
 
-  // Light theme only with primary color #5C4D91
+  // Light theme with primary color #5C4D91
   const theme = React.useMemo(
     () =>
       createTheme({
@@ -215,17 +231,17 @@ export default function DashboardLayout({ children, title, menuItems }) {
     if (currentPath === path) return true;
 
     // For nested routes
-    if (path !== '/superadmin-dashboard' && path !== '/member-dashboard' && path !== '/client-dashboard' && currentPath.startsWith(path + '/')) {
+    if (path !== '/superadmin-dashboard' && path !== '/client-dashboard' && currentPath.startsWith(path + '/')) {
       return true;
     }
 
     // Special handling for dashboard root
-    if (path === '/member-dashboard' && currentPath === '/member-dashboard' && path !== '/client-dashboard') {
+    if (path === '/client-dashboard' && currentPath === '/client-dashboard') {
       return true;
     }
 
     // For paths that are direct parent of current path
-    if (path !== '/superadmin-dashboard' && path !== '/member-dashboard' && path !== '/client-dashboard' && currentPath === path) {
+    if (path !== '/superadmin-dashboard' && path !== '/client-dashboard' && currentPath === path) {
       return true;
     }
 
@@ -235,17 +251,76 @@ export default function DashboardLayout({ children, title, menuItems }) {
   const getActiveStyles = (path) => {
     const isActive = isRouteActive(path);
 
-    if (isActive) {
+    if (isClient) {
+      if (isActive) {
+        return {
+          color: textColor,
+          backgroundColor: alpha(primaryColor, 0.15),
+          borderLeft: `3px solid ${primaryColor}`,
+          '& .MuiListItemIcon-root': {
+            color: primaryColor,
+          },
+          '&:hover': {
+            backgroundColor: alpha(primaryColor, 0.2),
+            color: textColor,
+          },
+          borderRadius: '0 6px 6px 0',
+          transition: 'all 0.15s ease',
+          mx: 0.5,
+          my: 0.25,
+        };
+      }
+
       return {
-        color: '#FFFFFF',
-        backgroundColor: alpha('#FFFFFF', 0.15),
-        borderLeft: `3px solid #FFFFFF`,
+        color: alpha(textColor, 0.7),
+        backgroundColor: 'transparent',
         '& .MuiListItemIcon-root': {
-          color: '#FFFFFF',
+          color: alpha(textColor, 0.5),
         },
         '&:hover': {
-          backgroundColor: alpha('#FFFFFF', 0.2),
-          color: '#FFFFFF',
+          backgroundColor: alpha(textColor, 0.05),
+          color: textColor,
+          '& .MuiListItemIcon-root': {
+            color: textColor,
+          },
+        },
+        borderRadius: '0 6px 6px 0',
+        transition: 'all 0.15s ease',
+        mx: 0.5,
+        my: 0.25,
+      };
+    } else {
+      if (isActive) {
+        return {
+          color: textColor,
+          backgroundColor: alpha(textColor, 0.15),
+          borderLeft: `3px solid ${textColor}`,
+          '& .MuiListItemIcon-root': {
+            color: textColor,
+          },
+          '&:hover': {
+            backgroundColor: alpha(textColor, 0.2),
+            color: textColor,
+          },
+          borderRadius: '0 6px 6px 0',
+          transition: 'all 0.15s ease',
+          mx: 0.5,
+          my: 0.25,
+        };
+      }
+
+      return {
+        color: alpha(textColor, 0.9),
+        backgroundColor: 'transparent',
+        '& .MuiListItemIcon-root': {
+          color: alpha(textColor, 0.7),
+        },
+        '&:hover': {
+          backgroundColor: alpha(textColor, 0.08),
+          color: textColor,
+          '& .MuiListItemIcon-root': {
+            color: textColor,
+          },
         },
         borderRadius: '0 6px 6px 0',
         transition: 'all 0.15s ease',
@@ -253,41 +328,81 @@ export default function DashboardLayout({ children, title, menuItems }) {
         my: 0.25,
       };
     }
-
-    return {
-      color: alpha('#FFFFFF', 0.9),
-      backgroundColor: 'transparent',
-      '& .MuiListItemIcon-root': {
-        color: alpha('#FFFFFF', 0.7),
-      },
-      '&:hover': {
-        backgroundColor: alpha('#FFFFFF', 0.08),
-        color: '#FFFFFF',
-        '& .MuiListItemIcon-root': {
-          color: '#FFFFFF',
-        },
-      },
-      borderRadius: '0 6px 6px 0',
-      transition: 'all 0.15s ease',
-      mx: 0.5,
-      my: 0.25,
-    };
   };
 
   const getSubItemActiveStyles = (path) => {
     const isActive = isRouteActive(path);
 
-    if (isActive) {
+    if (isClient) {
+      if (isActive) {
+        return {
+          color: textColor,
+          backgroundColor: alpha(primaryColor, 0.15),
+          borderLeft: `2px solid ${primaryColor}`,
+          '& .MuiListItemIcon-root': {
+            color: primaryColor,
+          },
+          '&:hover': {
+            backgroundColor: alpha(primaryColor, 0.2),
+            color: textColor,
+          },
+          borderRadius: '0 6px 6px 0',
+          transition: 'all 0.15s ease',
+          mx: 0,
+          my: 0.1,
+        };
+      }
+
       return {
-        color: '#FFFFFF',
-        backgroundColor: alpha('#FFFFFF', 0.15),
-        borderLeft: `2px solid #FFFFFF`,
+        color: alpha(textColor, 0.7),
+        backgroundColor: 'transparent',
         '& .MuiListItemIcon-root': {
-          color: '#FFFFFF',
+          color: alpha(textColor, 0.5),
         },
         '&:hover': {
-          backgroundColor: alpha('#FFFFFF', 0.2),
-          color: '#FFFFFF',
+          backgroundColor: alpha(textColor, 0.05),
+          color: textColor,
+          '& .MuiListItemIcon-root': {
+            color: textColor,
+          },
+        },
+        borderRadius: '0 6px 6px 0',
+        transition: 'all 0.15s ease',
+        mx: 0,
+        my: 0.1,
+      };
+    } else {
+      if (isActive) {
+        return {
+          color: textColor,
+          backgroundColor: alpha(textColor, 0.15),
+          borderLeft: `2px solid ${textColor}`,
+          '& .MuiListItemIcon-root': {
+            color: textColor,
+          },
+          '&:hover': {
+            backgroundColor: alpha(textColor, 0.2),
+            color: textColor,
+          },
+          borderRadius: '0 6px 6px 0',
+          transition: 'all 0.15s ease',
+          mx: 0,
+          my: 0.1,
+        };
+      }
+
+      return {
+        color: alpha(textColor, 0.9),
+        backgroundColor: 'transparent',
+        '& .MuiListItemIcon-root': {
+          color: alpha(textColor, 0.7),
+        },
+        '&:hover': {
+          backgroundColor: alpha(textColor, 0.08),
+          color: textColor,
+          '& .MuiListItemIcon-root': {
+            color: textColor,
+          },
         },
         borderRadius: '0 6px 6px 0',
         transition: 'all 0.15s ease',
@@ -295,25 +410,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
         my: 0.1,
       };
     }
-
-    return {
-      color: alpha('#FFFFFF', 0.9),
-      backgroundColor: 'transparent',
-      '& .MuiListItemIcon-root': {
-        color: alpha('#FFFFFF', 0.7),
-      },
-      '&:hover': {
-        backgroundColor: alpha('#FFFFFF', 0.08),
-        color: '#FFFFFF',
-        '& .MuiListItemIcon-root': {
-          color: '#FFFFFF',
-        },
-      },
-      borderRadius: '0 6px 6px 0',
-      transition: 'all 0.15s ease',
-      mx: 0,
-      my: 0.1,
-    };
   };
 
   const getDialogTabActiveStyles = (isActive) => {
@@ -393,14 +489,11 @@ export default function DashboardLayout({ children, title, menuItems }) {
   };
 
   const handleItemClick = (item) => {
-    // If item has subItems and is expandable, toggle expansion
     if (item.subItems && item.subItems.length > 0 && open) {
       toggleExpand(item.text);
     } else if (item.path) {
-      // If it's a regular item with a path, navigate
       handleNavigation(item.path);
     } else if (item.onClick) {
-      // If it has a custom onClick handler
       item.onClick();
     }
   };
@@ -411,7 +504,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
 
     return (
       <Box sx={{ py: 0.5, minWidth: 180 }}>
-        {/* Main item with clickable link */}
         <Box
           sx={{
             display: 'flex',
@@ -421,8 +513,9 @@ export default function DashboardLayout({ children, title, menuItems }) {
             cursor: 'pointer',
             p: 0.75,
             borderRadius: 1,
+            backgroundColor: isClient ? alpha(textColor, 0.05) : alpha(textColor, 0.1),
             '&:hover': {
-              backgroundColor: alpha('#FFFFFF', 0.1),
+              backgroundColor: isClient ? alpha(textColor, 0.1) : alpha(textColor, 0.15),
             }
           }}
           onClick={() => {
@@ -433,21 +526,20 @@ export default function DashboardLayout({ children, title, menuItems }) {
             }
           }}
         >
-          <Box sx={{ color: '#FFFFFF' }}>
+          <Box sx={{ color: textColor }}>
             {React.cloneElement(item.icon, { sx: { fontSize: 16 } })}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#FFFFFF', lineHeight: 1.2 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: textColor, lineHeight: 1.2 }}>
               {item.text}
             </Typography>
           </Box>
         </Box>
 
-        {/* Sub items if they exist */}
         {hasSubItems && (
           <Box sx={{
             mt: 0.5,
-            borderTop: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+            borderTop: `1px solid ${alpha(textColor, 0.2)}`,
             pt: 0.5
           }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -462,8 +554,9 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     py: 0.5,
                     borderRadius: 1,
                     cursor: 'pointer',
+                    backgroundColor: isClient ? alpha(textColor, 0.02) : alpha(textColor, 0.05),
                     '&:hover': {
-                      backgroundColor: alpha('#FFFFFF', 0.1),
+                      backgroundColor: isClient ? alpha(textColor, 0.08) : alpha(textColor, 0.1),
                     }
                   }}
                   onClick={() => {
@@ -475,12 +568,12 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   }}
                 >
                   {subItem.icon && (
-                    <Box sx={{ color: alpha('#FFFFFF', 0.7) }}>
+                    <Box sx={{ color: alpha(textColor, 0.7) }}>
                       {React.cloneElement(subItem.icon, { sx: { fontSize: 14 } })}
                     </Box>
                   )}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#FFFFFF', lineHeight: 1.2, fontWeight: 500 }}>
+                    <Typography sx={{ fontSize: '0.75rem', color: textColor, lineHeight: 1.2, fontWeight: 500 }}>
                       {subItem.text}
                     </Typography>
                   </Box>
@@ -492,11 +585,11 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     px: 0.75,
                     py: 0.25,
                     borderRadius: 1,
-                    backgroundColor: alpha('#FFFFFF', 0.15),
+                    backgroundColor: alpha(textColor, 0.1),
                     textAlign: 'center',
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.7rem', color: '#FFFFFF', lineHeight: 1.2 }}>
+                  <Typography sx={{ fontSize: '0.7rem', color: textColor, lineHeight: 1.2 }}>
                     +{item.subItems.length - 5} more
                   </Typography>
                 </Box>
@@ -514,7 +607,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        color: '#FFFFFF',
+        color: textColor,
         backgroundColor: sidebarColor,
         '& .MuiListItemIcon-root': {
           color: 'inherit',
@@ -523,11 +616,11 @@ export default function DashboardLayout({ children, title, menuItems }) {
           color: 'inherit',
         },
         '& .MuiDivider-root': {
-          borderColor: alpha('#FFFFFF', 0.12),
+          borderColor: isClient ? borderColorClient : alpha(textColor, 0.12),
         },
       }}
     >
-      <DrawerHeader>
+      <DrawerHeader sx={{ backgroundColor: sidebarColor }}>
         <Box
           sx={{
             display: 'flex',
@@ -541,24 +634,26 @@ export default function DashboardLayout({ children, title, menuItems }) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box
                 component="img"
-                src={logo}
-                alt="FatherOfMeow Logo"
+                src={isClient ? client_logo : logo}
+                alt="Logo"
                 sx={{
                   height: { xs: 40, sm: 75 },
                   width: { xs: 100, sm: 155 },
                   display: "block",
+                  objectFit: 'contain',
                 }}
               />
             </Box>
           ) : (
             <Box
               component="img"
-              src={logo_single}
-              alt="FatherOfMeow Logo"
+              src={isClient ? client_logo : logo_single}
+              alt="Logo"
               sx={{
                 height: { xs: 40, sm: 60 },
                 width: { xs: 100, sm: 150 },
                 display: "block",
+                objectFit: 'contain',
               }}
             />
           )}
@@ -568,7 +663,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
       <ScrollableBox sx={{ py: 0.5, my: 0.5 }}>
         {menuItems?.map((section, sectionIndex) => (
           <React.Fragment key={sectionIndex}>
-            {/* Section Header - Only show when drawer is open */}
             {open && section.sectionName && (
               <Box
                 sx={{
@@ -580,7 +674,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: alpha('#FFFFFF', 0.5),
+                    color: isClient ? alpha(textColor, 0.5) : alpha(textColor, 0.5),
                     fontSize: '0.65rem',
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -593,7 +687,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
               </Box>
             )}
 
-            {/* Section Items */}
             <List sx={{ py: 0.25 }}>
               {section.items.map((item) => {
                 const hasSubItems = item.subItems && item.subItems.length > 0;
@@ -632,8 +725,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                         sx: {
                           fontSize: 16,
                           color: isRouteActive(item.path)
-                            ? '#FFFFFF'
-                            : alpha('#FFFFFF', 0.7),
+                            ? (isClient ? primaryColor : textColor)
+                            : (isClient ? alpha(textColor, 0.5) : alpha(textColor, 0.7)),
                         },
                       })}
                     </ListItemIcon>
@@ -671,7 +764,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   </ListItemButton>
                 );
 
-                // Wrap in tooltip for collapsed state
                 const wrappedButton = open ? (
                   mainButton
                 ) : (
@@ -690,8 +782,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                           fontSize: '0.7rem',
                           padding: '8px',
                           borderRadius: '8px',
-                          color: '#FFFFFF',
-                          border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+                          color: textColor,
+                          border: `1px solid ${borderColor}`,
                           maxWidth: 240,
                           cursor: 'default',
                         },
@@ -700,7 +792,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                         sx: {
                           color: sidebarColor,
                           '&:before': {
-                            border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+                            border: `1px solid ${borderColor}`,
                           },
                         },
                       },
@@ -733,7 +825,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
                       {wrappedButton}
                     </ListItem>
 
-                    {/* Sub-items in expanded drawer */}
                     {hasSubItems && isExpanded && open && (
                       <Box
                         sx={{
@@ -780,13 +871,16 @@ export default function DashboardLayout({ children, title, menuItems }) {
                                   <ListItemIcon
                                     sx={{
                                       minWidth: 26,
-                                      color: '#FFFFFF',
-                                      opacity: 0.8,
+                                      color: isClient ? alpha(textColor, 0.7) : textColor,
+                                      opacity: isClient ? 0.8 : 1,
                                       mt: 0.25,
                                     }}
                                   >
                                     {React.cloneElement(subItem.icon, {
-                                      sx: { fontSize: 14, color: '#FFFFFF' },
+                                      sx: {
+                                        fontSize: 14,
+                                        color: isClient ? textColor : textColor,
+                                      },
                                     })}
                                   </ListItemIcon>
                                 )}
@@ -823,11 +917,10 @@ export default function DashboardLayout({ children, title, menuItems }) {
         sx={{
           p: 1,
           flexShrink: 0,
-          borderTop: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+          borderTop: `1px solid ${borderColor}`,
         }}
       >
         {open ? (
-          // Expanded view with user info and menu
           <Box>
             <Box
               sx={{
@@ -843,8 +936,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   sx={{
                     width: 26,
                     height: 26,
-                    bgcolor: alpha('#FFFFFF', 0.2),
-                    color: '#FFFFFF',
+                    bgcolor: isClient ? alpha(primaryColor, 0.15) : alpha(textColor, 0.2),
+                    color: isClient ? primaryColor : textColor,
                     fontWeight: 600,
                     fontSize: '0.75rem',
                   }}
@@ -856,7 +949,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     sx={{
                       fontSize: '0.75rem',
                       fontWeight: 600,
-                      color: '#FFFFFF',
+                      color: textColor,
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -867,7 +960,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   <Typography
                     sx={{
                       fontSize: '0.65rem',
-                      color: alpha('#FFFFFF', 0.7),
+                      color: isClient ? alpha(textColor, 0.6) : alpha(textColor, 0.7),
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -881,12 +974,12 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 size="small"
                 onClick={handleDrawerMenuClick}
                 sx={{
-                  color: alpha('#FFFFFF', 0.7),
+                  color: isClient ? alpha(textColor, 0.5) : alpha(textColor, 0.7),
                   width: 26,
                   height: 26,
                   '&:hover': {
-                    backgroundColor: alpha('#FFFFFF', 0.1),
-                    color: '#FFFFFF',
+                    backgroundColor: isClient ? alpha(textColor, 0.1) : alpha(textColor, 0.1),
+                    color: textColor,
                   },
                 }}
               >
@@ -910,20 +1003,20 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   mt: 1,
                   ml: -1,
                   minWidth: 150,
-                  backgroundColor: sidebarColor,
-                  color: '#FFFFFF',
-                  border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+                  backgroundColor: isClient ? sidebarColorClient : sidebarColorAdmin,
+                  color: textColor,
+                  border: `1px solid ${borderColor}`,
                   '& .MuiMenuItem-root': {
                     fontSize: '0.75rem',
                     py: 0.5,
                     minHeight: 32,
-                    color: '#FFFFFF',
+                    color: textColor,
                     '&:hover': {
-                      backgroundColor: alpha('#FFFFFF', 0.1),
+                      backgroundColor: isClient ? alpha(textColor, 0.05) : alpha(textColor, 0.1),
                     },
                     '& .MuiSvgIcon-root': {
                       fontSize: 16,
-                      color: alpha('#FFFFFF', 0.7),
+                      color: isClient ? alpha(textColor, 0.5) : alpha(textColor, 0.7),
                       mr: 1,
                     },
                   },
@@ -938,7 +1031,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 <SettingsIcon />
                 Settings
               </MenuItem>
-              <Divider sx={{ borderColor: alpha('#FFFFFF', 0.12), my: 0.5 }} />
+              <Divider sx={{ borderColor: borderColor, my: 0.5 }} />
               <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
                 <LogoutIcon />
                 Logout
@@ -946,15 +1039,14 @@ export default function DashboardLayout({ children, title, menuItems }) {
             </Menu>
           </Box>
         ) : (
-          // Collapsed view - only avatar with menu
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Tooltip
               title={
                 <Box sx={{ py: 0.5, minWidth: 150 }}>
-                  <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: '#FFFFFF', mb: 0.25, lineHeight: 1.2 }}>
+                  <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', color: textColor, mb: 0.25, lineHeight: 1.2 }}>
                     {user?.name || 'User'}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.7rem', color: alpha('#FFFFFF', 0.7), lineHeight: 1.2 }}>
+                  <Typography sx={{ fontSize: '0.7rem', color: isClient ? alpha(textColor, 0.6) : alpha(textColor, 0.7), lineHeight: 1.2 }}>
                     {user?.email || user?.role || 'User'}
                   </Typography>
                 </Box>
@@ -970,8 +1062,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                     fontSize: '0.7rem',
                     padding: '6px 8px',
                     borderRadius: '6px',
-                    color: '#FFFFFF',
-                    border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+                    color: textColor,
+                    border: `1px solid ${borderColor}`,
                     boxShadow: 3,
                   },
                 },
@@ -979,7 +1071,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   sx: {
                     color: sidebarColor,
                     '&:before': {
-                      border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+                      border: `1px solid ${borderColor}`,
                     },
                   },
                 },
@@ -992,7 +1084,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   height: 36,
                   p: 0,
                   '&:hover': {
-                    backgroundColor: alpha('#FFFFFF', 0.1),
+                    backgroundColor: isClient ? alpha(textColor, 0.05) : alpha(textColor, 0.1),
                   },
                 }}
               >
@@ -1000,8 +1092,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   sx={{
                     width: 30,
                     height: 30,
-                    bgcolor: alpha('#FFFFFF', 0.2),
-                    color: '#FFFFFF',
+                    bgcolor: isClient ? alpha(primaryColor, 0.15) : alpha(textColor, 0.2),
+                    color: isClient ? primaryColor : textColor,
                     fontWeight: 600,
                     fontSize: '0.75rem',
                   }}
@@ -1027,31 +1119,31 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   mt: 0,
                   ml: 1,
                   minWidth: 150,
-                  backgroundColor: sidebarColor,
-                  color: '#FFFFFF',
-                  border: `1px solid ${alpha('#FFFFFF', 0.12)}`,
+                  backgroundColor: isClient ? sidebarColorClient : sidebarColorAdmin,
+                  color: textColor,
+                  border: `1px solid ${borderColor}`,
                   '& .MuiMenuItem-root': {
                     fontSize: '0.75rem',
                     py: 0.5,
                     minHeight: 32,
-                    color: '#FFFFFF',
+                    color: textColor,
                     '&:hover': {
-                      backgroundColor: alpha('#FFFFFF', 0.1),
+                      backgroundColor: isClient ? alpha(textColor, 0.05) : alpha(textColor, 0.1),
                     },
                     '& .MuiSvgIcon-root': {
                       fontSize: 16,
-                      color: alpha('#FFFFFF', 0.7),
+                      color: isClient ? alpha(textColor, 0.5) : alpha(textColor, 0.7),
                       mr: 1,
                     },
                   },
                 },
               }}
             >
-              <Box sx={{ px: 1, py: 0.75, borderBottom: `1px solid ${alpha('#FFFFFF', 0.12)}` }}>
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.2 }}>
+              <Box sx={{ px: 1, py: 0.75, borderBottom: `1px solid ${borderColor}` }}>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: textColor, lineHeight: 1.2 }}>
                   {user?.name || 'User'}
                 </Typography>
-                <Typography sx={{ fontSize: '0.65rem', color: alpha('#FFFFFF', 0.7), lineHeight: 1.2 }}>
+                <Typography sx={{ fontSize: '0.65rem', color: isClient ? alpha(textColor, 0.6) : alpha(textColor, 0.7), lineHeight: 1.2 }}>
                   {user?.email || user?.role || 'User'}
                 </Typography>
               </Box>
@@ -1063,7 +1155,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 <SettingsIcon />
                 Settings
               </MenuItem>
-              <Divider sx={{ borderColor: alpha('#FFFFFF', 0.12), my: 0.5 }} />
+              <Divider sx={{ borderColor: borderColor, my: 0.5 }} />
               <MenuItem onClick={handleLogout} sx={{ color: '#ff6b6b' }}>
                 <LogoutIcon />
                 Logout
@@ -1206,7 +1298,43 @@ export default function DashboardLayout({ children, title, menuItems }) {
               </Typography>
             </Box>
 
+            {/* Right side: Cart + User */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+
+              {/* Cart Icon with Badge */}
+              <IconButton
+                onClick={() => navigate('/cart')}
+                size="small"
+                sx={{
+                  color: theme.palette.text.secondary,
+                  '&:hover': {
+                    backgroundColor: alpha(primaryColor, 0.08),
+                    color: primaryColor,
+                  },
+                  width: 34,
+                  height: 34,
+                }}
+              >
+                <Badge
+                  badgeContent={cartItemCount}
+                  sx={{
+                    '& .MuiBadge-badge': {
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      minWidth: '18px',
+                      height: '18px',
+                      borderRadius: '9px',
+                      backgroundColor: primaryColor,
+                      color: '#fff',
+                      boxShadow: `0 2px 4px ${alpha(primaryColor, 0.3)}`,
+                    },
+                  }}
+                >
+                  <ShoppingCartIcon sx={{ fontSize: 20 }} />
+                </Badge>
+              </IconButton>
+
+              {/* User Chip - Desktop */}
               <Chip
                 avatar={
                   <Avatar
@@ -1244,6 +1372,8 @@ export default function DashboardLayout({ children, title, menuItems }) {
                   display: { xs: 'none', sm: 'flex' },
                 }}
               />
+
+              {/* User Avatar - Mobile */}
               <IconButton
                 size="small"
                 onClick={handleMenuClick}
@@ -1334,7 +1464,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
               '& .MuiDrawer-paper': {
                 width: mobileDrawerWidth,
                 backgroundColor: sidebarColor,
-                borderRight: `1px solid ${alpha('#000000', 0.12)}`,
+                borderRight: `1px solid ${borderColor}`,
                 '&::-webkit-scrollbar': {
                   display: 'none',
                 },
@@ -1346,7 +1476,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
             {renderDrawerContent()}
           </MuiDrawer>
         ) : (
-          <PermanentDrawer variant="permanent" open={open}>
+          <PermanentDrawer variant="permanent" open={open} isClient={isClient}>
             {renderDrawerContent()}
           </PermanentDrawer>
         )}
@@ -1364,7 +1494,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
             overflow: 'hidden',
           }}
         >
-          <DrawerHeader />
+          <DrawerHeader sx={{ backgroundColor: sidebarColor }} />
 
           <Box
             sx={{
@@ -1388,7 +1518,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 overflow: 'hidden',
               }}
             >
-              {/* Scrollable content area with minimal scrollbar */}
               <Box
                 sx={{
                   flex: 1,
@@ -1410,7 +1539,6 @@ export default function DashboardLayout({ children, title, menuItems }) {
                       background: theme.palette.action.disabledBackground,
                     },
                   },
-                  // For Firefox
                   scrollbarWidth: 'thin',
                   scrollbarColor: `${theme.palette.action.disabled} ${alpha(theme.palette.background.default, 0.5)}`,
                 }}

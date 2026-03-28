@@ -105,7 +105,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)({
   '& .MuiToggleButton-root': {
     border: '1px solid #e0d9f5',
     borderRadius: '30px !important',
-    padding: '5px 16px',
+    paddingTop: { xs: '5px 5px', sm: '5px 16px', },
     fontSize: '13px',
     fontWeight: 500,
     color: '#555',
@@ -632,7 +632,7 @@ const Cat = () => {
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '16px', width: '100%', alignItems: 'center' }}>
 
               {/* Gender */}
-              <Box sx={{ display: 'flex', paddingTop: '40px', alignItems: 'center', gap: '10px' }}>
+              <Box sx={{ display: 'flex', paddingTop: { xs: '13px', sm: '40px' }, alignItems: 'center', gap: '10px' }}>
                 <FilterLabel>Gender</FilterLabel>
                 <StyledToggleButtonGroup
                   value={gender}
@@ -651,7 +651,7 @@ const Cat = () => {
               </Box>
 
               {/* Stock */}
-              <Box sx={{ display: 'flex', paddingTop: '40px', alignItems: 'center', gap: '10px' }}>
+              <Box sx={{ display: 'flex', paddingTop: { xs: '13px', sm: '40px' }, alignItems: 'center', gap: '10px' }}>
                 <FilterLabel>Stock</FilterLabel>
                 <StyledToggleButtonGroup
                   value={stock}
@@ -784,7 +784,7 @@ const Cat = () => {
             <>
               <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
                 {paginatedCats.map((cat) => (
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={cat._id}>
+                  <Grid size={{ xs: 6, sm: 6, md: 3 }} key={cat._id}>
                     <CatCard cat={cat} onAddToCart={handleAddToCart} />
                   </Grid>
                 ))}

@@ -295,7 +295,7 @@ export default function BlogManagement() {
       {/* Header */}
       <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, gap: 2, mb: 3 }}>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: TEXT_PRIMARY }}>Blog Management</Typography>
+          <Typography sx={{ fontWeight: 600, color: TEXT_PRIMARY, fontSize: '1rem' }}>Blog Management</Typography>
           <Typography variant="body2" sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}>Manage your pet blog posts</Typography>
         </Box>
         <GradientButton variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenModal("create")} size="small">

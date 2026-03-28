@@ -18,8 +18,8 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "../../../api/axios";
-import SectionTile from "../../../components/SectionTile";
+import axiosInstance from "../../api/axios";
+import SectionTile from "../../components/SectionTile";
 
 const PRIMARY_COLOR = "#5C4D91";
 const PRIMARY_DARK = "#4A3D75";

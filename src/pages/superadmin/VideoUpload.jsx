@@ -396,7 +396,7 @@ export default function VideoUpload() {
         }}
       >
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: TEXT_PRIMARY }}>
+          <Typography sx={{ fontWeight: 600, color: TEXT_PRIMARY, fontSize: '1rem' }}>
             Video Management
           </Typography>
           <Typography variant="body2" sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}>

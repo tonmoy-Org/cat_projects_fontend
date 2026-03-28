@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     Box, Typography, styled, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, Chip, IconButton,
+    TableContainer, TableHead, TableRow, IconButton,
     Dialog, DialogTitle, DialogContent, DialogActions,
     TablePagination, alpha, CircularProgress, Select, MenuItem,
     FormControl, TextField, InputAdornment, Tooltip, Divider, Paper,
@@ -15,14 +15,9 @@ import {
     Delete as DeleteIcon,
     Close as CloseIcon,
     ShoppingBag as OrderIcon,
-    FilterList as FilterIcon,
     Refresh as RefreshIcon,
-    LocationOn as LocationIcon,
-    Person as PersonIcon,
     Receipt as ReceiptIcon,
-    LocalShipping as ShippingIcon,
     CheckCircle as CheckIcon,
-    Cancel as CancelIcon,
     HourglassEmpty as PendingIcon,
 } from '@mui/icons-material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -170,6 +165,18 @@ const OutlineBtn = styled(Button)({
     '&:hover': { borderColor: PRIMARY, color: PRIMARY, backgroundColor: 'transparent' },
 });
 
+const DangerBtn = styled(Button)({
+    backgroundColor: '#b91c1c',
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 600,
+    textTransform: 'none',
+    borderRadius: 8,
+    padding: '7px 20px',
+    '&:hover': { backgroundColor: '#991b1b' },
+    '&.Mui-disabled': { backgroundColor: alpha('#b91c1c', 0.4), color: '#fff' },
+});
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function OrderManagement() {
     const queryClient = useQueryClient();
@@ -241,14 +248,19 @@ export default function OrderManagement() {
 
     // ── Delete order mutation ─────────────────────────────────────────────────
     const deleteMutation = useMutation({
-        mutationFn: async (orderId) => {
-            const res = await axiosInstance.delete(`/orders/${orderId}`);
+        mutationFn: async (id) => {
+            // Use MongoDB _id for the DELETE route, not the human-readable orderId
+            const res = await axiosInstance.delete(`/orders/${id}`);
             return res.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
             addAlert('success', 'Order deleted successfully!');
             setDeleteTarget(null);
+            // Page boundary fix: step back if current page becomes empty
+            if ((filtered.length - 1) % rowsPerPage === 0 && page > 0) {
+                setPage(page - 1);
+            }
         },
         onError: (err) => {
             addAlert('error', err.response?.data?.message || 'Failed to delete order.');
@@ -279,7 +291,7 @@ export default function OrderManagement() {
             {/* ── Header ──────────────────────────────────────────────────── */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
                 <Box>
-                    <Typography sx={{ fontSize: 18, fontWeight: 700, color: TEXT }}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: TEXT }}>
                         Order Management
                     </Typography>
                     <Typography sx={{ fontSize: 13, color: GRAY, mt: 0.3 }}>
@@ -430,8 +442,9 @@ export default function OrderManagement() {
                             paginated.map((order) => {
                                 const ps = PAYMENT_STATUS[order.paymentStatus] || PAYMENT_STATUS.pending;
                                 const os = ORDER_STATUS[order.orderStatus] || ORDER_STATUS.pending;
+                                const isDeleting = deleteMutation.isPending && deleteTarget?._id === order._id;
                                 return (
-                                    <StyledTableRow key={order._id}>
+                                    <StyledTableRow key={order._id} sx={{ opacity: isDeleting ? 0.5 : 1 }}>
                                         {/* Order ID */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <Typography sx={{ fontSize: 12, fontWeight: 700, color: PRIMARY }}>
@@ -500,8 +513,15 @@ export default function OrderManagement() {
                                                 </ActionIconBtn>
                                             </Tooltip>
                                             <Tooltip title="Delete Order">
-                                                <ActionIconBtn btncolor="#b91c1c" onClick={() => setDeleteTarget(order)}>
-                                                    <DeleteIcon sx={{ fontSize: 17 }} />
+                                                <ActionIconBtn
+                                                    btncolor="#b91c1c"
+                                                    onClick={() => setDeleteTarget(order)}
+                                                    disabled={isDeleting}
+                                                >
+                                                    {isDeleting
+                                                        ? <CircularProgress size={14} sx={{ color: '#b91c1c' }} />
+                                                        : <DeleteIcon sx={{ fontSize: 17 }} />
+                                                    }
                                                 </ActionIconBtn>
                                             </Tooltip>
                                         </TableCell>
@@ -642,7 +662,16 @@ export default function OrderManagement() {
                         );
                     })()}
                 </DialogContent>
-                <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${BORDER}` }}>
+                <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${BORDER}`, gap: 1 }}>
+                    <DangerBtn
+                        onClick={() => {
+                            const target = viewOrder;
+                            setViewOrder(null);
+                            setDeleteTarget(target);
+                        }}
+                    >
+                        Delete Order
+                    </DangerBtn>
                     <PrimaryBtn onClick={() => { setViewOrder(null); openEdit(viewOrder); }}>
                         Update Status
                     </PrimaryBtn>
@@ -714,38 +743,57 @@ export default function OrderManagement() {
                 fullWidth
                 PaperProps={{ sx: { borderRadius: 2, border: `1px solid ${BORDER}` } }}
             >
-                <DialogTitle sx={{ fontSize: 15, fontWeight: 700, color: TEXT, py: 2, px: 3 }}>
-                    Delete Order
+                <DialogTitle sx={{
+                    display: 'flex', justifyContent: 'space-between',
+                    alignItems: 'center', py: 2, px: 3,
+                }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{
+                            width: 32, height: 32, borderRadius: '8px',
+                            backgroundColor: alpha('#b91c1c', 0.1),
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <DeleteIcon sx={{ fontSize: 17, color: '#b91c1c' }} />
+                        </Box>
+                        <Typography sx={{ fontSize: 15, fontWeight: 700, color: TEXT }}>
+                            Delete Order
+                        </Typography>
+                    </Box>
+                    <IconButton
+                        size="small"
+                        onClick={() => !deleteMutation.isPending && setDeleteTarget(null)}
+                        sx={{ color: GRAY }}
+                        disabled={deleteMutation.isPending}
+                    >
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
                 </DialogTitle>
                 <Divider />
-                <DialogContent sx={{ px: 3, py: 2 }}>
-                    <Typography sx={{ fontSize: 13, color: TEXT, lineHeight: 1.7 }}>
+                <DialogContent sx={{ px: 3, py: 2.5 }}>
+                    <Typography sx={{ fontSize: 13, color: TEXT, lineHeight: 1.8 }}>
                         Are you sure you want to delete order{' '}
                         <strong style={{ color: PRIMARY }}>{deleteTarget?.orderId}</strong>?
-                        This action cannot be undone.
+                    </Typography>
+                    <Typography sx={{ fontSize: 12, color: GRAY, mt: 0.5 }}>
+                        This action is permanent and cannot be undone.
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${BORDER}`, gap: 1 }}>
-                    <OutlineBtn onClick={() => setDeleteTarget(null)} disabled={deleteMutation.isPending}>
+                    <OutlineBtn
+                        onClick={() => setDeleteTarget(null)}
+                        disabled={deleteMutation.isPending}
+                    >
                         Cancel
                     </OutlineBtn>
-                    <Button
-                        variant="contained"
-                        size="small"
-                        sx={{
-                            backgroundColor: '#b91c1c', color: '#fff', fontSize: 13,
-                            textTransform: 'none', borderRadius: 2, px: 2.5,
-                            '&:hover': { backgroundColor: '#991b1b' },
-                            '&.Mui-disabled': { backgroundColor: alpha('#b91c1c', 0.4), color: '#fff' },
-                        }}
-                        onClick={() => deleteMutation.mutate(deleteTarget.orderId)}
+                    <DangerBtn
+                        onClick={() => deleteMutation.mutate(deleteTarget._id)}
                         disabled={deleteMutation.isPending}
                     >
                         {deleteMutation.isPending
                             ? <CircularProgress size={16} sx={{ color: '#fff' }} />
-                            : 'Delete'
+                            : 'Delete Order'
                         }
-                    </Button>
+                    </DangerBtn>
                 </DialogActions>
             </Dialog>
         </Box>

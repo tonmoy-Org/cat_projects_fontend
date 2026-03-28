@@ -246,7 +246,7 @@ const ProductImage = styled("img")({
   display: "block",
   transition: "transform 0.5s ease",
   "@media (max-width: 900px)": { height: "240px" },
-  "@media (max-width: 600px)": { height: "220px" },
+  "@media (max-width: 600px)": { height: "190px" },
 });
 
 const PriceOverlay = styled(Box, {
@@ -1004,7 +1004,7 @@ const Product = () => {
             <>
               <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
                 {paginatedProducts.map((product) => (
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product._id}>
+                  <Grid size={{ xs: 6, sm: 6, md: 3 }} key={product._id}>
                     <ProductCardItem
                       product={product}
                       onCardClick={handleProductClick}

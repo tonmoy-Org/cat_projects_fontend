@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import {
   Box, Container, Typography, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, IconButton, TextField,
-  Button, Divider, styled, Paper, Chip,
+  Button, Divider, styled, Paper,
 } from '@mui/material';
 import {
   Close as CloseIcon,
   ShoppingCartOutlined as CartIcon,
   ArrowForward as ArrowForwardIcon,
-  LocalOffer as CouponIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import SectionTile from '../../components/SectionTile';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '../../api/axios';
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const primaryColor = '#db89ca';
@@ -193,12 +194,18 @@ const EmptyCartBox = styled(Box)({
 
 const fmt = (n) => `৳${parseFloat(n).toFixed(0)}`;
 
-// ─── Cart Context / Hook ──────────────────────────────────────────────────────
-// This component receives cart state as props. Wire it to your global cart state
-// (Context, Redux, Zustand, etc.).
+// ─── API ─────────────────────────────────────────────────────────────────────
+
+const updateCartItem = async ({ itemId, quantity }) => {
+  const { data } = await axiosInstance.put(`/cart/item/${itemId}`, { quantity });
+  return data.cart;
+};
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [coupon, setCoupon] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
   const [discount, setDiscount] = useState(0);
@@ -208,6 +215,20 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
   const [localQtys, setLocalQtys] = useState(() =>
     Object.fromEntries(cartItems.map((item) => [item._id, item.quantity]))
   );
+
+  // ─── Mutation ───────────────────────────────────────────────────────────
+  const { mutate: updateItem, isPending: isUpdating } = useMutation({
+    mutationFn: updateCartItem,
+    onSuccess: (updatedCart) => {
+      // Invalidate/refetch cart query so parent or other consumers stay in sync
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      setIsDirty(false);
+    },
+    onError: (err) => {
+      console.error('Failed to update cart item:', err);
+      alert('Could not update cart. Please try again.');
+    },
+  });
 
   const handleQtyChange = (id, val) => {
     const n = Math.max(0, parseInt(val) || 0);
@@ -221,14 +242,22 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
       if (newQty === 0) {
         onRemove(item._id);
       } else if (newQty !== item.quantity) {
-        onUpdateQty(item._id, newQty);
+        // Call the API mutation for each changed item
+        updateItem(
+          { itemId: item._id, quantity: newQty },
+          {
+            onSuccess: () => {
+              // Also notify parent so local prop stays consistent
+              onUpdateQty(item._id, newQty);
+            },
+          }
+        );
       }
     });
     setIsDirty(false);
   };
 
   const handleApplyCoupon = () => {
-    // Stub: replace with real coupon validation
     if (coupon.trim().toUpperCase() === 'PETCARE10') {
       setDiscount(0.1);
       setCouponApplied(true);
@@ -239,11 +268,13 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
     }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * (localQtys[item._id] ?? item.quantity), 0);
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * (localQtys[item._id] ?? item.quantity),
+    0
+  );
   const discountAmt = subtotal * discount;
   const total = subtotal - discountAmt;
 
-  // Pass cart data to checkout via navigation state
   const handleProceedToCheckout = () => {
     navigate('/checkout', {
       state: {
@@ -332,11 +363,14 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
 
                             {/* Name */}
                             <StyledTd>
-                              <Link to={`/shop/${item.title_id}`} style={{ textDecoration: 'none', color: textColor, fontWeight: 600, fontSize: '15px', '&:hover': { color: primaryColor } }}>
-                                {item.title}
+                              <Link to={`/shop/${item.title_id}`} style={{ textDecoration: 'none', color: textColor, fontWeight: 600, fontSize: '15px' }}>
+                                {item.title || item.name}
                               </Link>
                               {item.category && (
                                 <Typography sx={{ fontSize: '12px', color: darkGray, mt: 0.4 }}>{item.category}</Typography>
+                              )}
+                              {item.breed && (
+                                <Typography sx={{ fontSize: '12px', color: darkGray, mt: 0.4 }}>{item.breed}</Typography>
                               )}
                             </StyledTd>
 
@@ -371,24 +405,8 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
 
                 {/* ── Actions Row ──────────────────────────────────────────── */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'right', flexWrap: 'wrap', gap: 2, mt: 3 }}>
-                  {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-                    <CouponIcon sx={{ color: darkGray, fontSize: '20px' }} />
-                    <CouponInput
-                      placeholder="Coupon code"
-                      value={coupon}
-                      onChange={(e) => setCoupon(e.target.value)}
-                      size="small"
-                    />
-                    <ApplyBtn onClick={handleApplyCoupon}>Apply coupon</ApplyBtn>
-                    {couponApplied && (
-                      <Chip label="10% off applied!" size="small"
-                        sx={{ backgroundColor: '#e8f5e9', color: '#388e3c', fontWeight: 600, fontSize: '12px' }} />
-                    )}
-                  </Box> */}
-
-                  {/* Update cart */}
-                  <UpdateBtn onClick={handleUpdateCart} disabled={!isDirty}>
-                    Update cart
+                  <UpdateBtn onClick={handleUpdateCart} disabled={!isDirty || isUpdating}>
+                    {isUpdating ? 'Updating…' : 'Update cart'}
                   </UpdateBtn>
                 </Box>
               </Box>
@@ -428,7 +446,7 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
                 </CheckoutBtn>
 
                 <Button
-                  component={Link} to="/shop"
+                  component={Link} to="/"
                   sx={{ width: '100%', mt: 1.5, color: darkGray, fontSize: '13px', textTransform: 'none', fontWeight: 500, '&:hover': { color: primaryColor, backgroundColor: 'transparent' } }}
                 >
                   ← Continue Shopping

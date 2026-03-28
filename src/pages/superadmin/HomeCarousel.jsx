@@ -266,7 +266,7 @@ export const HomeCarousel = () => {
       {/* Header */}
       <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, gap: 2, mb: 3 }}>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: TEXT_PRIMARY }}>Carousel Management</Typography>
+          <Typography sx={{ fontWeight: 600, color: TEXT_PRIMARY, fontSize: '1rem' }}>Carousel Management</Typography>
           <Typography variant="body2" sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}>Manage homepage carousel slides and content</Typography>
         </Box>
         <GradientButton variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()} size="small">

@@ -26,6 +26,7 @@ import {
     Security as SecurityIcon,
     Email as EmailIcon,
     Person as PersonIcon,
+    LocationOn as LocationIcon,
 } from '@mui/icons-material';
 import axiosInstance from '../api/axios';
 import { useAuth } from '../auth/AuthProvider';
@@ -62,18 +63,20 @@ export const ProfilePage = ({ roleLabel }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        address: '',
     });
 
     const {
         data: profile,
         isLoading,
         isError,
-        error: fetchError
+        error: fetchError,
+        refetch: refetchProfile,
     } = useQuery({
         queryKey: ['userProfile', user?.id],
         queryFn: async () => {
             const response = await axiosInstance.get('/auth/me');
-            const userData = response.data.user || response.data.data || response.data;
+            const userData = response?.data?.user || response?.data?.data || response?.data;
             return userData;
         },
         enabled: !!user?.id,
@@ -86,6 +89,7 @@ export const ProfilePage = ({ roleLabel }) => {
             setFormData({
                 name: profile.name || '',
                 email: profile.email || '',
+                address: profile.address || '',
             });
         }
     }, [profile]);
@@ -118,6 +122,7 @@ export const ProfilePage = ({ roleLabel }) => {
             setFormData({
                 name: updatedData.name || '',
                 email: updatedData.email || '',
+                address: updatedData.address || '',
             });
 
             if (updateUser) {
@@ -134,6 +139,7 @@ export const ProfilePage = ({ roleLabel }) => {
                 setFormData({
                     name: context.previousProfile.name || '',
                     email: context.previousProfile.email || '',
+                    address: context.previousProfile.address || '',
                 });
 
                 if (updateUser) {
@@ -209,11 +215,13 @@ export const ProfilePage = ({ roleLabel }) => {
             setFormData({
                 name: currentProfile.name || '',
                 email: currentProfile.email || '',
+                address: currentProfile.address || '',
             });
         } else if (profile) {
             setFormData({
                 name: profile.name || '',
                 email: profile.email || '',
+                address: profile.address || '',
             });
         }
     };
@@ -503,6 +511,40 @@ export const ProfilePage = ({ roleLabel }) => {
                                     }}
                                 />
                             </Grid>
+
+                            <Grid size={{ xs: 12 }}>
+                                <StyledTextField
+                                    fullWidth
+                                    label="Address"
+                                    name="address"
+                                    value={formData.address || ''}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing || updating}
+                                    multiline
+                                    rows={2}
+                                    InputProps={{
+                                        startAdornment: <LocationIcon sx={{ mr: 1, fontSize: '0.9rem', color: TEXT_PRIMARY, mt: 0.5 }} />,
+                                    }}
+                                    variant="outlined"
+                                    size="small"
+                                    sx={{
+                                        mb: 1.5,
+                                        '& .MuiInputBase-input': {
+                                            fontSize: '0.8rem',
+                                            color: TEXT_PRIMARY,
+                                        },
+                                        '& .MuiInputLabel-root': {
+                                            fontSize: '0.8rem',
+                                            color: TEXT_PRIMARY,
+                                        },
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: alpha(TEXT_PRIMARY, 0.3),
+                                            },
+                                        },
+                                    }}
+                                />
+                            </Grid>
                         </Grid>
 
                         <Divider sx={{
@@ -510,7 +552,12 @@ export const ProfilePage = ({ roleLabel }) => {
                             backgroundColor: theme.palette.divider,
                         }} />
 
-                        <DeviceList devices={profile?.devices || []} />
+                        {/* Pass refetchProfile as onDeviceRemoved so the device list re-fetches after removal */}
+                        <DeviceList
+                            devices={profile?.devices || []}
+                            userId={user?.id}
+                            onDeviceRemoved={refetchProfile}
+                        />
 
                         {profile?.createdAt && (
                             <Box mt={2}>

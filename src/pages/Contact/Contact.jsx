@@ -14,8 +14,8 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import GradientButton from "../../../components/ui/GradientButton";
-import SectionTile from "../../../components/SectionTile";
+import GradientButton from "../../components/ui/GradientButton";
+import SectionTile from "../../components/SectionTile";
 
 // Styled components
 const ContactSection = styled(Box)({

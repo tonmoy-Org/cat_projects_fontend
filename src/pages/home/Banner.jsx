@@ -32,7 +32,7 @@ const SlideContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '400px',
+        height: '300px',
     },
 });
 

@@ -1,4 +1,3 @@
-// Footer.jsx
 import React from 'react';
 import {
     Box,
@@ -9,7 +8,6 @@ import {
     IconButton,
     Link,
     TextField,
-    InputAdornment,
     useTheme,
     useMediaQuery,
 } from '@mui/material';
@@ -63,14 +61,14 @@ const TopSection = styled(Box)({
 const FooterLogo = styled('img')({
     maxWidth: '160px',
     marginBottom: '20px',
-    marginTop: '-5px', // Moved logo 5px up
+    marginTop: '-5px',
     transition: 'transform 0.3s ease',
     '&:hover': {
         transform: 'scale(1.05)',
     },
     '@media (max-width: 600px)': {
         maxWidth: '140px',
-        marginTop: '-3px', // Slightly less on mobile
+        marginTop: '-3px',
     },
 });
 
@@ -156,6 +154,11 @@ const FooterTitle = styled(Typography)({
     '@media (max-width: 600px)': {
         fontSize: '18px',
         marginBottom: '20px',
+        textAlign: 'center',
+        '&::after': {
+            left: '50%',
+            transform: 'translateX(-50%)',
+        },
     },
 });
 
@@ -183,6 +186,15 @@ const ContactInfo = styled(Box)({
             '&:hover': {
                 color: PRIMARY_COLOR,
             },
+        },
+    },
+    // ✅ ONLY CHANGE: center the whole contact block on mobile
+    '@media (max-width: 600px)': {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        '& .contact-item': {
+            width: 'fit-content',
         },
     },
 });
@@ -365,7 +377,6 @@ const Footer = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle newsletter subscription
         console.log('Newsletter subscription');
     };
 
@@ -383,10 +394,7 @@ const Footer = () => {
                                 flexDirection: 'column',
                                 alignItems: { xs: 'center', md: 'flex-start' },
                             }}>
-                                <FooterLogo
-                                    src={logo}
-                                    alt="Logo"
-                                />
+                                <FooterLogo src={logo} alt="Logo" />
                                 <FooterText>
                                     Lorem ipsum is simply dummy text of the printe and type setting industry in the fermen.
                                 </FooterText>
@@ -420,7 +428,7 @@ const Footer = () => {
                                         </span>
                                     </Box>
                                     <Box className="contact-item">
-                                        <PhoneIcon />
+                                        <PhoneIcon/>
                                         <Link href="tel:+1234567890">+123 456 7890</Link>
                                     </Box>
                                     <Box className="contact-item">

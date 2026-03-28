@@ -21,6 +21,8 @@ const textColor = '#1a1a1a';
 const ShopSection = styled(Box)({
   padding: '80px 0',
   backgroundColor: '#fff',
+  '@media (max-width: 900px)': { padding: '60px 0' },
+  '@media (max-width: 600px)': { padding: '20px 0' },
 });
 
 const SectionHeaderWrapper = styled(Box)({
@@ -68,6 +70,9 @@ const SectionTitle = styled(Typography)({
 
 const ProductCard = styled(Box)({
   width: '100%',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
   borderRadius: '10px',
   overflow: 'hidden',
   cursor: 'pointer',
@@ -83,6 +88,7 @@ const ImageWrapper = styled(Box)({
   position: 'relative',
   width: '100%',
   overflow: 'hidden',
+  flexShrink: 0,
 });
 
 const ProductImage = styled('img')({
@@ -91,8 +97,8 @@ const ProductImage = styled('img')({
   objectFit: 'cover',
   display: 'block',
   transition: 'transform 0.5s ease',
-  '@media (max-width: 900px)': { height: '240px' },
-  '@media (max-width: 600px)': { height: '220px' },
+  '@media (max-width: 900px)': { height: '220px' },
+  '@media (max-width: 600px)': { height: '180px' },  // CHANGED: Much smaller on mobile
 });
 
 const PriceOverlay = styled(Box, {
@@ -114,7 +120,7 @@ const PriceOverlay = styled(Box, {
   visibility: isVisible ? 'visible' : 'hidden',
   transition: 'all 0.3s ease',
   zIndex: 2,
-  '@media (max-width: 600px)': { width: '70px', height: '70px' },
+  '@media (max-width: 600px)': { width: '60px', height: '60px' },  // CHANGED: Smaller overlay
 }));
 
 const FeaturedBadge = styled(Box)({
@@ -132,11 +138,22 @@ const FeaturedBadge = styled(Box)({
   gap: '4px',
   zIndex: 10,
   boxShadow: '0 2px 8px rgba(236,64,122,0.3)',
+  '@media (max-width: 600px)': {  // ADDED: Smaller badge on mobile
+    padding: '4px 8px',
+    fontSize: '10px',
+  },
 });
 
 const CardBody = styled(Box)({
   padding: '14px 12px 16px',
   textAlign: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+  flexGrow: 1,
+  justifyContent: 'space-between',
+  '@media (max-width: 600px)': {  // ADDED: Less padding on mobile
+    padding: '10px 8px 12px',
+  },
 });
 
 const ProductName = styled(Typography)({
@@ -144,12 +161,24 @@ const ProductName = styled(Typography)({
   fontWeight: 600,
   color: '#1a1a1a',
   marginBottom: '6px',
+  minHeight: '24px',
+  '@media (max-width: 600px)': {
+    fontSize: '13px',
+    minHeight: '18px',
+    marginBottom: '4px',
+  },
 });
 
 const ProductCategory = styled(Typography)({
   fontSize: '13px',
   color: '#888',
   marginBottom: '8px',
+  minHeight: '20px',
+  '@media (max-width: 600px)': {
+    fontSize: '11px',
+    minHeight: '16px',
+    marginBottom: '4px',
+  },
 });
 
 const ProductPrice = styled(Typography)({
@@ -157,6 +186,12 @@ const ProductPrice = styled(Typography)({
   fontWeight: 700,
   color: PRIMARY_COLOR,
   marginBottom: '12px',
+  minHeight: '24px',
+  '@media (max-width: 600px)': {
+    fontSize: '13px',
+    minHeight: '18px',
+    marginBottom: '8px',
+  },
 });
 
 const AddToCartBtn = styled(Button)({
@@ -170,6 +205,12 @@ const AddToCartBtn = styled(Button)({
   width: '100%',
   gap: '6px',
   transition: 'all 0.3s ease',
+  minHeight: '36px',
+  '@media (max-width: 600px)': {
+    fontSize: '11px',
+    padding: '5px 10px',
+    minHeight: '30px',
+  },
   '&:hover': {
     backgroundColor: '#c96db8',
     boxShadow: '0 4px 12px rgba(219,137,202,0.4)',
@@ -188,6 +229,12 @@ const ViewCartBtn = styled(Button)({
   gap: '6px',
   border: `2px solid ${iconColor}`,
   transition: 'all 0.3s ease',
+  minHeight: '36px',
+  '@media (max-width: 600px)': {
+    fontSize: '11px',
+    padding: '5px 10px',
+    minHeight: '30px',
+  },
   '&:hover': {
     backgroundColor: iconColor,
     color: '#fff',
@@ -301,25 +348,31 @@ const ProductCardItem = ({ product, onAddToCart }) => {
           }}
         />
         <PriceOverlay isVisible={hovered}>
-          <Typography sx={{ fontWeight: 600, fontSize: '20px', color: primaryColor }}>
+          <Typography sx={{ 
+            fontWeight: 600, 
+            fontSize: { xs: '14px', sm: '20px' },  // CHANGED: Smaller price on mobile
+            color: primaryColor 
+          }}>
             ৳{product.price}
           </Typography>
         </PriceOverlay>
       </ImageWrapper>
 
       <CardBody>
-        <ProductName>Name : {product.title}</ProductName>
-        <ProductCategory>Category : {product.category}</ProductCategory>
-        <ProductPrice>Price : ৳ {product.price}</ProductPrice>
+        <Box>
+          <ProductName>Name : {product.title}</ProductName>
+          <ProductCategory>Category : {product.category}</ProductCategory>
+          <ProductPrice>Price : ৳ {product.price}</ProductPrice>
+        </Box>
 
         {addedToCart ? (
           <ViewCartBtn variant="outlined" onClick={handleViewCart}>
-            <ShoppingCartIcon sx={{ fontSize: '17px' }} />
+            <ShoppingCartIcon sx={{ fontSize: { xs: '14px', sm: '17px' } }} />
             View Cart
           </ViewCartBtn>
         ) : (
           <AddToCartBtn onClick={handleAddToCart}>
-            <ShoppingCartIcon sx={{ fontSize: '17px' }} />
+            <ShoppingCartIcon sx={{ fontSize: { xs: '14px', sm: '17px' } }} />
             Add to Cart
           </AddToCartBtn>
         )}
@@ -349,7 +402,7 @@ const SectionHeader = () => (
 // ── Main Component ────────────────────────────────────────────────────────────
 
 const FeaturedProducts = () => {
-  const navigate = useNavigate(); // ✅ FIXED: moved here from ProductCardItem
+  const navigate = useNavigate();
   const [displayProducts, setDisplayProducts] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
@@ -377,7 +430,6 @@ const FeaturedProducts = () => {
     setSnackbar({ open: true, message: `${productName} added to cart!`, severity: 'success' });
   };
 
-  // ✅ FIXED: moved here from ProductCardItem so ViewAllBtn can access it
   const handleViewAllPets = () => {
     navigate('/shop');
   };
@@ -418,7 +470,7 @@ const FeaturedProducts = () => {
         <Grid container spacing={3}>
           {displayProducts.length > 0 ? (
             displayProducts.map((product) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product._id}>
+              <Grid size={{ xs: 6, sm: 6, md: 3 }} key={product._id}>
                 <ProductCardItem product={product} onAddToCart={handleAddToCart} />
               </Grid>
             ))
@@ -434,7 +486,6 @@ const FeaturedProducts = () => {
         </Grid>
 
         <SectionInfo>
-          {/* ✅ FIXED: handleViewAllPets is now in scope */}
           <ViewAllBtn variant="contained" onClick={handleViewAllPets}>
             View all products
           </ViewAllBtn>

@@ -25,12 +25,12 @@ import ResetPassword from "../pages/reset-password/ResetPassword";
 
 import { PublicLayout } from "../layouts/PublicLayout";
 import { HomeCarousel } from "../pages/superadmin/HomeCarousel";
-import Blog from "../pages/home/Blog/Blog";
-import Contact from "../pages/home/Contact/Contact";
-import Video from "../pages/home/Video/Video";
+import Blog from "../pages/Blog/Blog";
+import Contact from "../pages/Contact/Contact";
+import Video from "../pages/Video/Video";
 import VideoUpload from "../pages/superadmin/VideoUpload";
-import About from "../pages/home/About/About";
-import BlogDetail from "../pages/home/Blog/BlogDetail";
+import About from "../pages/About/About";
+import BlogDetail from "../pages/Blog/BlogDetail";
 import { SignUp } from "../pages/SignUp/SignUp";
 import CatsManagement from "../pages/superadmin/CatsManagement";
 import ProductsManagement from "../pages/superadmin/ProductsManagement";
@@ -43,6 +43,7 @@ import BlogManagement from "../pages/superadmin/BlogManagement";
 import Checkout from "../pages/cart/Checkout";
 import PaymentSuccess from "../pages/cart/PaymentSuccess";
 import OrderManagement from "../pages/superadmin/Ordermanagement";
+import OrdersClient from "../pages/client/OrdersClient";
 
 
 export const AppRoutes = () => {
@@ -305,6 +306,7 @@ export const AppRoutes = () => {
         >
           <Route index element={<ClientDashboard />} />
           <Route path="profile" element={<ClientProfile />} />
+          <Route path="my-orders" element={<OrdersClient />} />
         </Route>
 
         {/* Catch-all 404 Route */}

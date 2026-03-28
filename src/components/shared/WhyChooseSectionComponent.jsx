@@ -15,6 +15,10 @@ const iconColor = '#db89ca';
 const WhyChooseSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#fff',
   paddingTop: '80px',
+
+  [theme.breakpoints.down('sm')]: {
+    padding: '20px 0',
+  },
 }));
 
 const SectionSubtitle = styled(Box)({

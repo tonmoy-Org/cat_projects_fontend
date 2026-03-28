@@ -32,6 +32,7 @@ const AdoptionSection = styled(Box)({
   width: '100%',
   '@media (max-width: 900px)': { padding: '60px 0' },
   '@media (max-width: 600px)': { padding: '40px 0' },
+  
 });
 
 const SectionHeaderWrapper = styled(Box)({
@@ -87,6 +88,9 @@ const SectionTitle = styled(Typography)({
 // Styled components matching the cart page design
 const AdoptionCard = styled(Box)({
   width: '100%',
+  height: '100%',  // ADDED: Makes card take full height
+  display: 'flex',  // ADDED: Enables flexbox
+  flexDirection: 'column',  // ADDED: Stacks children vertically
   borderRadius: '10px',
   overflow: 'hidden',
   cursor: 'pointer',
@@ -106,6 +110,7 @@ const ImageWrapper = styled(Box)({
   width: '100%', 
   overflow: 'hidden',
   position: 'relative',
+  flexShrink: 0,  // ADDED: Prevents image from shrinking
 });
 
 const PetImage = styled('img')({
@@ -115,7 +120,7 @@ const PetImage = styled('img')({
   display: 'block',
   transition: 'transform 0.5s ease',
   '@media (max-width: 900px)': { height: '240px' },
-  '@media (max-width: 600px)': { height: '220px' },
+  '@media (max-width: 600px)': { height: '200px' },  // MODIFIED: Reduced for mobile
 });
 
 const FeaturedBadge = styled(Box)({
@@ -137,7 +142,11 @@ const FeaturedBadge = styled(Box)({
 
 const CardBody = styled(Box)({ 
   padding: '14px 12px', 
-  textAlign: 'center' 
+  textAlign: 'center',
+  display: 'flex',  // ADDED: Enables flexbox
+  flexDirection: 'column',  // ADDED: Stacks children vertically
+  flexGrow: 1,  // ADDED: Takes remaining space
+  justifyContent: 'space-between',  // ADDED: Distributes space evenly
 });
 
 const PetName = styled(Typography)({
@@ -145,6 +154,11 @@ const PetName = styled(Typography)({
   fontWeight: 600, 
   color: '#1a1a1a', 
   marginBottom: '6px',
+  minHeight: '24px',  // ADDED: Fixed minimum height
+  '@media (max-width: 600px)': {
+    fontSize: '14px',  // ADDED: Smaller font on mobile
+    minHeight: '20px',
+  },
 });
 
 const PetGender = styled(Typography)({
@@ -155,9 +169,13 @@ const PetGender = styled(Typography)({
   alignItems: 'center', 
   justifyContent: 'center', 
   gap: '4px',
+  minHeight: '20px',  // ADDED: Fixed minimum height
   '& svg': { 
     fontSize: '16px', 
     color: iconColor 
+  },
+  '@media (max-width: 600px)': {
+    fontSize: '12px',  // ADDED: Smaller font on mobile
   },
 });
 
@@ -166,6 +184,11 @@ const PetPrice = styled(Typography)({
   fontWeight: 700, 
   color: PRIMARY_COLOR, 
   marginBottom: '12px',
+  minHeight: '24px',  // ADDED: Fixed minimum height
+  '@media (max-width: 600px)': {
+    fontSize: '14px',  // ADDED: Smaller font on mobile
+    minHeight: '20px',
+  },
 });
 
 const AddToCartBtn = styled(Button)({
@@ -179,6 +202,11 @@ const AddToCartBtn = styled(Button)({
   width: '100%',
   gap: '6px', 
   transition: 'all 0.3s ease',
+  minHeight: '36px',  // ADDED: Fixed button height
+  '@media (max-width: 600px)': {
+    fontSize: '12px',  // ADDED: Smaller font on mobile
+    padding: '6px 12px',
+  },
   '&:hover': { 
     backgroundColor: '#c06bb0' 
   },
@@ -196,6 +224,11 @@ const ViewCartBtn = styled(Button)({
   gap: '6px', 
   border: `2px solid ${iconColor}`, 
   transition: 'all 0.3s ease',
+  minHeight: '36px',  // ADDED: Fixed button height
+  '@media (max-width: 600px)': {
+    fontSize: '12px',  // ADDED: Smaller font on mobile
+    padding: '6px 12px',
+  },
   '&:hover': { 
     backgroundColor: iconColor, 
     color: '#fff' 
@@ -294,14 +327,15 @@ const CatCard = ({ cat, onAddToCart }) => {
         <PetImage className="pet-image" src={cat.featuredImage} alt={cat.name} />
       </ImageWrapper>
       <CardBody>
-        <PetName>Name : {cat.name}</PetName>
-        <PetGender>
-          Gender :
-          {getGenderIcon(cat.gender)}
-          {cat.gender}
-        </PetGender>
-        
-        <PetPrice>Price : ৳ {cat.price || 0}</PetPrice>
+        <Box>
+          <PetName>Name : {cat.name}</PetName>
+          <PetGender>
+            Gender :
+            {getGenderIcon(cat.gender)}
+            {cat.gender}
+          </PetGender>
+          <PetPrice>Price : ৳ {cat.price || 0}</PetPrice>
+        </Box>
         
         {addedToCart ? (
           <ViewCartBtn variant="outlined" onClick={handleViewCart}>
@@ -413,12 +447,12 @@ const Adoption = () => {
           </Grid>
         </Grid>
 
-        {/* Adoption Cards - Using CatCard component - 4 cards in a row */}
+        {/* Adoption Cards - Using CatCard component - 2 cards on mobile, 4 on desktop */}
         <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
           <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} justifyContent="center">
             {displayPets.length > 0 ? (
               displayPets.map((pet) => (
-                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={pet._id}>
+                <Grid size={{ xs: 6, sm: 6, md: 3 }} key={pet._id}>
                   <CatCard cat={pet} onAddToCart={handleAddToCart} />
                 </Grid>
               ))

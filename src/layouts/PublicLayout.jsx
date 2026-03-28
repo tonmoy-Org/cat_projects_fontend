@@ -37,9 +37,11 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import ArticleIcon from "@mui/icons-material/Article";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import GradientButton from "../components/ui/GradientButton";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "../auth/AuthProvider";
+import { useCart } from "../context/CartContext"; // Import your cart context
 import logo from "../public/High-quality logo of.png";
 import Footer from "./Footer";
 
@@ -59,6 +61,7 @@ function HideOnScroll(props) {
 
 export const PublicLayout = ({ children, title, description }) => {
   const { user, logout } = useAuth();
+  const { cartItems } = useCart(); // Get cart items from context
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -70,6 +73,12 @@ export const PublicLayout = ({ children, title, description }) => {
   // State for user menu
   const [anchorEl, setAnchorEl] = useState(null);
   const userMenuOpen = Boolean(anchorEl);
+
+  // Calculate total cart items count
+  const cartItemCount = cartItems?.reduce(
+    (total, item) => total + (item.quantity || 0),
+    0
+  ) || 0;
 
   // Professional color palette
   const ACTIVE_COLOR = "#43376A"; // Deep purple
@@ -101,7 +110,7 @@ export const PublicLayout = ({ children, title, description }) => {
   const handleNavigation = (path) => {
     navigate(path);
     if (isMobile) {
-      setMobileDrawerOpen(false);
+      setMobileDrawerClose();
     }
     handleUserMenuClose();
   };
@@ -305,8 +314,43 @@ export const PublicLayout = ({ children, title, description }) => {
                 </Box>
               )}
 
-              {/* Right Side - Authentication */}
+              {/* Right Side - Cart Icon and Authentication */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                {/* Cart Icon with Badge */}
+                <IconButton
+                  onClick={() => navigate("/cart")}
+                  size="small"
+                  sx={{
+                    p: 0.5,
+                    color: theme.palette.text.primary,
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      color: ACTIVE_COLOR,
+                      backgroundColor: HOVER_COLOR,
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                >
+                  <Badge
+                    badgeContent={cartItemCount}
+                    color="error"
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        fontSize: "0.7rem",
+                        fontWeight: 600,
+                        minWidth: "18px",
+                        height: "18px",
+                        borderRadius: "9px",
+                        backgroundColor: ACTIVE_COLOR,
+                        color: "#fff",
+                        boxShadow: `0 2px 4px ${alpha(ACTIVE_COLOR, 0.3)}`,
+                      },
+                    }}
+                  >
+                    <ShoppingCartIcon sx={{ fontSize: "24px" }} />
+                  </Badge>
+                </IconButton>
+
                 {user ? (
                   <>
                     {/* User Avatar for Desktop */}
@@ -526,7 +570,6 @@ export const PublicLayout = ({ children, title, description }) => {
                   width: "100%",
                 }}
               />
-             
             </Box>
             <IconButton
               onClick={handleMobileDrawerClose}
@@ -542,6 +585,46 @@ export const PublicLayout = ({ children, title, description }) => {
               <CloseIcon fontSize="small" />
             </IconButton>
           </Box>
+
+          {/* Mobile Cart Section */}
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              onClick={() => handleNavigation("/carts")}
+              sx={{
+                borderRadius: 2,
+                py: 1,
+                px: 1.5,
+                gap: 1.5,
+                backgroundColor: alpha(ACTIVE_COLOR, 0.05),
+                "&:hover": {
+                  backgroundColor: alpha(ACTIVE_COLOR, 0.1),
+                },
+              }}
+            >
+              <Badge
+                badgeContent={cartItemCount}
+                color="error"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: ACTIVE_COLOR,
+                    color: "#fff",
+                  },
+                }}
+              >
+                <ShoppingCartIcon sx={{ color: ACTIVE_COLOR }} />
+              </Badge>
+              <ListItemText
+                primary="Shopping Cart"
+                primaryTypographyProps={{
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  color: ACTIVE_COLOR,
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+
+          <Divider sx={{ my: 1 }} />
 
           {/* Mobile Navigation Links with icons */}
           <List sx={{ py: 0 }}>

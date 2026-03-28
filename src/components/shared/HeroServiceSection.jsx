@@ -20,12 +20,16 @@ const primaryColor = '#ff6b6b';
 const iconColor = '#db89ca';
 
 // Styled components
-const HeroSection = styled(Box)({
+const HeroSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#f9f9f9',
   padding: '80px 0',
   position: 'relative',
   overflow: 'hidden',
-});
+
+  [theme.breakpoints.down('sm')]: {
+    padding: '40px 0',
+  },
+}));;
 
 const SectionTitleWrapper = styled(Box)({
   display: 'flex',
