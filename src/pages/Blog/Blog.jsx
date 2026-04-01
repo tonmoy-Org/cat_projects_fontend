@@ -10,44 +10,111 @@ import {
   styled,
   useMediaQuery,
   CircularProgress,
+  Button,
+  TextField,
+  InputAdornment,
+  MenuItem,
+  Select,
+  FormControl,
+  Chip,
 } from "@mui/material";
-import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "../../api/axios";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
 import SectionTile from "../../components/SectionTile";
+import { useBlogApi } from "../../hooks/useBlogApi";
 
 // Theme colors
 const PRIMARY_COLOR = '#5C4D91';
 const PRIMARY_DARK = '#4A3D75';
+const ACCENT = '#db89ca';
 
-// Styled components for custom hover effects
+// Styled components
 const BlogSection = styled(Box)(({ theme }) => ({
   backgroundColor: "#ffffff",
   width: "100%",
   display: "flex",
   justifyContent: "center",
-  padding: theme.spacing(4, 0),
+  padding: '80px 0',
   [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(3, 0),
   },
 }));
 
+const FilterBar = styled(Box)(({ theme }) => ({
+  backgroundColor: '#faf8ff',
+  border: '1px solid #ede8f7',
+  borderRadius: '12px',
+  padding: '20px 24px',
+  marginBottom: '32px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+  [theme.breakpoints.down('sm')]: { padding: '16px', gap: '14px', marginBottom: '20px' },
+}));
+
+const FilterRow = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '16px',
+  alignItems: 'center',
+  width: '100%',
+  [theme.breakpoints.down('sm')]: { gap: '12px', flexDirection: 'column', alignItems: 'stretch' },
+}));
+
+const FilterLabel = styled(Typography)({
+  fontSize: '11px',
+  fontWeight: 600,
+  color: '#999',
+  textTransform: 'uppercase',
+  letterSpacing: '0.6px',
+  minWidth: 'max-content',
+});
+
+const SearchInput = styled(TextField)(({ theme }) => ({
+  flex: '1 1 280px',
+  minWidth: '200px',
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '30px',
+    backgroundColor: '#fff',
+    fontSize: '13px',
+    '& fieldset': { borderColor: '#e0d9f5' },
+    '&:hover fieldset': { borderColor: PRIMARY_COLOR },
+    '&.Mui-focused fieldset': { borderColor: PRIMARY_COLOR },
+  },
+  '& input': { padding: '8px 14px' },
+  [theme.breakpoints.down('sm')]: { flex: '1 1 100%', width: '100%' },
+}));
+
+const CategorySelect = styled(Select)(({ theme }) => ({
+  borderRadius: '30px',
+  backgroundColor: '#fff',
+  fontSize: '13px',
+  minWidth: '160px',
+  '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0d9f5' },
+  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: PRIMARY_COLOR },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: PRIMARY_COLOR },
+  '& .MuiSelect-select': { padding: '8px 14px' },
+  [theme.breakpoints.down('sm')]: { width: '100%', minWidth: 'unset' },
+}));
+
+const ActiveFiltersRow = styled(Box)({ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '14px' });
+
 const BlogCard = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",
-  borderRadius: "8px",
+  borderRadius: "3px",
   overflow: "hidden",
   transition: "all 0.3s ease",
   height: "100%",
   width: "100%",
-  boxShadow: "none",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.07)",
   border: "1px solid #f0f0f0",
   cursor: "pointer",
   position: "relative",
   "&:hover": {
-    transform: "translateY(-5px)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.11)",
     "& .blog-image": {
       transform: "scale(1.05)",
     },
@@ -59,19 +126,21 @@ const BlogCard = styled(Box)(({ theme }) => ({
     "& .date-only": {
       opacity: 0,
       visibility: "hidden",
-      display: "none",
     },
     "& .author-info": {
       opacity: 1,
       visibility: "visible",
-      display: "flex",
     },
   },
-  // Mobile touch optimization
   [theme.breakpoints.down("sm")]: {
-    "&:active": {
-      transform: "translateY(-3px)",
-      boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
+    "& .blog-category": {
+      opacity: 1,
+      visibility: "visible",
+      transform: "translateY(0)",
+    },
+    "& .author-info": {
+      opacity: 1,
+      visibility: "visible",
     },
   },
 }));
@@ -80,11 +149,8 @@ const ImageWrapper = styled(Box)(({ theme }) => ({
   position: "relative",
   overflow: "hidden",
   width: "100%",
-  height: "240px",
+  height: "220px",
   [theme.breakpoints.down("sm")]: {
-    height: "200px",
-  },
-  [theme.breakpoints.down("xs")]: {
     height: "180px",
   },
 }));
@@ -99,13 +165,13 @@ const BlogImage = styled("img")({
 
 const CategoryTag = styled(Box)(({ theme }) => ({
   position: "absolute",
-  top: "15px",
-  right: "15px",
+  top: "12px",
+  right: "12px",
   backgroundColor: PRIMARY_COLOR,
   color: "#fff",
-  padding: "6px 15px",
+  padding: "4px 12px",
   borderRadius: "20px",
-  fontSize: "14px",
+  fontSize: "11px",
   fontWeight: 500,
   transition: "all 0.3s ease",
   zIndex: 10,
@@ -116,58 +182,55 @@ const CategoryTag = styled(Box)(({ theme }) => ({
   "&:hover": {
     backgroundColor: PRIMARY_DARK,
   },
-  // Always show category on mobile for better UX
   [theme.breakpoints.down("sm")]: {
     opacity: 1,
     visibility: "visible",
     transform: "translateY(0)",
-    padding: "4px 12px",
-    fontSize: "12px",
-    top: "10px",
-    right: "10px",
+    padding: "4px 10px",
+    fontSize: "10px",
   },
 }));
 
 const BlogContent = styled(Box)(({ theme }) => ({
-  padding: "20px 18px",
+  padding: "16px",
   position: "relative",
   pointerEvents: "none",
   [theme.breakpoints.down("sm")]: {
-    padding: "15px 12px",
+    padding: "12px",
   },
 }));
 
 const BlogTitle = styled(Typography)(({ theme }) => ({
-  fontSize: "18px",
+  fontSize: "16px",
   fontWeight: 600,
-  marginBottom: "10px",
+  marginBottom: "8px",
   lineHeight: 1.4,
   color: "#333",
   [theme.breakpoints.down("sm")]: {
-    fontSize: "16px",
-    marginBottom: "8px",
+    fontSize: "14px",
+    marginBottom: "6px",
   },
 }));
 
 const BlogDescription = styled(Typography)(({ theme }) => ({
   color: "#666",
-  fontSize: "14px",
-  lineHeight: 1.6,
-  marginBottom: "15px",
+  fontSize: "13px",
+  lineHeight: 1.5,
+  marginBottom: "12px",
   display: "-webkit-box",
   WebkitLineClamp: 2,
   WebkitBoxOrient: "vertical",
   overflow: "hidden",
   textOverflow: "ellipsis",
   [theme.breakpoints.down("sm")]: {
-    fontSize: "13px",
-    marginBottom: "12px",
+    fontSize: "12px",
+    marginBottom: "10px",
   },
 }));
 
-const AuthorInfoWrapper = styled(Box)({
+const MetaWrapper = styled(Box)({
   position: "relative",
-  minHeight: "24px",
+  minHeight: "20px",
 });
 
 const DateOnly = styled(Typography)(({ theme }) => ({
@@ -177,16 +240,12 @@ const DateOnly = styled(Typography)(({ theme }) => ({
   transition: "all 0.3s ease",
   opacity: 1,
   visibility: "visible",
-  display: "block",
   color: "#999",
-  fontSize: "14px",
-  fontWeight: 400,
+  fontSize: "12px",
   [theme.breakpoints.down("sm")]: {
-    fontSize: "12px",
     position: "relative",
     opacity: 1,
     visibility: "visible",
-    display: "block",
   },
 }));
 
@@ -195,91 +254,57 @@ const AuthorInfo = styled(Box)(({ theme }) => ({
   top: 0,
   left: 0,
   alignItems: "center",
-  gap: "15px",
+  gap: "8px",
   transition: "all 0.3s ease",
   opacity: 0,
   visibility: "hidden",
-  display: "none",
-  // Show author info on mobile with different layout
+  display: "flex",
   [theme.breakpoints.down("sm")]: {
     position: "relative",
     opacity: 1,
     visibility: "visible",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "5px",
-    marginTop: "10px",
-  },
-}));
-
-const DateText = styled(Typography)(({ theme }) => ({
-  color: "#999",
-  fontSize: "14px",
-  fontWeight: 400,
-  whiteSpace: "nowrap",
-  [theme.breakpoints.down("sm")]: {
-    fontSize: "12px",
+    marginTop: "8px",
   },
 }));
 
 const AuthorLink = styled("span")(({ theme }) => ({
-  color: "#333",
+  color: PRIMARY_COLOR,
   textDecoration: "none",
   fontWeight: 500,
-  fontSize: "14px",
-  whiteSpace: "nowrap",
-  position: "relative",
+  fontSize: "12px",
   cursor: "pointer",
-  zIndex: 20,
   pointerEvents: "auto",
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    bottom: "-2px",
-    left: "0",
-    width: "0",
-    height: "1px",
-    backgroundColor: PRIMARY_COLOR,
-    transition: "width 0.3s ease",
-  },
-  "&:hover::after": {
-    width: "100%",
-  },
-  [theme.breakpoints.down("sm")]: {
-    fontSize: "13px",
-    "&::after": {
-      display: "none",
-    },
+  "&:hover": {
+    textDecoration: "underline",
   },
 }));
 
 const PaginationWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
-  marginTop: "50px",
+  marginTop: "48px",
   width: "100%",
   [theme.breakpoints.down("sm")]: {
-    marginTop: "30px",
+    marginTop: "32px",
   },
 }));
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
   "& .MuiPaginationItem-root": {
     margin: "0 5px",
-    minWidth: "40px",
-    height: "40px",
-    borderRadius: "40px",
-    fontSize: "15px",
+    minWidth: "36px",
+    height: "36px",
+    borderRadius: "36px",
+    fontSize: "13px",
     fontWeight: 500,
     color: "#333",
     backgroundColor: "#fff",
     border: "1px solid #e0e0e0",
     transition: "all 0.3s ease",
     [theme.breakpoints.down("sm")]: {
-      minWidth: "36px",
-      height: "36px",
-      fontSize: "14px",
+      minWidth: "32px",
+      height: "32px",
+      fontSize: "12px",
       margin: "0 3px",
     },
     "&:hover": {
@@ -296,15 +321,6 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
       },
     },
   },
-  "& .MuiPaginationItem-previousNext": {
-    fontSize: "18px",
-    "& svg": {
-      fontSize: "20px",
-      [theme.breakpoints.down("sm")]: {
-        fontSize: "18px",
-      },
-    },
-  },
 }));
 
 const LoadingContainer = styled(Box)({
@@ -315,7 +331,6 @@ const LoadingContainer = styled(Box)({
   width: "100%",
 });
 
-// Helper function to format date
 const formatDate = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -329,28 +344,32 @@ const formatDate = (dateString) => {
 const Blog = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [page, setPage] = React.useState(1);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const itemsPerPage = 9;
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["blogs", page],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/blogs?page=${page}&limit=${itemsPerPage}`);
-      return response.data;
-    },
-  });
-
-  const blogs = data?.blogs || [];
-  const pagination = data?.pagination || { totalPages: 1 };
+  
+  const { useBlogs } = useBlogApi();
+  const {
+    blogs,
+    paginatedBlogs,
+    pagination,
+    totalPages,
+    page,
+    setPage,
+    search,
+    setSearch,
+    category,
+    setCategory,
+    categoryOptions,
+    activeFilters,
+    isLoading,
+    error,
+    handleBlogClick,
+    handleRefresh,
+    clearFilters,
+  } = useBlogs();
 
   const handlePageChange = (event, value) => {
     setPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleCardClick = (post) => {
-    navigate(`/blog/${post.title_id}`, { state: { post } });
   };
 
   const handleAuthorClick = (e, author) => {
@@ -358,9 +377,14 @@ const Blog = () => {
     navigate(`/author/${author.toLowerCase().replace(/\s+/g, "-")}`);
   };
 
-  const handleCategoryClick = (e, category) => {
+  const handleCategoryClick = (e, categoryName) => {
     e.stopPropagation();
-    navigate(`/category/${category.toLowerCase()}`);
+    setCategory(categoryName);
+  };
+
+  const clearFilter = (key) => {
+    if (key === 'search') setSearch('');
+    if (key === 'category') setCategory('All');
   };
 
   if (isLoading) {
@@ -396,7 +420,7 @@ const Blog = () => {
         />
         <BlogSection>
           <Container maxWidth="lg">
-            <Typography textAlign="center" color="error">
+            <Typography textAlign="center" color="error" sx={{ py: 4 }}>
               Error loading blogs: {error.message}
             </Typography>
           </Container>
@@ -414,38 +438,104 @@ const Blog = () => {
         icon={true}
         iconClass="flaticon-custom-icon"
       />
-      <BlogSection sx={{ py: { xs: 5, md: 12 } }}>
+      <BlogSection>
         <Container maxWidth="lg">
-          {blogs.length === 0 ? (
-            <Typography textAlign="center" variant="h6" color="text.secondary">
-              No blogs found
-            </Typography>
+          {/* Filter Bar */}
+          <FilterBar>
+            <FilterRow>
+              <SearchInput
+                placeholder="Search blogs..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                size="small"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: '16px', color: '#bbb' }} /></InputAdornment>,
+                  endAdornment: search ? (
+                    <InputAdornment position="end">
+                      <CloseIcon sx={{ fontSize: '14px', color: '#bbb', cursor: 'pointer' }} onClick={() => setSearch('')} />
+                    </InputAdornment>
+                  ) : null,
+                }}
+              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1' }}>
+                <FilterLabel>Category</FilterLabel>
+                <FormControl size="small" sx={{ flex: '1', minWidth: '140px' }}>
+                  <CategorySelect value={category} onChange={e => setCategory(e.target.value)} displayEmpty>
+                    {categoryOptions.map(c => <MenuItem key={c} value={c} sx={{ fontSize: '13px' }}>{c}</MenuItem>)}
+                  </CategorySelect>
+                </FormControl>
+              </Box>
+            </FilterRow>
+          </FilterBar>
+
+          {/* Active Filters */}
+          {activeFilters.length > 0 && (
+            <ActiveFiltersRow>
+              <Typography sx={{ fontSize: '11px', color: '#999', mr: '4px' }}>Active:</Typography>
+              {activeFilters.map(f => (
+                <Chip 
+                  key={f.key} 
+                  label={f.label} 
+                  size="small" 
+                  onDelete={() => clearFilter(f.key)}
+                  sx={{ backgroundColor: '#f0ecfb', color: PRIMARY_COLOR, fontWeight: 500, fontSize: '11px', height: '22px' }}
+                />
+              ))}
+              <Button 
+                size="small" 
+                onClick={clearFilters}
+                sx={{ fontSize: '11px', color: PRIMARY_COLOR, textTransform: 'none', fontWeight: 500 }}
+              >
+                Clear All
+              </Button>
+            </ActiveFiltersRow>
+          )}
+
+          {/* Results Count */}
+          <Typography sx={{ fontSize: '12px', color: '#999', mb: '14px' }}>
+            Showing {paginatedBlogs.length} of {pagination.totalBlogs || 0} blog{pagination.totalBlogs !== 1 ? 's' : ''}
+          </Typography>
+
+          {/* Blog Grid */}
+          {paginatedBlogs.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography sx={{ fontSize: '14px', color: '#666', mb: 2 }}>
+                No blogs match your filters
+              </Typography>
+              <Button 
+                onClick={clearFilters} 
+                variant="outlined"
+                sx={{ color: PRIMARY_COLOR, borderColor: PRIMARY_COLOR }}
+              >
+                Clear All Filters
+              </Button>
+            </Box>
           ) : (
             <>
               <Grid container spacing={isMobile ? 2 : 3}>
-                {blogs.map((post) => (
+                {paginatedBlogs.map((post) => (
                   <Grid size={{ xs: 12, sm: 6, md: 4 }} key={post._id}>
-                    <BlogCard onClick={() => handleCardClick(post)}>
-                      <Box className="blog-image-wrapper">
-                        <ImageWrapper>
-                          <BlogImage
-                            src={post.imageUrl || post.image}
-                            alt={post.title}
-                            className="blog-image"
-                            loading="lazy"
-                          />
-                          <CategoryTag
-                            className="blog-category"
-                            onClick={(e) => handleCategoryClick(e, post.category)}
-                          >
-                            {post.category}
-                          </CategoryTag>
-                        </ImageWrapper>
-                      </Box>
+                    <BlogCard onClick={() => handleBlogClick(post)}>
+                      <ImageWrapper>
+                        <BlogImage
+                          src={post.imageUrl || post.image}
+                          alt={post.title}
+                          className="blog-image"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                          }}
+                        />
+                        <CategoryTag
+                          className="blog-category"
+                          onClick={(e) => handleCategoryClick(e, post.category)}
+                        >
+                          {post.category}
+                        </CategoryTag>
+                      </ImageWrapper>
 
                       <BlogContent>
                         <BlogTitle>{post.title}</BlogTitle>
-
                         <BlogDescription>
                           {post.excerpt ||
                             post.content
@@ -453,57 +543,36 @@ const Blog = () => {
                               .substring(0, 100) + "..."}
                         </BlogDescription>
 
-                        <AuthorInfoWrapper>
-                          {/* Initially visible - only date (hidden on mobile) */}
+                        <MetaWrapper>
                           {!isMobile && (
                             <DateOnly className="date-only">
                               {formatDate(post.publishedAt || post.date)}
                             </DateOnly>
                           )}
-
-                          {/* Author info - visible on hover (always visible on mobile) */}
                           <AuthorInfo className="author-info">
-                            <DateText variant="body2">
+                            <Typography sx={{ color: '#999', fontSize: '11px' }}>
                               {formatDate(post.publishedAt || post.date)}
-                            </DateText>
+                            </Typography>
                             {post.author && (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "4px",
-                                  flexWrap: "wrap",
-                                }}
-                              >
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    color: "#666",
-                                    fontSize: isMobile ? "12px" : "14px",
-                                  }}
-                                >
-                                  by
-                                </Typography>
-                                <AuthorLink
-                                  onClick={(e) => handleAuthorClick(e, post.author)}
-                                >
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Typography sx={{ color: '#999', fontSize: '11px' }}>by</Typography>
+                                <AuthorLink onClick={(e) => handleAuthorClick(e, post.author)}>
                                   {post.author}
                                 </AuthorLink>
                               </Box>
                             )}
                           </AuthorInfo>
-                        </AuthorInfoWrapper>
+                        </MetaWrapper>
                       </BlogContent>
                     </BlogCard>
                   </Grid>
                 ))}
               </Grid>
 
-              {/* Show pagination only if total items > 9 */}
-              {pagination.totalPages > 1 && (
+              {totalPages > 1 && (
                 <PaginationWrapper>
                   <StyledPagination
-                    count={pagination.totalPages}
+                    count={totalPages}
                     page={page}
                     onChange={handlePageChange}
                     variant="outlined"

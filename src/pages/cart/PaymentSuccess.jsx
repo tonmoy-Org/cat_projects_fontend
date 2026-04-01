@@ -7,6 +7,8 @@ import {
     Box,
     Divider,
     styled,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
@@ -48,30 +50,28 @@ const PageWrapper = styled(Box)({
     padding: '60px 0',
 });
 
-const Card = styled(Box)({
+const Card = styled(Box)(({ theme }) => ({
     backgroundColor: '#ffffff',
     border: `1px solid ${borderColor}`,
     borderRadius: '12px',
-    padding: '56px 48px',
+    padding: '48px 40px',
     width: '100%',
     maxWidth: 560,
     textAlign: 'center',
     animation: `${fadeUp} 0.5s ease both`,
-    '@media (max-width: 600px)': {
-        padding: '40px 24px',
+    [theme.breakpoints.down('sm')]: {
+        padding: '32px 24px',
     },
-});
+}));
 
 const IconRing = styled(Box)({
     position: 'relative',
-    width: 88,
-    height: 88,
-    margin: '0 auto 32px',
+    width: 80,
+    height: 80,
+    margin: '0 auto 28px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-
-    // ripple pseudo-element via Box child
 });
 
 const RippleCircle = styled(Box)({
@@ -82,9 +82,9 @@ const RippleCircle = styled(Box)({
     animation: `${ripple} 2s ease-out infinite`,
 });
 
-const IconCircle = styled(Box)({
-    width: 88,
-    height: 88,
+const IconCircle = styled(Box)(({ theme }) => ({
+    width: 80,
+    height: 80,
     borderRadius: '50%',
     backgroundColor: '#fdf4fb',
     border: `2px solid ${primaryColor}`,
@@ -94,38 +94,48 @@ const IconCircle = styled(Box)({
     animation: `${scaleIn} 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both`,
     position: 'relative',
     zIndex: 1,
-});
+    [theme.breakpoints.down('sm')]: {
+        width: 70,
+        height: 70,
+    },
+}));
 
 const DetailRow = styled(Box)({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '12px 0',
+    padding: '10px 0',
     '&:not(:last-child)': {
         borderBottom: `1px dashed ${borderColor}`,
     },
 });
 
-const DetailLabel = styled(Typography)({
-    fontSize: '14px',
+const DetailLabel = styled(Typography)(({ theme }) => ({
+    fontSize: '13px',
     color: darkGray,
     fontWeight: 500,
-});
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '12px',
+    },
+}));
 
-const DetailValue = styled(Typography)({
-    fontSize: '14px',
+const DetailValue = styled(Typography)(({ theme }) => ({
+    fontSize: '13px',
     color: textColor,
     fontWeight: 600,
     textAlign: 'right',
     maxWidth: '55%',
     wordBreak: 'break-all',
-});
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '12px',
+    },
+}));
 
-const PrimaryButton = styled(Button)({
+const PrimaryButton = styled(Button)(({ theme }) => ({
     backgroundColor: primaryColor,
     color: '#fff',
-    padding: '13px 28px',
-    fontSize: '15px',
+    padding: '11px 24px',
+    fontSize: '13px',
     fontWeight: 600,
     textTransform: 'none',
     borderRadius: '8px',
@@ -133,13 +143,17 @@ const PrimaryButton = styled(Button)({
     '&:hover': {
         backgroundColor: '#c06bb0',
     },
-});
+    [theme.breakpoints.down('sm')]: {
+        padding: '10px 20px',
+        fontSize: '12px',
+    },
+}));
 
-const OutlineBtn = styled(Button)({
+const OutlineBtn = styled(Button)(({ theme }) => ({
     color: primaryColor,
     border: `1.5px solid ${primaryColor}`,
-    padding: '13px 28px',
-    fontSize: '15px',
+    padding: '11px 24px',
+    fontSize: '13px',
     fontWeight: 600,
     textTransform: 'none',
     borderRadius: '8px',
@@ -149,26 +163,36 @@ const OutlineBtn = styled(Button)({
         backgroundColor: '#fdf4fb',
         border: `1.5px solid ${primaryColor}`,
     },
-});
+    [theme.breakpoints.down('sm')]: {
+        padding: '10px 20px',
+        fontSize: '12px',
+    },
+}));
 
-const StatusBadge = styled(Box)({
+const StatusBadge = styled(Box)(({ theme }) => ({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
     backgroundColor: '#f0fbf1',
     border: '1px solid #c3e6c5',
     borderRadius: '20px',
-    padding: '5px 14px',
-    fontSize: '13px',
+    padding: '4px 12px',
+    fontSize: '12px',
     fontWeight: 600,
     color: '#2e7d32',
-    marginBottom: '20px',
-});
+    marginBottom: '18px',
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '11px',
+        padding: '3px 10px',
+    },
+}));
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const PaymentSuccess = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const query         = new URLSearchParams(location.search);
     const transactionId = query.get('transactionId');
@@ -194,7 +218,7 @@ const PaymentSuccess = () => {
                         <RippleCircle />
                         <IconCircle>
                             <CheckCircleOutlineIcon
-                                sx={{ fontSize: 44, color: primaryColor }}
+                                sx={{ fontSize: { xs: 36, sm: 40 }, color: primaryColor }}
                             />
                         </IconCircle>
                     </IconRing>
@@ -203,8 +227,8 @@ const PaymentSuccess = () => {
                     <StatusBadge>
                         <Box
                             sx={{
-                                width: 7,
-                                height: 7,
+                                width: 6,
+                                height: 6,
                                 borderRadius: '50%',
                                 backgroundColor: '#4caf50',
                             }}
@@ -215,7 +239,7 @@ const PaymentSuccess = () => {
                     {/* Heading */}
                     <Typography
                         sx={{
-                            fontSize: { xs: '1.5rem', md: '1.9rem' },
+                            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem' },
                             fontWeight: 700,
                             color: textColor,
                             mb: 1.5,
@@ -227,12 +251,12 @@ const PaymentSuccess = () => {
 
                     <Typography
                         sx={{
-                            fontSize: '15px',
+                            fontSize: { xs: '12px', sm: '13px' },
                             color: darkGray,
-                            mb: 4,
+                            mb: 3,
                             maxWidth: '80%',
                             mx: 'auto',
-                            lineHeight: 1.7,
+                            lineHeight: 1.6,
                         }}
                     >
                         Your payment was processed successfully. A confirmation
@@ -245,8 +269,8 @@ const PaymentSuccess = () => {
                             backgroundColor,
                             border: `1px solid ${borderColor}`,
                             borderRadius: '8px',
-                            padding: '4px 20px',
-                            mb: 4,
+                            padding: '2px 18px',
+                            mb: 3,
                             textAlign: 'left',
                         }}
                     >
@@ -292,14 +316,14 @@ const PaymentSuccess = () => {
                     >
                         <OutlineBtn
                             variant="outlined"
-                            startIcon={<ShoppingBagOutlinedIcon />}
+                            startIcon={<ShoppingBagOutlinedIcon sx={{ fontSize: '18px' }} />}
                             onClick={() => navigate('/orders')}
                         >
                             My Orders
                         </OutlineBtn>
                         <PrimaryButton
                             variant="contained"
-                            endIcon={<ArrowForwardIcon />}
+                            endIcon={<ArrowForwardIcon sx={{ fontSize: '16px' }} />}
                             onClick={() => navigate('/shop')}
                         >
                             Continue Shopping
@@ -308,12 +332,12 @@ const PaymentSuccess = () => {
 
                     {/* Back to home link */}
                     <Button
-                        startIcon={<HomeOutlinedIcon sx={{ fontSize: '16px' }} />}
+                        startIcon={<HomeOutlinedIcon sx={{ fontSize: '14px' }} />}
                         onClick={() => navigate('/')}
                         sx={{
-                            mt: 2.5,
+                            mt: 2,
                             color: darkGray,
-                            fontSize: '13px',
+                            fontSize: '12px',
                             textTransform: 'none',
                             fontWeight: 500,
                             '&:hover': {

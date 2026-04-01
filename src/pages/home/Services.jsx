@@ -23,7 +23,7 @@ import HotelIcon from '@mui/icons-material/Hotel';
 const primaryColor = '#ff6b6b';
 const iconColor = '#db89ca';
 
-// Styled components
+// Styled components with consistent font sizes
 const ServicesSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#f9f9f9',
   padding: '80px 0',
@@ -31,7 +31,7 @@ const ServicesSection = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 
   [theme.breakpoints.down('sm')]: {
-    padding: '20px 0',
+    padding: '50px 0',
   },
 }));
 
@@ -45,13 +45,13 @@ const HeaderTopRow = styled(Box)({
   alignItems: 'center',
   justifyContent: 'center',
   gap: '10px',
-  marginBottom: '15px',
+  marginBottom: '12px',
   flexWrap: 'wrap',
 });
 
 const SectionIconWrapper = styled(Box)({
-  width: '30px',
-  height: '30px',
+  width: '26px',
+  height: '26px',
   borderRadius: '50%',
   backgroundColor: iconColor,
   display: 'flex',
@@ -60,26 +60,26 @@ const SectionIconWrapper = styled(Box)({
 });
 
 const SectionSubtitle = styled(Typography)({
-  fontSize: '14px',
+  fontSize: '10px',
   fontWeight: 600,
   letterSpacing: '1px',
   color: '#666',
   textTransform: 'uppercase',
 });
 
-const SectionTitle = styled(Typography)({
-  fontSize: '38px',
+const SectionTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '26px',
   fontWeight: 700,
   color: '#1a1a1a',
   lineHeight: 1.2,
-  '@media (max-width: 900px)': {
+  [theme.breakpoints.down('md')]: {
     fontSize: '32px',
   },
-  '@media (max-width: 600px)': {
+  [theme.breakpoints.down('sm')]: {
     fontSize: '28px',
     padding: '0 15px',
   },
-});
+}));
 
 const CarouselContainer = styled(Box)({
   position: 'relative',
@@ -125,7 +125,7 @@ const FlipCardInner = styled(Box)({
   transition: 'transform 0.6s',
   transformStyle: 'preserve-3d',
   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-  borderRadius: '10px',
+  borderRadius: '12px',
 });
 
 const FlipCardFront = styled(Box)({
@@ -134,7 +134,7 @@ const FlipCardFront = styled(Box)({
   height: '100%',
   backfaceVisibility: 'hidden',
   backgroundColor: '#fff',
-  borderRadius: '10px',
+  borderRadius: '12px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -148,12 +148,12 @@ const FlipCardBack = styled(Box)({
   height: '100%',
   backfaceVisibility: 'hidden',
   backgroundColor: '#fff',
-  borderRadius: '10px',
+  borderRadius: '12px',
   transform: 'rotateY(180deg)',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  borderTop: `3px solid ${primaryColor}`,
+  borderTop: `4px solid ${primaryColor}`,
 });
 
 const CardImage = styled('img')({
@@ -186,37 +186,31 @@ const IconWrapper = styled(Box)(({ bgcolor }) => ({
 }));
 
 const CardTitle = styled(Typography)({
-  fontSize: '20px',
+  fontSize: '16px',
   fontWeight: 600,
   color: '#1a1a1a',
-  marginBottom: '15px',
-  position: 'relative',
-  display: 'inline-block',
-  '& a': {
-    color: 'inherit',
-    textDecoration: 'none',
-  },
+  marginBottom: '12px',
 });
 
 const CardText = styled(Typography)({
-  fontSize: '14px',
+  fontSize: '13px',
   color: '#666',
   lineHeight: 1.6,
-  marginBottom: '15px',
+  marginBottom: '18px',
+  flex: 1,
 });
 
 const ReadMoreButton = styled(Button)({
   backgroundColor: primaryColor,
   color: '#fff',
-  padding: '8px 60px',
-  fontSize: '14px',
-  fontWeight: 500,
+  padding: '8px 24px',
+  fontSize: '13px',
+  fontWeight: 600,
   textTransform: 'none',
   borderRadius: '25px',
   boxShadow: 'none',
   marginTop: 'auto',
   alignSelf: 'center',
-  minWidth: '110px',
   '&:hover': {
     backgroundColor: '#ff5252',
     boxShadow: '0 5px 15px rgba(255,107,107,0.3)',
@@ -243,7 +237,7 @@ const Dot = styled(Box)(({ active }) => ({
   },
 }));
 
-// Service data with real icons
+// Service data
 const services = [
   {
     id: 1,
@@ -324,19 +318,10 @@ const Services = () => {
   const cardsPerView = 4;
   const totalSlides = Math.ceil(services.length / cardsPerView);
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
-  };
-
   const handleDotClick = (index) => {
     setCurrentIndex(index);
   };
 
-  // Get current cards to display
   const startIndex = currentIndex * cardsPerView;
   const visibleCards = services.slice(startIndex, startIndex + cardsPerView);
 
@@ -351,13 +336,9 @@ const Services = () => {
                 <SectionIconWrapper>
                   <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
                 </SectionIconWrapper>
-                <SectionSubtitle>
-                  We love animals
-                </SectionSubtitle>
+                <SectionSubtitle>We love animals</SectionSubtitle>
               </HeaderTopRow>
-              <SectionTitle>
-                Our pet care services
-              </SectionTitle>
+              <SectionTitle>Our pet care services</SectionTitle>
             </SectionHeaderWrapper>
           </Grid>
         </Grid>
@@ -365,12 +346,12 @@ const Services = () => {
         {/* Carousel */}
         <CarouselContainer>
           <Box sx={{ overflow: 'hidden' }}>
-            <CardsWrapper>
+            <CardsWrapper sx={{ transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)` }}>
               {visibleCards.map((service) => (
                 <CardWrapper key={service.id}>
                   <FlipCard>
                     <FlipCardInner className="flip-card-inner">
-                      {/* Front of card - shown normally (icon, title, description) */}
+                      {/* Front Side */}
                       <FlipCardFront>
                         <IconWrapper bgcolor={service.iconBg}>
                           {service.icon}
@@ -378,24 +359,17 @@ const Services = () => {
                         <CardTitle>
                           <a href={service.link}>{service.title}</a>
                         </CardTitle>
-                        <CardText>
-                          {service.description}
-                        </CardText>
+                        <CardText>{service.description}</CardText>
                       </FlipCardFront>
 
-                      {/* Back of card - shown on hover (image, title, description, button) */}
+                      {/* Back Side */}
                       <FlipCardBack>
-                        <CardImage
-                          src={service.image}
-                          alt={service.title}
-                        />
+                        <CardImage src={service.image} alt={service.title} />
                         <CardContentBack>
                           <CardTitle>
                             <a href={service.link}>{service.title}</a>
                           </CardTitle>
-                          <CardText>
-                            {service.description}
-                          </CardText>
+                          <CardText>{service.description}</CardText>
                           <ReadMoreButton href={service.link}>
                             Read more
                           </ReadMoreButton>

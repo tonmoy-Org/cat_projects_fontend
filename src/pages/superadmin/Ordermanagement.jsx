@@ -7,6 +7,7 @@ import {
     TablePagination, alpha, CircularProgress, Select, MenuItem,
     FormControl, TextField, InputAdornment, Tooltip, Divider, Paper,
     Grid, Button,
+    Chip,
 } from '@mui/material';
 import {
     Search as SearchIcon,
@@ -19,6 +20,7 @@ import {
     Receipt as ReceiptIcon,
     CheckCircle as CheckIcon,
     HourglassEmpty as PendingIcon,
+    LocalShipping as ShippingIcon,
 } from '@mui/icons-material';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../../api/axios';
@@ -249,7 +251,6 @@ export default function OrderManagement() {
     // ── Delete order mutation ─────────────────────────────────────────────────
     const deleteMutation = useMutation({
         mutationFn: async (id) => {
-            // Use MongoDB _id for the DELETE route, not the human-readable orderId
             const res = await axiosInstance.delete(`/orders/${id}`);
             return res.data;
         },
@@ -257,7 +258,6 @@ export default function OrderManagement() {
             queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
             addAlert('success', 'Order deleted successfully!');
             setDeleteTarget(null);
-            // Page boundary fix: step back if current page becomes empty
             if ((filtered.length - 1) % rowsPerPage === 0 && page > 0) {
                 setPage(page - 1);
             }
@@ -445,7 +445,6 @@ export default function OrderManagement() {
                                 const isDeleting = deleteMutation.isPending && deleteTarget?._id === order._id;
                                 return (
                                     <StyledTableRow key={order._id} sx={{ opacity: isDeleting ? 0.5 : 1 }}>
-                                        {/* Order ID */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <Typography sx={{ fontSize: 12, fontWeight: 700, color: PRIMARY }}>
                                                 {order.orderId}
@@ -454,7 +453,6 @@ export default function OrderManagement() {
                                                 {order.transactionId?.slice(0, 20)}…
                                             </Typography>
                                         </TableCell>
-                                        {/* Customer */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <Typography sx={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
                                                 {order.customerName}
@@ -463,7 +461,6 @@ export default function OrderManagement() {
                                                 {order.customerEmail}
                                             </Typography>
                                         </TableCell>
-                                        {/* Items */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <Typography sx={{ fontSize: 12, color: TEXT }}>
                                                 {order.items?.length} item{order.items?.length !== 1 ? 's' : ''}
@@ -472,7 +469,6 @@ export default function OrderManagement() {
                                                 {order.items?.map(i => i.productName).join(', ')}
                                             </Typography>
                                         </TableCell>
-                                        {/* Total */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <Typography sx={{ fontSize: 13, fontWeight: 700, color: TEXT }}>
                                                 {fmt(order.totalAmount)}
@@ -481,26 +477,22 @@ export default function OrderManagement() {
                                                 {order.shippingDistrict?.charAt(0).toUpperCase() + order.shippingDistrict?.slice(1)}
                                             </Typography>
                                         </TableCell>
-                                        {/* Payment status */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <StatusChip statuscolor={ps.color} statusbg={ps.bg} statusborder={ps.border}>
                                                 <Box sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: ps.color, flexShrink: 0 }} />
                                                 {ps.label}
                                             </StatusChip>
                                         </TableCell>
-                                        {/* Order status */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <StatusChip statuscolor={os.color} statusbg={os.bg} statusborder={os.border}>
                                                 {os.label}
                                             </StatusChip>
                                         </TableCell>
-                                        {/* Date */}
                                         <TableCell sx={{ py: 1.2 }}>
                                             <Typography sx={{ fontSize: 12, color: TEXT, whiteSpace: 'nowrap' }}>
                                                 {fmtDate(order.createdAt)}
                                             </Typography>
                                         </TableCell>
-                                        {/* Actions */}
                                         <TableCell sx={{ py: 1.2 }} align="right">
                                             <Tooltip title="View Details">
                                                 <ActionIconBtn btncolor={PRIMARY} onClick={() => setViewOrder(order)}>
@@ -543,36 +535,39 @@ export default function OrderManagement() {
                 />
             </TableContainer>
 
-            {/* ── View Order Dialog ────────────────────────────────────────── */}
+            {/* ── View Order Dialog - Enhanced with images and all details ───── */}
             <Dialog
                 open={!!viewOrder}
                 onClose={() => setViewOrder(null)}
-                maxWidth="sm"
+                maxWidth="md"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 2, border: `1px solid ${BORDER}` } }}
+                PaperProps={{ sx: { borderRadius: 2, border: `1px solid ${BORDER}`, overflow: 'hidden' } }}
             >
-                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, px: 3 }}>
-                    <Box>
-                        <Typography sx={{ fontSize: 16, fontWeight: 700, color: TEXT }}>
-                            Order Details
-                        </Typography>
-                        <Typography sx={{ fontSize: 12, color: PRIMARY, fontWeight: 600 }}>
-                            {viewOrder?.orderId}
-                        </Typography>
-                    </Box>
-                    <IconButton size="small" onClick={() => setViewOrder(null)} sx={{ color: GRAY }}>
-                        <CloseIcon fontSize="small" />
-                    </IconButton>
-                </DialogTitle>
-                <Divider />
-                <DialogContent sx={{ px: 3, py: 2 }}>
-                    {viewOrder && (() => {
-                        const ps = PAYMENT_STATUS[viewOrder.paymentStatus] || PAYMENT_STATUS.pending;
-                        const os = ORDER_STATUS[viewOrder.orderStatus] || ORDER_STATUS.pending;
-                        return (
-                            <>
+                {viewOrder && (() => {
+                    const ps = PAYMENT_STATUS[viewOrder.paymentStatus] || PAYMENT_STATUS.pending;
+                    const os = ORDER_STATUS[viewOrder.orderStatus] || ORDER_STATUS.pending;
+                    return (
+                        <>
+                            <DialogTitle sx={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                py: 2, px: 3, backgroundColor: alpha(PRIMARY, 0.04),
+                            }}>
+                                <Box>
+                                    <Typography sx={{ fontSize: 16, fontWeight: 700, color: TEXT }}>
+                                        Order Details
+                                    </Typography>
+                                    <Typography sx={{ fontSize: 12, color: PRIMARY, fontWeight: 600 }}>
+                                        {viewOrder.orderId}
+                                    </Typography>
+                                </Box>
+                                <IconButton size="small" onClick={() => setViewOrder(null)} sx={{ color: GRAY }}>
+                                    <CloseIcon fontSize="small" />
+                                </IconButton>
+                            </DialogTitle>
+                            <Divider />
+                            <DialogContent sx={{ px: 3, py: 3, backgroundColor: BG }}>
                                 {/* Status badges */}
-                                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                                <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
                                     <StatusChip statuscolor={ps.color} statusbg={ps.bg} statusborder={ps.border}>
                                         <Box sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: ps.color }} />
                                         Payment: {ps.label}
@@ -582,54 +577,103 @@ export default function OrderManagement() {
                                     </StatusChip>
                                 </Box>
 
-                                {/* Customer */}
+                                {/* Customer Information */}
                                 <SectionLabel>Customer Information</SectionLabel>
-                                <Box sx={{ backgroundColor: BG, borderRadius: 1.5, p: 2, mb: 0 }}>
+                                <Box sx={{ backgroundColor: '#fff', borderRadius: 1.5, p: 2, mb: 0, border: `1px solid ${BORDER}` }}>
                                     {[
                                         ['Name', viewOrder.customerName],
                                         ['Email', viewOrder.customerEmail],
                                         ['Phone', viewOrder.customerPhone],
                                         ['Address', `${viewOrder.customerAddress?.street}, ${viewOrder.customerAddress?.city}, ${viewOrder.customerAddress?.district?.toUpperCase()}, ${viewOrder.customerAddress?.postalCode}`],
+                                        ['District', viewOrder.shippingDistrict?.charAt(0).toUpperCase() + viewOrder.shippingDistrict?.slice(1)],
                                     ].map(([k, v]) => (
                                         <DetailRow key={k}>
                                             <Typography sx={{ fontSize: 12, color: GRAY, fontWeight: 500 }}>{k}</Typography>
-                                            <Typography sx={{ fontSize: 12, color: TEXT, fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{v}</Typography>
+                                            <Typography sx={{ fontSize: 12, color: TEXT, fontWeight: 600, textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{v || '—'}</Typography>
                                         </DetailRow>
                                     ))}
                                 </Box>
 
-                                {/* Items */}
-                                <SectionLabel>Order Items</SectionLabel>
-                                <Box sx={{ backgroundColor: BG, borderRadius: 1.5, overflow: 'hidden', mb: 0 }}>
-                                    {viewOrder.items?.map((item, i) => (
-                                        <Box key={i} sx={{
-                                            display: 'flex', justifyContent: 'space-between',
-                                            alignItems: 'center', p: '10px 16px',
-                                            borderBottom: i < viewOrder.items.length - 1 ? `1px solid ${BORDER}` : 'none',
-                                        }}>
-                                            <Box>
-                                                <Typography sx={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
-                                                    {item.productName}
+                                {/* Order Items with Images */}
+                                <SectionLabel>Order Items ({viewOrder.items?.length || 0})</SectionLabel>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                                    {viewOrder.items?.map((item, idx) => (
+                                        <Box
+                                            key={idx}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 2,
+                                                p: 1.5,
+                                                borderRadius: 2,
+                                                backgroundColor: '#fff',
+                                                border: `1px solid ${BORDER}`,
+                                            }}
+                                        >
+                                            {/* Product Image */}
+                                            <Box
+                                                component="img"
+                                                src={item.details?.featuredImage || item.image || 'https://via.placeholder.com/60'}
+                                                alt={item.productName || item.name}
+                                                sx={{
+                                                    width: 60,
+                                                    height: 60,
+                                                    objectFit: 'cover',
+                                                    borderRadius: 1.5,
+                                                    border: `1px solid ${BORDER}`,
+                                                    backgroundColor: BG,
+                                                }}
+                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/60'; }}
+                                            />
+                                            
+                                            {/* Product Details */}
+                                            <Box sx={{ flex: 1 }}>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: TEXT, fontSize: '0.85rem', mb: 0.5 }}>
+                                                    {item.productName || item.name}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: 11, color: GRAY }}>
-                                                    {item.itemType} · qty {item.quantity} · {fmt(item.price)} each
+                                                <Typography variant="caption" sx={{ color: GRAY, fontSize: '0.7rem' }}>
+                                                    {item.itemType === 'pet' ? 'Pet' : 'Product'}
+                                                </Typography>
+                                                {item.details?.breed && (
+                                                    <Typography variant="caption" sx={{ color: GRAY, fontSize: '0.7rem', display: 'block' }}>
+                                                        Breed: {item.details.breed}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                            
+                                            {/* Price and Quantity */}
+                                            <Box sx={{ textAlign: 'right' }}>
+                                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#2e7d32', fontSize: '0.85rem' }}>
+                                                    {fmt(item.price)}
+                                                </Typography>
+                                                <Chip
+                                                    label={`x${item.quantity}`}
+                                                    size="small"
+                                                    sx={{
+                                                        fontSize: '0.7rem',
+                                                        height: 22,
+                                                        mt: 0.5,
+                                                        backgroundColor: alpha(PRIMARY, 0.1),
+                                                        color: PRIMARY,
+                                                        fontWeight: 600,
+                                                    }}
+                                                />
+                                                <Typography variant="caption" sx={{ color: GRAY, fontSize: '0.7rem', display: 'block', mt: 0.5 }}>
+                                                    Subtotal: {fmt(item.subtotal)}
                                                 </Typography>
                                             </Box>
-                                            <Typography sx={{ fontSize: 13, fontWeight: 700, color: TEXT }}>
-                                                {fmt(item.subtotal)}
-                                            </Typography>
                                         </Box>
                                     ))}
                                 </Box>
 
-                                {/* Pricing */}
+                                {/* Pricing Breakdown */}
                                 <SectionLabel>Pricing Breakdown</SectionLabel>
-                                <Box sx={{ backgroundColor: BG, borderRadius: 1.5, p: 2 }}>
+                                <Box sx={{ backgroundColor: '#fff', borderRadius: 1.5, p: 2, border: `1px solid ${BORDER}` }}>
                                     {[
                                         ['Subtotal', fmt(viewOrder.subtotal)],
                                         ['Discount', viewOrder.discount > 0 ? `− ${fmt(viewOrder.discount)}` : '৳0'],
-                                        ['Shipping', fmt(viewOrder.shippingCost)],
-                                        ['Tax (15%)', fmt(viewOrder.tax)],
+                                        ['Shipping Cost', fmt(viewOrder.shippingCost)],
+                                        ['Tax', fmt(viewOrder.tax)],
                                     ].map(([k, v]) => (
                                         <DetailRow key={k}>
                                             <Typography sx={{ fontSize: 12, color: GRAY }}>{k}</Typography>
@@ -637,46 +681,46 @@ export default function OrderManagement() {
                                         </DetailRow>
                                     ))}
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 1.5, mt: 0.5, borderTop: `2px solid ${BORDER}` }}>
-                                        <Typography sx={{ fontSize: 14, fontWeight: 700, color: TEXT }}>Total</Typography>
+                                        <Typography sx={{ fontSize: 14, fontWeight: 700, color: TEXT }}>Total Amount</Typography>
                                         <Typography sx={{ fontSize: 14, fontWeight: 700, color: PRIMARY }}>{fmt(viewOrder.totalAmount)}</Typography>
                                     </Box>
                                 </Box>
 
-                                {/* Payment info */}
-                                <SectionLabel>Payment Info</SectionLabel>
-                                <Box sx={{ backgroundColor: BG, borderRadius: 1.5, p: 2 }}>
+                                {/* Payment Info */}
+                                <SectionLabel>Payment Information</SectionLabel>
+                                <Box sx={{ backgroundColor: '#fff', borderRadius: 1.5, p: 2, border: `1px solid ${BORDER}` }}>
                                     {[
                                         ['Transaction ID', viewOrder.transactionId],
-                                        ['Method', viewOrder.paymentMethod],
-                                        ['District', viewOrder.shippingDistrict?.charAt(0).toUpperCase() + viewOrder.shippingDistrict?.slice(1)],
-                                        ['Created', fmtDateTime(viewOrder.createdAt)],
-                                        ['Paid At', viewOrder.paidAt ? fmtDateTime(viewOrder.paidAt) : 'Not paid'],
+                                        ['Payment Method', viewOrder.paymentMethod?.toUpperCase()],
+                                        ['Currency', viewOrder.currency],
+                                        ['Created At', fmtDateTime(viewOrder.createdAt)],
+                                        ['Paid At', viewOrder.paidAt ? fmtDateTime(viewOrder.paidAt) : 'Not paid yet'],
                                     ].map(([k, v]) => (
                                         <DetailRow key={k}>
                                             <Typography sx={{ fontSize: 12, color: GRAY, fontWeight: 500 }}>{k}</Typography>
-                                            <Typography sx={{ fontSize: 12, color: TEXT, fontWeight: 600, textAlign: 'right', maxWidth: '60%', wordBreak: 'break-all' }}>{v}</Typography>
+                                            <Typography sx={{ fontSize: 12, color: TEXT, fontWeight: 600, textAlign: 'right', maxWidth: '60%', wordBreak: 'break-all' }}>{v || '—'}</Typography>
                                         </DetailRow>
                                     ))}
                                 </Box>
-                            </>
-                        );
-                    })()}
-                </DialogContent>
-                <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${BORDER}`, gap: 1 }}>
-                    <DangerBtn
-                        onClick={() => {
-                            const target = viewOrder;
-                            setViewOrder(null);
-                            setDeleteTarget(target);
-                        }}
-                    >
-                        Delete Order
-                    </DangerBtn>
-                    <PrimaryBtn onClick={() => { setViewOrder(null); openEdit(viewOrder); }}>
-                        Update Status
-                    </PrimaryBtn>
-                    <OutlineBtn onClick={() => setViewOrder(null)}>Close</OutlineBtn>
-                </DialogActions>
+                            </DialogContent>
+                            <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${BORDER}`, gap: 1, backgroundColor: '#fff' }}>
+                                <DangerBtn
+                                    onClick={() => {
+                                        const target = viewOrder;
+                                        setViewOrder(null);
+                                        setDeleteTarget(target);
+                                    }}
+                                >
+                                    Delete Order
+                                </DangerBtn>
+                                <PrimaryBtn onClick={() => { setViewOrder(null); openEdit(viewOrder); }}>
+                                    Update Status
+                                </PrimaryBtn>
+                                <OutlineBtn onClick={() => setViewOrder(null)}>Close</OutlineBtn>
+                            </DialogActions>
+                        </>
+                    );
+                })()}
             </Dialog>
 
             {/* ── Edit Status Dialog ───────────────────────────────────────── */}

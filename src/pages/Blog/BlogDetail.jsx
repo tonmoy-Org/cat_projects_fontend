@@ -1,4 +1,3 @@
-// BlogDetail.jsx
 import React, { useState } from 'react';
 import {
   Container,
@@ -7,72 +6,71 @@ import {
   Typography,
   styled,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import PetsIcon from '@mui/icons-material/Pets';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import SectionTile from '../../components/SectionTile';
+import { useBlogApi } from '../../hooks/useBlogApi';
 
-const primaryColor = '#ff6b6b';
+const PRIMARY_COLOR = '#5C4D91';
+const ACCENT = '#db89ca';
 const textColor = '#666';
+
+const C = {
+  primary: '#db89ca',
+  primaryDark: '#c06bb0',
+  text: '#1a1a1a',
+  textLight: '#666',
+  border: '#e0e0e0',
+  bg: '#f5f5f5',
+  price: '#ff6b6b',
+  rating: '#ffb400',
+  success: '#4caf50',
+  warning: '#ff9800',
+  error: '#f44336',
+};
 
 const BlogDetailSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#ffffff',
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
-  padding: '80px 0',
+  padding: '60px 0',
   [theme.breakpoints.down('sm')]: {
-    padding: '20px 0',
+    padding: '40px 0',
   },
 }));
 
 const ContentText = styled(Typography)({
-  fontSize: '16px',
+  fontSize: '15px',
   color: textColor,
   lineHeight: 1.8,
-  marginBottom: '25px',
-});
-
-const GalleryWrapper = styled(Box)({
-  marginBottom: '30px',
+  marginBottom: '20px',
 });
 
 const GalleryImage = styled('img')({
   width: '100%',
   height: 'auto',
-  maxHeight: '620px',
+  maxHeight: '500px',
   objectFit: 'cover',
-  borderRadius: '8px',
+  borderRadius: '12px',
   display: 'block',
   margin: '0 auto',
   transition: 'transform 0.3s ease',
   '&:hover': {
     transform: 'scale(1.02)',
   },
-  '@media (max-width: 900px)': {
-    maxHeight: '400px',
-  },
   '@media (max-width: 600px)': {
-    maxHeight: '220px',
-    borderRadius: '6px',
+    maxHeight: '250px',
+    borderRadius: '8px',
   },
 });
 
-const GalleryImageContainer = styled(Box)({
-  width: '100%',
-  maxWidth: '100%',
-  margin: '0 auto',
-  overflow: 'hidden',
-  borderRadius: '8px',
-  '@media (max-width: 600px)': {
-    borderRadius: '6px',
-  },
-});
-
-const LatestNewsSection = styled(Box)({
-  marginTop: '80px',
+const RelatedSection = styled(Box)({
+  marginTop: '60px',
   padding: '60px 0',
   backgroundColor: '#f9f9f9',
 });
@@ -83,35 +81,32 @@ const SectionHeaderWrapper = styled(Box)({
 });
 
 const SectionIconWrapper = styled(Box)({
-  width: 45,
-  height: 45,
+  width: '40px',
+  height: '40px',
   borderRadius: '50%',
-  backgroundColor: primaryColor,
+  backgroundColor: ACCENT,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  margin: '0 auto 15px',
+  margin: '0 auto 12px',
 });
 
 const SectionSubtitle = styled(Typography)({
-  fontSize: '15px',
+  fontSize: '12px',
   fontWeight: 600,
   letterSpacing: '1px',
-  color: '#333',
-  marginBottom: '10px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '10px',
+  color: '#999',
+  textTransform: 'uppercase',
+  marginBottom: '8px',
 });
 
 const SectionTitle = styled(Typography)({
-  fontSize: '36px',
+  fontSize: '28px',
   fontWeight: 700,
   color: '#1a1a1a',
   lineHeight: 1.2,
   '@media (max-width: 600px)': {
-    fontSize: '28px',
+    fontSize: '22px',
   },
 });
 
@@ -141,116 +136,66 @@ const CardWrapper = styled(Box)({
   },
 });
 
-const BlogCard = styled(Box)(({ theme }) => ({
+const RelatedCard = styled(Box)({
   backgroundColor: '#fff',
-  borderRadius: '8px',
+  borderRadius: '3px',
   overflow: 'hidden',
   transition: 'all 0.3s ease',
   height: '100%',
-  width: '100%',
-  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.07)',
   border: '1px solid #f0f0f0',
   cursor: 'pointer',
   '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-    '& .blog-image': { transform: 'scale(1.05)' },
-    '& .blog-category': { opacity: 1, visibility: 'visible', transform: 'translateY(0)' },
-    '& .date-only': { opacity: 0, visibility: 'hidden', display: 'none' },
-    '& .author-info': { opacity: 1, visibility: 'visible', display: 'flex' },
+    boxShadow: '0 8px 24px rgba(0,0,0,0.11)',
+    '& .related-image': { transform: 'scale(1.05)' },
   },
-}));
+});
 
-const CardImageWrapper = styled(Box)({
+const RelatedImageWrapper = styled(Box)({
   position: 'relative',
   overflow: 'hidden',
   width: '100%',
-  height: '200px',
+  height: '180px',
 });
 
-const CardImage = styled('img')({
+const RelatedImage = styled('img')({
   width: '100%',
   height: '100%',
   objectFit: 'cover',
   transition: 'transform 0.5s ease',
 });
 
-const CardCategory = styled(Box)(({ theme }) => ({
+const RelatedCategory = styled(Box)({
   position: 'absolute',
-  top: '15px',
-  right: '15px',
-  backgroundColor: primaryColor,
+  top: '10px',
+  right: '10px',
+  backgroundColor: PRIMARY_COLOR,
   color: '#fff',
-  padding: '5px 12px',
+  padding: '3px 10px',
   borderRadius: '20px',
-  fontSize: '12px',
+  fontSize: '10px',
   fontWeight: 500,
   zIndex: 2,
-  opacity: 0,
-  visibility: 'hidden',
-  transform: 'translateY(-10px)',
-  transition: 'all 0.3s ease',
-  '&:hover': { backgroundColor: '#ff5252' },
-}));
+});
 
-const CardContent = styled(Box)({ padding: '20px 18px' });
+const RelatedContent = styled(Box)({
+  padding: '12px',
+});
 
-const CardTitle = styled(Typography)({
-  fontSize: '18px',
+const RelatedTitle = styled(Typography)({
+  fontSize: '14px',
   fontWeight: 600,
-  marginBottom: '10px',
+  marginBottom: '6px',
   lineHeight: 1.4,
   color: '#333',
 });
 
-const CardDescription = styled(Typography)({
-  color: '#666',
-  fontSize: '14px',
-  lineHeight: 1.6,
-  marginBottom: '15px',
-  display: '-webkit-box',
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-});
-
-const CardMeta = styled(Box)({
+const RelatedMeta = styled(Box)({
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
+  gap: '8px',
   color: '#999',
-  fontSize: '13px',
-  position: 'relative',
-  minHeight: '24px',
-});
-
-const CardDate = styled(Typography)({
-  color: '#999',
-  fontSize: '13px',
-  transition: 'all 0.3s ease',
-  opacity: 1,
-  visibility: 'visible',
-  display: 'block',
-});
-
-const CardAuthor = styled('span')({
-  color: '#333',
-  fontWeight: 500,
-  fontSize: '13px',
-  position: 'relative',
-  cursor: 'pointer',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: '-2px',
-    left: '0',
-    width: '0',
-    height: '1px',
-    backgroundColor: primaryColor,
-    transition: 'width 0.3s ease',
-  },
-  '&:hover::after': { width: '100%' },
+  fontSize: '11px',
 });
 
 const NavButton = styled(IconButton)({
@@ -270,119 +215,133 @@ const DotsContainer = styled(Box)({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  gap: '10px',
-  marginTop: '30px',
+  gap: '8px',
+  marginTop: '24px',
 });
 
 const Dot = styled(Box)(({ active }) => ({
-  width: '12px',
-  height: '12px',
+  width: '8px',
+  height: '8px',
   borderRadius: '50%',
-  backgroundColor: active ? primaryColor : '#ddd',
+  backgroundColor: active ? PRIMARY_COLOR : '#ddd',
   cursor: 'pointer',
   transition: 'all 0.3s ease',
-  '&:hover': { backgroundColor: active ? primaryColor : '#ccc' },
 }));
 
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-};
-
-const stripHtmlTags = (html) => {
-  if (!html) return '';
-  const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
-};
+const LoadingContainer = styled(Box)({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '400px',
+});
 
 const BlogDetail = () => {
-  const location = useLocation();
   const { title_id } = useParams();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  let post = location.state?.post;
+  const { useBlogDetail } = useBlogApi();
+  const {
+    blog,
+    relatedBlogs,
+    formatDate,
+    stripHtmlTags,
+    isLoading,
+    error,
+    handleBlogClick,
+  } = useBlogDetail(title_id);
 
-  if (!post) {
-    return (
-      <BlogDetailSection>
-        <Container>
-          <Typography variant="h4" sx={{ textAlign: 'center', color: '#666' }}>
-            Blog post not found
-          </Typography>
-        </Container>
-      </BlogDetailSection>
-    );
-  }
-
-  const contentParagraphs = post.content
-    ? post.content.split('</p>').map(p => p.replace(/<[^>]*>/g, '')).filter(p => p.trim())
-    : [post.excerpt || ''];
-
-  const galleryImages = post.imageUrl ? [post.imageUrl] : [];
-  const otherPosts = [];
   const cardsPerView = 3;
-  const totalSlides = Math.ceil(otherPosts.length / cardsPerView);
+  const totalSlides = Math.ceil(relatedBlogs.length / cardsPerView);
 
   const handlePrev = () => setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1));
   const handleNext = () => setCurrentIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : 0));
   const handleDotClick = (index) => setCurrentIndex(index);
 
-  const handleCardClick = (post) => {
-    navigate(`/blog/${post.title_id}`, { state: { post } });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const startIndex = currentIndex * cardsPerView;
-  const visibleCards = otherPosts.slice(startIndex, startIndex + cardsPerView);
+  const visibleCards = relatedBlogs.slice(startIndex, startIndex + cardsPerView);
+
+  if (isLoading) {
+    return (
+      <Box>
+        <SectionTile
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
+          subtitle="Blog Detail"
+          title="Read Our Latest News"
+          icon={true}
+          iconClass="flaticon-custom-icon"
+        />
+        <BlogDetailSection>
+          <Container>
+            <LoadingContainer>
+              <CircularProgress sx={{ color: PRIMARY_COLOR }} />
+            </LoadingContainer>
+          </Container>
+        </BlogDetailSection>
+      </Box>
+    );
+  }
+
+  if (error || !blog) {
+    return (
+      <Box>
+        <SectionTile
+          bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
+          subtitle="Blog Detail"
+          title="Read Our Latest News"
+          icon={true}
+          iconClass="flaticon-custom-icon"
+        />
+        <BlogDetailSection>
+          <Container>
+            <Typography textAlign="center" color="error" sx={{ py: 4 }}>
+              {error ? `Error: ${error.message}` : 'Blog post not found'}
+            </Typography>
+          </Container>
+        </BlogDetailSection>
+      </Box>
+    );
+  }
+
+  const contentParagraphs = blog.content
+    ? blog.content.split('</p>').map(p => p.replace(/<[^>]*>/g, '')).filter(p => p.trim())
+    : [blog.excerpt || ''];
+
+  const galleryImages = blog.imageUrl ? [blog.imageUrl] : [];
 
   return (
     <Box>
       <SectionTile
         bgImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg"
-        subtitle="Our Services"
-        title="What We Offer"
+        subtitle="Blog Detail"
+        title={blog.title}
         icon={true}
         iconClass="flaticon-custom-icon"
       />
+
       <BlogDetailSection>
         <Container>
           <Grid container justifyContent="center">
-            <Grid size={{ lg: 12, md: 8 }}>
+            <Grid size={{ lg: 10, md: 10 }}>
               <Box className="post-content">
-
-                {/* Blog Title */}
-                <Typography
-                  variant="h4"
-                  sx={{
-                    mb: 3,
-                    fontWeight: 700,
-                    fontSize: { xs: '22px', sm: '26px', md: '32px' },
-                  }}
-                >
-                  {post.title}
-                </Typography>
-
                 {/* Blog Meta Info */}
                 <Box sx={{
                   display: 'flex',
                   gap: 2,
-                  mb: 4,
+                  mb: 3,
                   color: '#999',
                   flexWrap: 'wrap',
-                  fontSize: { xs: '13px', sm: '14px' },
+                  fontSize: { xs: '12px', sm: '13px' },
                 }}>
-                  <Typography>By {post.author || 'Admin'}</Typography>
+                  <Typography>By {blog.author || 'Admin'}</Typography>
                   <Typography>•</Typography>
-                  <Typography>{formatDate(post.publishedAt || post.date)}</Typography>
+                  <Typography>{formatDate(blog.publishedAt || blog.date)}</Typography>
                   <Typography>•</Typography>
-                  <Typography>{post.category}</Typography>
+                  <Typography>{blog.category}</Typography>
                 </Box>
 
-                {/* ── Blog Content FIRST ── */}
-                <Box className="col-md-12" sx={{ mb: 4 }}>
+                {/* Blog Content */}
+                <Box sx={{ mb: 4 }}>
                   {contentParagraphs.map((paragraph, index) => (
                     <ContentText key={index} paragraph>
                       {paragraph}
@@ -390,86 +349,66 @@ const BlogDetail = () => {
                   ))}
                 </Box>
 
-                {/* ── Gallery / Image AFTER content ── */}
+                {/* Gallery / Image */}
                 {galleryImages.length > 0 && (
-                  <GalleryWrapper>
-                    <Grid container spacing={3}>
+                  <Box sx={{ mb: 4 }}>
+                    <Grid container spacing={2}>
                       {galleryImages.map((image, index) => (
                         <Grid size={{ xs: 12 }} key={index}>
-                          <Box className="gallery-masonry-wrapper">
-                            <a href={image} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                              <Box className="gallery-box">
-                                <Box className="gallery-img">
-                                  <GalleryImageContainer>
-                                    <GalleryImage
-                                      src={image}
-                                      alt={`Gallery ${index + 1}`}
-                                      className="img-fluid"
-                                    />
-                                  </GalleryImageContainer>
-                                </Box>
-                              </Box>
-                            </a>
-                          </Box>
+                          <GalleryImage
+                            src={image}
+                            alt={`Gallery ${index + 1}`}
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/800x500?text=No+Image';
+                            }}
+                          />
                         </Grid>
                       ))}
                     </Grid>
-                  </GalleryWrapper>
+                  </Box>
                 )}
-
               </Box>
             </Grid>
           </Grid>
         </Container>
 
-        {/* Latest News Carousel */}
-        {otherPosts.length > 0 && (
-          <LatestNewsSection>
+        {/* Related Blogs Carousel */}
+        {relatedBlogs.length > 0 && (
+          <RelatedSection>
             <Container maxWidth="lg">
-              <Grid container justifyContent="center">
-                <Grid size={{ xs: 12, md: 8 }}>
-                  <SectionHeaderWrapper>
-                    <SectionIconWrapper>
-                      <PetsIcon sx={{ color: '#fff', fontSize: 20 }} />
-                    </SectionIconWrapper>
-                    <SectionSubtitle>Latest News</SectionSubtitle>
-                    <SectionTitle>Browse articles & news.</SectionTitle>
-                  </SectionHeaderWrapper>
-                </Grid>
-              </Grid>
-
+              <Typography sx={{ fontSize: '20px', fontWeight: 700, color: C.text, mb: '28px', textAlign: 'center' }}>
+                Other Blogs You Might Like
+              </Typography>
               <CarouselContainer>
                 <Box sx={{ overflow: 'hidden' }}>
-                  <CardsWrapper>
-                    {visibleCards.map((post) => (
-                      <CardWrapper key={post._id || post.id}>
-                        <BlogCard onClick={() => handleCardClick(post)}>
-                          <CardImageWrapper>
-                            <CardImage src={post.imageUrl || post.image} alt={post.title} className="blog-image" />
-                            <CardCategory className="blog-category">{post.category}</CardCategory>
-                          </CardImageWrapper>
-                          <CardContent>
-                            <CardTitle>{post.title}</CardTitle>
-                            <CardDescription>
-                              {post.excerpt || stripHtmlTags(post.content).substring(0, 100) + '...'}
-                            </CardDescription>
-                            <CardMeta>
-                              <CardDate className="date-only">
-                                {formatDate(post.publishedAt || post.date)}
-                              </CardDate>
-                              <Box className="author-info" sx={{
-                                display: 'none',
-                                alignItems: 'center',
-                                gap: '4px',
-                                opacity: 0,
-                                transition: 'all 0.3s ease',
-                              }}>
-                                <Typography sx={{ color: '#999', fontSize: '13px' }}>by</Typography>
-                                <CardAuthor>{post.author || 'Admin'}</CardAuthor>
-                              </Box>
-                            </CardMeta>
-                          </CardContent>
-                        </BlogCard>
+                  <CardsWrapper
+                    sx={{
+                      transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`,
+                    }}
+                  >
+                    {relatedBlogs.map((post) => (
+                      <CardWrapper key={post._id}>
+                        <RelatedCard onClick={() => handleBlogClick(post)}>
+                          <RelatedImageWrapper>
+                            <RelatedImage
+                              className="related-image"
+                              src={post.imageUrl || post.image}
+                              alt={post.title}
+                              onError={(e) => {
+                                e.target.src = 'https://via.placeholder.com/400x250?text=No+Image';
+                              }}
+                            />
+                            <RelatedCategory>{post.category}</RelatedCategory>
+                          </RelatedImageWrapper>
+                          <RelatedContent>
+                            <RelatedTitle>{post.title}</RelatedTitle>
+                            <RelatedMeta>
+                              <span>{formatDate(post.publishedAt || post.date)}</span>
+                              <span>•</span>
+                              <span>By {post.author || 'Admin'}</span>
+                            </RelatedMeta>
+                          </RelatedContent>
+                        </RelatedCard>
                       </CardWrapper>
                     ))}
                   </CardsWrapper>
@@ -477,8 +416,12 @@ const BlogDetail = () => {
 
                 {totalSlides > 1 && (
                   <>
-                    <PrevButton onClick={handlePrev}><ChevronLeftIcon /></PrevButton>
-                    <NextButton onClick={handleNext}><ChevronRightIcon /></NextButton>
+                    <PrevButton onClick={handlePrev}>
+                      <ChevronLeftIcon />
+                    </PrevButton>
+                    <NextButton onClick={handleNext}>
+                      <ChevronRightIcon />
+                    </NextButton>
                   </>
                 )}
               </CarouselContainer>
@@ -486,12 +429,16 @@ const BlogDetail = () => {
               {totalSlides > 1 && (
                 <DotsContainer>
                   {Array.from({ length: totalSlides }).map((_, index) => (
-                    <Dot key={index} active={currentIndex === index} onClick={() => handleDotClick(index)} />
+                    <Dot
+                      key={index}
+                      active={currentIndex === index}
+                      onClick={() => handleDotClick(index)}
+                    />
                   ))}
                 </DotsContainer>
               )}
             </Container>
-          </LatestNewsSection>
+          </RelatedSection>
         )}
       </BlogDetailSection>
     </Box>

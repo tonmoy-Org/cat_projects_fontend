@@ -26,7 +26,7 @@ const PageContainer = styled(Box)({
 });
 
 const MainTitle = styled(Typography)({
-  fontSize: '48px',
+  fontSize: '32px',
   fontWeight: 700,
   color: colors.primary,
   textAlign: 'center',
@@ -35,18 +35,19 @@ const MainTitle = styled(Typography)({
     fontSize: '36px',
   },
 });
+
 const SubTitle = styled(Typography)({
-  fontSize: '30px',
+  fontSize: '24px', // Reduced from 30px
   fontWeight: 700,
-  color: 'primary',
+  color: colors.primary,
   paddingBottom: '20px',
 });
 
 const Paragraph = styled(Typography)({
-  fontSize: '16px',
+  fontSize: '14px', // Reduced from 16px
   color: colors.gray,
-  lineHeight: 1.8,
-  marginBottom: '25px',
+  lineHeight: 1.6, // Slightly adjusted for better readability with smaller font
+  marginBottom: '20px', // Reduced from 25px
   width: '100%',
 });
 
@@ -56,7 +57,7 @@ const Privacy = () => {
       <Container maxWidth="lg">
         <MainTitle>Privacy Policy</MainTitle>
 
-        <SubTitle> Privacy Policy</SubTitle>
+        <SubTitle>Privacy Policy</SubTitle>
 
         <Paragraph>
           Thank you for joining the <strong>Father of Maw</strong> family. We are committed to protecting your personal information and privacy. If you have any questions about our privacy policy, please contact us at privacy@fatherofmaw.com.
@@ -112,18 +113,6 @@ const Privacy = () => {
 
         <Paragraph>
           <strong>Contact Us:</strong> If you have any questions or comments about this policy, please contact us at privacy@fatherofmaw.com, call us at +1 (234) 567-8910, or visit us at 0665 Broadway St, New York, NY 10234.
-        </Paragraph>
-
-        <Paragraph sx={{ textAlign: 'center', mt: 5, color: colors.primary, fontWeight: 600 }}>
-          Thank you for being part of the Father of Maw family!
-        </Paragraph>
-
-        <Paragraph sx={{ textAlign: 'center', color: colors.gray }}>
-          Team Father of Maw
-        </Paragraph>
-
-        <Paragraph sx={{ textAlign: 'center', fontSize: '14px', color: colors.gray, mt: 4 }}>
-          © {new Date().getFullYear()} Father of Maw. All rights reserved.
         </Paragraph>
       </Container>
     </PageContainer>

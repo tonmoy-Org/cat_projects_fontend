@@ -122,9 +122,6 @@ export const ForgotPassword = () => {
         alignItems: 'center',
         justifyContent: 'center',
         px: 2,
-        background: theme.palette.mode === 'dark'
-          ? `linear-gradient(135deg, ${alpha('#1a1a1a', 1)} 0%, ${alpha('#2d2d2d', 1)} 100%)`
-          : `linear-gradient(135deg, ${alpha('#f8fafc', 1)} 0%, ${alpha('#f1f5f9', 1)} 100%)`,
       }}
     >
       <Container maxWidth="xs">
@@ -133,24 +130,19 @@ export const ForgotPassword = () => {
           sx={{
             p: { xs: 2, md: 4 },
             borderRadius: 0.5,
-            boxShadow: theme.palette.mode === 'dark'
-              ? '0 10px 40px rgba(0, 0, 0, 0.3)'
-              : '0 10px 40px rgba(0, 0, 0, 0.08)',
-            border: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
           }}
         >
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Typography
               sx={{
                 fontWeight: 'bold',
                 mb: 0.5,
-                fontSize: '1.5rem',
+                fontSize: '1.25rem', // Reduced from 1.5rem
               }}
             >
               Reset Password
             </Typography>
-            <Typography sx={{ color: TEXT_PRIMARY, fontSize: '0.9rem' }}>
+            <Typography sx={{ color: TEXT_PRIMARY, fontSize: '0.8rem' }}> {/* Reduced from 0.9rem */}
               Enter your email to receive reset instructions
             </Typography>
           </Box>
@@ -159,7 +151,7 @@ export const ForgotPassword = () => {
             <Alert
               severity="error"
               sx={{
-                mb: 3,
+                mb: 2.5, // Reduced from 3
                 borderRadius: 2,
                 backgroundColor: theme.palette.mode === 'dark'
                   ? alpha(theme.palette.error.main, 0.1)
@@ -168,6 +160,10 @@ export const ForgotPassword = () => {
                 color: TEXT_PRIMARY,
                 '& .MuiAlert-message': {
                   width: '100%',
+                  fontSize: '0.8rem', // Added smaller font for alert
+                },
+                '& .MuiAlert-icon': {
+                  fontSize: '1rem', // Adjusted icon size
                 },
               }}
               onClose={handleClearMessages}
@@ -180,7 +176,7 @@ export const ForgotPassword = () => {
             <Alert
               severity="success"
               sx={{
-                mb: 3,
+                mb: 2.5, // Reduced from 3
                 borderRadius: 2,
                 backgroundColor: theme.palette.mode === 'dark'
                   ? alpha(GREEN_COLOR, 0.1)
@@ -189,6 +185,10 @@ export const ForgotPassword = () => {
                 color: TEXT_PRIMARY,
                 '& .MuiAlert-message': {
                   width: '100%',
+                  fontSize: '0.8rem', // Added smaller font for alert
+                },
+                '& .MuiAlert-icon': {
+                  fontSize: '1rem', // Adjusted icon size
                 },
               }}
               onClose={handleClearMessages}
@@ -202,7 +202,7 @@ export const ForgotPassword = () => {
               fullWidth
               label="Email Address"
               type="email"
-              size='small'
+              size="small"
               value={email}
               onChange={handleEmailChange}
               placeholder="you@example.com"
@@ -214,12 +214,14 @@ export const ForgotPassword = () => {
               }}
               error={!!localError && !localSuccess}
               sx={{
-                mb: 3,
+                mb: 2.5, // Reduced from 3
                 '& .MuiInputBase-input': {
                   color: TEXT_PRIMARY,
+                  fontSize: '0.85rem', // Added smaller font size for input
                 },
                 '& .MuiInputLabel-root': {
                   color: TEXT_PRIMARY,
+                  fontSize: '0.85rem', // Added smaller font size for label
                 },
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
@@ -234,6 +236,7 @@ export const ForgotPassword = () => {
                   '& input::placeholder': {
                     color: TEXT_PRIMARY,
                     opacity: 0.5,
+                    fontSize: '0.85rem', // Added placeholder font size
                   },
                   '&.Mui-disabled': {
                     backgroundColor: alpha(TEXT_PRIMARY, 0.04),
@@ -251,8 +254,9 @@ export const ForgotPassword = () => {
               variant="contained"
               disabled={isLoading || !email || !email.includes('@') || !email.includes('.')}
               sx={{
-                mb: 2,
-                py: 0.9,
+                mb: 1.5, // Reduced from 2
+                py: 0.8, // Reduced from 0.9
+                fontSize: '0.85rem', // Added button text size
                 opacity: (isLoading || !email || !email.includes('@') || !email.includes('.')) ? 0.7 : 1,
                 transition: 'opacity 0.2s',
                 '&:disabled': {
@@ -263,7 +267,7 @@ export const ForgotPassword = () => {
             >
               {isLoading ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'white' }}>
-                  <CircularProgress size={20} sx={{ color: 'white' }} />
+                  <CircularProgress size={18} sx={{ color: 'white' }} /> {/* Reduced from 20 */}
                   Sending...
                 </Box>
               ) : (
@@ -272,7 +276,7 @@ export const ForgotPassword = () => {
             </GradientButton>
 
             <Box sx={{
-              pt: 2,
+              pt: 1.5, // Reduced from 2
               textAlign: 'center',
             }}>
               <Link
@@ -281,28 +285,32 @@ export const ForgotPassword = () => {
                   textDecoration: 'none',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '0.85rem',
+                  gap: '6px', // Reduced from 8px
+                  fontSize: '0.8rem', // Reduced from 0.85rem
                   color: BLUE_COLOR,
                   fontWeight: 500,
                   pointerEvents: isLoading ? 'none' : 'auto',
                   opacity: isLoading ? 0.5 : 1,
                   transition: 'opacity 0.2s',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                    opacity: 0.8,
-                  },
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = 'underline';
+                  e.currentTarget.style.opacity = '0.8';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = 'none';
+                  e.currentTarget.style.opacity = '1';
                 }}
               >
-                <ArrowLeft size={16} />
+                <ArrowLeft size={14} /> {/* Reduced from 16 */}
                 Back to Login
               </Link>
             </Box>
           </Box>
 
           <Box sx={{
-            pt: 3,
-            mt: 2,
+            pt: 2.5, // Reduced from 3
+            mt: 1.5, // Reduced from 2
             borderTop: `1px solid ${alpha(TEXT_PRIMARY, 0.1)}`,
           }}>
             <Typography 
@@ -310,9 +318,9 @@ export const ForgotPassword = () => {
               color={TEXT_PRIMARY} 
               align="center" 
               sx={{ 
-                fontSize: '0.8rem',
+                fontSize: '0.7rem', // Reduced from 0.8rem
                 opacity: 0.8,
-                lineHeight: 1.6,
+                lineHeight: 1.5, // Reduced from 1.6
               }}
             >
               <Box component="span" display="block">

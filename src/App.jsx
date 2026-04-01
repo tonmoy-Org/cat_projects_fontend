@@ -9,7 +9,8 @@ import {
 import CustomTheme from './styles/theme';
 import { HelmetProvider } from 'react-helmet-async';
 import { AlertProvider } from './components/ui/AlertProvider';
-import { CartProvider } from './context/CartContext'; // ← ADD THIS
+import { CartProvider } from './context/CartContext';
+import { GlobalSnackbarProvider } from './context/GlobalSnackbarContext';
 
 // Create a client
 const queryClient = new QueryClient()
@@ -20,11 +21,13 @@ function App() {
       <HelmetProvider>
         <AuthProvider>
           <QueryClientProvider client={queryClient}>
-            <AlertProvider>
-              <CartProvider>
-                <AppRoutes />
-              </CartProvider>
-            </AlertProvider>
+            <GlobalSnackbarProvider>
+              <AlertProvider>
+                <CartProvider>
+                  <AppRoutes />
+                </CartProvider>
+              </AlertProvider>
+            </GlobalSnackbarProvider>
           </QueryClientProvider>
         </AuthProvider>
       </HelmetProvider>

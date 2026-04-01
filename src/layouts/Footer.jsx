@@ -487,9 +487,9 @@ const Footer = () => {
                                 <FooterLink href="/">Home</FooterLink>
                                 <FooterLink href="/about">About</FooterLink>
                                 <FooterLink href="/cats">Cats</FooterLink>
-                                <FooterLink href="/product">Product</FooterLink>
+                                <FooterLink href="/shop">Product</FooterLink>
                                 <FooterLink href="/blog">Blog</FooterLink>
-                                <FooterLink href="/video">Video</FooterLink>
+                                <FooterLink href="/videos">Video</FooterLink>
                                 <FooterLink href="/contact">Contact</FooterLink>
                             </FooterLinks>
                         </Grid>

@@ -3,13 +3,13 @@ import { Box, Container, Typography, useTheme, useMediaQuery } from "@mui/materi
 import { styled } from "@mui/material/styles";
 import PetsIcon from '@mui/icons-material/Pets';
 
-// Theme colors
+// Theme colors matching your components
 const PRIMARY_COLOR = '#db89ca';
-const PRIMARY_LIGHT = '#7B6BA8';
+const PRIMARY_LIGHT = '#c06bb0';
 
 const BannerHeader = styled(Box)(({ theme, bgimage }) => ({
   position: "relative",
-  padding: "120px 0",
+  padding: "80px 0",
   backgroundImage: `url(${bgimage})`,
   backgroundSize: "cover",
   backgroundPosition: "center",
@@ -17,15 +17,15 @@ const BannerHeader = styled(Box)(({ theme, bgimage }) => ({
   width: "100%",
   overflow: "hidden",
   
-  // Responsive padding
+  // Responsive padding - reduced to match your components
   [theme.breakpoints.down("lg")]: {
-    padding: "100px 0",
+    padding: "70px 0",
   },
   [theme.breakpoints.down("md")]: {
-    padding: "80px 0",
+    padding: "60px 0",
   },
   [theme.breakpoints.down("sm")]: {
-    padding: "60px 0",
+    padding: "50px 0",
   },
   [theme.breakpoints.down("xs")]: {
     padding: "40px 0",
@@ -49,19 +49,19 @@ const ContentWrapper = styled(Box)({
   zIndex: 2,
   display: "flex",
   alignItems: "center",
-  minHeight: "180px",
+  minHeight: "220px",
   width: "100%",
   
   "@media (max-width: 768px)": {
-    minHeight: "140px",
+    minHeight: "120px",
   },
   "@media (max-width: 480px)": {
-    minHeight: "120px",
+    minHeight: "100px",
   },
 });
 
 const IconWrapper = styled(Box)(({ theme }) => ({
-  marginRight: "12px",
+  marginRight: "8px",
   width: "20px",
   height: "20px",
   borderRadius: "50%",
@@ -73,12 +73,12 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   flexShrink: 0,
   
   "& i": {
-    fontSize: "20px",
+    fontSize: "12px",
     color: "#fff",
     transition: "transform 0.3s ease",
   },
   "& svg": {
-    fontSize: "20px",
+    fontSize: "12px",
     color: "#fff",
     transition: "transform 0.3s ease",
   },
@@ -92,62 +92,67 @@ const IconWrapper = styled(Box)(({ theme }) => ({
   
   // Responsive sizing
   [theme.breakpoints.down("sm")]: {
-    marginRight: "10px",
+    marginRight: "6px",
+    width: "18px",
+    height: "18px",
+    "& svg": {
+      fontSize: "10px",
+    },
   },
 }));
 
 const SubtitleWrapper = styled(Box)({
   display: "flex",
   alignItems: "center",
-  marginBottom: "16px",
+  marginBottom: "12px",
   flexWrap: "wrap",
   
   "@media (max-width: 768px)": {
-    marginBottom: "12px",
+    marginBottom: "10px",
   },
   "@media (max-width: 480px)": {
-    marginBottom: "10px",
+    marginBottom: "8px",
   },
 });
 
 const Subtitle = styled(Typography)(({ theme }) => ({
   color: "#fff",
-  fontSize: "15px",
-  fontWeight: 500,
-  letterSpacing: "2px",
+  fontSize: "12px",
+  fontWeight: 600,
+  letterSpacing: "1.5px",
   display: "flex",
   alignItems: "center",
   textTransform: "uppercase",
   
   [theme.breakpoints.down("sm")]: {
-    fontSize: "13px",
-    letterSpacing: "1.5px",
+    fontSize: "11px",
+    letterSpacing: "1px",
   },
   [theme.breakpoints.down("xs")]: {
-    fontSize: "12px",
+    fontSize: "10px",
     letterSpacing: "1px",
   },
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
   color: "#fff",
-  fontSize: "36px",
+  fontSize: "28px",
   fontWeight: 700,
   lineHeight: 1.2,
   textAlign: "left",
   margin: 0,
   
   [theme.breakpoints.down("lg")]: {
-    fontSize: "44px",
+    fontSize: "26px",
   },
   [theme.breakpoints.down("md")]: {
-    fontSize: "40px",
+    fontSize: "24px",
   },
   [theme.breakpoints.down("sm")]: {
-    fontSize: "32px",
+    fontSize: "22px",
   },
   [theme.breakpoints.down("xs")]: {
-    fontSize: "28px",
+    fontSize: "20px",
   },
 }));
 
@@ -157,7 +162,7 @@ export default function SectionTile({
   title = "About Us",
   icon = true,
   iconColor = PRIMARY_COLOR,
-  iconSize = 40,
+  iconSize = 20,
   overlayOpacity = 0.4,
   titleMaxLines = 2,
 }) {
@@ -165,8 +170,8 @@ export default function SectionTile({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   
-  // Responsive icon size
-  const responsiveIconSize = isMobile ? iconSize * 0.8 : isTablet ? iconSize * 0.9 : iconSize;
+  // Responsive icon size - reduced to match your components
+  const responsiveIconSize = isMobile ? 18 : isTablet ? 20 : 22;
   
   return (
     <Box 

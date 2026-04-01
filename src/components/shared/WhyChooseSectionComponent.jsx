@@ -11,13 +11,13 @@ import PetsIcon from '@mui/icons-material/Pets';
 // Theme colors
 const iconColor = '#db89ca';
 
-// Styled components
+// Styled components with consistent font sizes
 const WhyChooseSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#fff',
-  paddingTop: '80px',
+  padding: '80px 0',
 
   [theme.breakpoints.down('sm')]: {
-    padding: '20px 0',
+    padding: '50px 0',
   },
 }));
 
@@ -25,43 +25,46 @@ const SectionSubtitle = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  marginBottom: '15px',
+  marginBottom: '12px',
 });
 
 const SubtitleText = styled(Typography)({
-  fontSize: '15px',
+  fontSize: '10px',
   fontWeight: 600,
   letterSpacing: '1px',
-  color: '#333',
+  color: '#666',
   textTransform: 'uppercase',
 });
 
 const SectionIcon = styled(Box)({
-  width: 30,
-  height: 30,
+  width: 26,
+  height: 26,
   borderRadius: '50%',
-  backgroundColor: '#db89ca',
+  backgroundColor: iconColor,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 });
 
-const SectionTitle = styled(Typography)({
-  fontSize: '36px',
+const SectionTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '26px',
   fontWeight: 700,
   color: '#1a1a1a',
   lineHeight: 1.2,
   marginBottom: '20px',
-  '@media (max-width: 600px)': {
+  [theme.breakpoints.down('md')]: {
     fontSize: '32px',
   },
-});
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '28px',
+  },
+}));
 
 const Description = styled(Typography)({
-  fontSize: '16px',
+  fontSize: '15px',
   color: '#666',
-  lineHeight: 1.8,
-  marginBottom: '30px',
+  lineHeight: 1.65,
+  marginBottom: '32px',
 });
 
 const FeatureList = styled('ul')({
@@ -73,8 +76,8 @@ const FeatureList = styled('ul')({
 const FeatureItem = styled('li')({
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
-  marginBottom: '12px',
+  gap: '12px',
+  marginBottom: '14px',
 });
 
 const FeatureIcon = styled(Box)({
@@ -82,18 +85,20 @@ const FeatureIcon = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  minWidth: '22px',
   '& svg': {
     fontSize: '20px',
   },
 });
 
 const FeatureText = styled(Typography)({
-  fontWeight: 500,
   fontSize: '14px',
+  fontWeight: 500,
   color: '#333',
+  lineHeight: 1.5,
 });
 
-// Updated ImageWrapper with better positioning for larger image
+// Image styling with better positioning
 const ImageWrapper = styled(Box)({
   textAlign: 'right',
   marginTop: '30px',
@@ -108,9 +113,8 @@ const ImageWrapper = styled(Box)({
   },
 });
 
-// Updated WhyChooseImage with increased size
 const WhyChooseImage = styled('img')({
-  width: '130%', // 30% larger than container
+  width: '130%',
   maxWidth: '130%',
   height: 'auto',
   display: 'block',
@@ -125,13 +129,13 @@ const WhyChooseImage = styled('img')({
 const WhyChooseSectionComponent = ({
   subtitle = "We love animals",
   title = "Why rely on us?",
-  description = "Lorem ipsum dolor sit amet, consectetur adipiscing eliten lobortis the rhoncus sapien mana elemen auris fermen.",
+  description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit lobortis rhoncus sapien mana elemen auris fermen.",
   features = [
     "We love dogs",
     "Personalized care",
     "Convenience",
     "Peace of mind",
-    "Transperency",
+    "Transparency",
     "Teamwork",
     "Certified Groomer",
     "20+ Years Experience"
@@ -145,53 +149,46 @@ const WhyChooseSectionComponent = ({
   const rightColumnFeatures = features.slice(midIndex);
 
   return (
-    <WhyChooseSection className="banner section-padding">
+    <WhyChooseSection>
       <Container maxWidth="lg">
-        <Grid container spacing={4} alignItems="center">
+        <Grid container spacing={6} alignItems="center">
           {/* Left Column - Content */}
-          <Grid size={{ xs: 12, lg: 6, md: 12 }}>
-            <Box className="content">
-              <SectionSubtitle className="section-subtitle">
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <Box>
+              <SectionSubtitle>
                 <SectionIcon>
-                  <PetsIcon sx={{ color: "#fff", fontSize: 18 }} />
+                  <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
                 </SectionIcon>
                 <SubtitleText>{subtitle}</SubtitleText>
               </SectionSubtitle>
 
-              <SectionTitle className="section-title">
-                {title}
-              </SectionTitle>
+              <SectionTitle>{title}</SectionTitle>
 
-              <Description>
-                {description}
-              </Description>
+              <Description>{description}</Description>
 
               {/* Features Grid */}
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, lg: 6, md: 6 }}>
-                  <FeatureList className="listext list-unstyled">
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FeatureList>
                     {leftColumnFeatures.map((feature, index) => (
                       <FeatureItem key={`left-${index}`}>
-                        <FeatureIcon className="listext-icon">
+                        <FeatureIcon>
                           <PetsIcon />
                         </FeatureIcon>
-                        <FeatureText className="listext-text">
-                          {feature}
-                        </FeatureText>
+                        <FeatureText>{feature}</FeatureText>
                       </FeatureItem>
                     ))}
                   </FeatureList>
                 </Grid>
-                <Grid size={{ xs: 12, lg: 6, md: 6 }}>
-                  <FeatureList className="listext list-unstyled">
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FeatureList>
                     {rightColumnFeatures.map((feature, index) => (
                       <FeatureItem key={`right-${index}`}>
-                        <FeatureIcon className="listext-icon">
+                        <FeatureIcon>
                           <PetsIcon />
                         </FeatureIcon>
-                        <FeatureText className="listext-text">
-                          {feature}
-                        </FeatureText>
+                        <FeatureText>{feature}</FeatureText>
                       </FeatureItem>
                     ))}
                   </FeatureList>
@@ -200,13 +197,12 @@ const WhyChooseSectionComponent = ({
             </Box>
           </Grid>
 
-          {/* Right Column - Image with adjusted offset for larger image */}
-          <Grid size={{ xs: 12, lg: 5, md: 12 }} offset={{ lg: 1 }}>
-            <ImageWrapper className="img">
+          {/* Right Column - Image */}
+          <Grid size={{ xs: 12, lg: 5 }} offset={{ lg: 1 }}>
+            <ImageWrapper>
               <WhyChooseImage
                 src={imageSrc}
                 alt={imageAlt}
-                className="img-fluid"
               />
             </ImageWrapper>
           </Grid>

@@ -44,6 +44,11 @@ import Checkout from "../pages/cart/Checkout";
 import PaymentSuccess from "../pages/cart/PaymentSuccess";
 import OrderManagement from "../pages/superadmin/Ordermanagement";
 import OrdersClient from "../pages/client/OrdersClient";
+import ManageAddress from "../pages/client/ManageAddress";
+import MyReview from "../pages/client/MyReview";
+import Privacy from "../pages/privacy/Privacy";
+import Cookies from "../pages/cookies/Cookies";
+import PaymentFail from "../pages/cart/PaymentFail";
 
 
 export const AppRoutes = () => {
@@ -259,6 +264,30 @@ export const AppRoutes = () => {
             </PublicLayout>
           }
         />
+        <Route
+          path="/payment/failed"
+          element={
+            <PublicLayout title="Payment failed" description="Payment failed page">
+              <PaymentFail />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <PublicLayout title="Privacy" description="Father of Maw privacy of service">
+              <Privacy />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/cookie-policy"
+          element={
+            <PublicLayout title="Cookie policy" description="Father of Maw cookie policy of service">
+              <Cookies />
+            </PublicLayout>
+          }
+        />
 
         {/* Dashboard Redirect */}
         <Route
@@ -292,7 +321,10 @@ export const AppRoutes = () => {
           <Route path="videos-management" element={<VideoUpload />} />
           <Route path="cats-management" element={<CatsManagement />} />
           <Route path="products-management" element={<ProductsManagement />} />
-          <Route path="order-management" element={<OrderManagement  />} />
+          <Route path="order-management" element={<OrderManagement />} />
+          <Route path="addresses" element={<ManageAddress />} />
+          <Route path="my-review" element={<MyReview />} />
+          <Route path="my-orders" element={<OrdersClient />} />
         </Route>
 
         {/* Client Routes */}
@@ -307,6 +339,8 @@ export const AppRoutes = () => {
           <Route index element={<ClientDashboard />} />
           <Route path="profile" element={<ClientProfile />} />
           <Route path="my-orders" element={<OrdersClient />} />
+          <Route path="addresses" element={<ManageAddress />} />
+          <Route path="my-review" element={<MyReview />} />
         </Route>
 
         {/* Catch-all 404 Route */}

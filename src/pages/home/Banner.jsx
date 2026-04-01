@@ -19,10 +19,10 @@ import PetsIcon from '@mui/icons-material/Pets';
 const primaryColor = '#ff6b6b';
 const iconColor = '#db89ca';
 
-// Styled components
-const BannerWrapper = styled(Box)(({ theme }) => ({
+// Styled components with consistent font sizes
+const BannerWrapper = styled(Box)({
     width: '100%',
-}));
+});
 
 const SlideContainer = styled(Box)({
     position: 'relative',
@@ -32,7 +32,7 @@ const SlideContainer = styled(Box)({
         height: '500px',
     },
     '@media (max-width: 600px)': {
-        height: '300px',
+        height: '420px',
     },
 });
 
@@ -45,19 +45,19 @@ const SlideImage = styled('img')({
 const Overlay = styled(Box)({
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 100%)',
+    background: 'linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 100%)',
     display: 'flex',
     alignItems: 'center',
     '@media (max-width: 600px)': {
-        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.75) 30%, rgba(0,0,0,0.4) 100%)',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingBottom: '20px',
+        paddingBottom: '30px',
     },
 });
 
 const ContentWrapper = styled(motion.div)({
-    maxWidth: '600px',
+    maxWidth: '620px',
     textAlign: 'left',
     '@media (max-width: 600px)': {
         textAlign: 'center',
@@ -74,18 +74,18 @@ const SectionTitleWrapper = styled(Box)({
     marginBottom: '15px',
     '@media (max-width: 600px)': {
         justifyContent: 'center',
-        marginBottom: '10px',
+        marginBottom: '12px',
     },
 });
 
 const SectionTitle = styled(Typography)({
-    fontSize: '14px',
+    fontSize: '12px',
     fontWeight: 600,
     letterSpacing: '1px',
-    color: '#666',
+    color: '#fff',
     textTransform: 'uppercase',
     '@media (max-width: 600px)': {
-        fontSize: '12px',
+        fontSize: '10px',
     },
 });
 
@@ -93,77 +93,76 @@ const SectionIcon = styled(Box)({
     width: 30,
     height: 30,
     borderRadius: '50%',
-    backgroundColor: '#db89ca',
+    backgroundColor: iconColor,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     '@media (max-width: 600px)': {
-        width: 25,
-        height: 25,
+        width: 26,
+        height: 26,
     },
 });
 
 const SlideTitle = styled(Typography)(({ theme }) => ({
     fontWeight: 700,
     color: '#fff',
-    marginBottom: '20px',
-    textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-    fontSize: '48px',
+    marginBottom: '22px',
+    textShadow: '2px 2px 6px rgba(0,0,0,0.4)',
+    fontSize: '35px',
     lineHeight: 1.2,
     [theme.breakpoints.down('md')]: {
-        fontSize: '42px',
+        fontSize: '38px',
     },
     [theme.breakpoints.down('sm')]: {
-        fontSize: '28px',
+        fontSize: '32px',
         textAlign: 'center',
-        marginBottom: '15px',
+        marginBottom: '18px',
     },
 }));
 
 const SlideDescription = styled(Typography)(({ theme }) => ({
     color: '#fff',
-    marginBottom: '30px',
+    marginBottom: '32px',
     fontSize: '16px',
-    lineHeight: 1.7,
-    textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-    maxWidth: '550px',
+    lineHeight: 1.6,
+    textShadow: '1px 1px 3px rgba(0,0,0,0.3)',
+    maxWidth: '520px',
     [theme.breakpoints.down('md')]: {
         fontSize: '15px',
     },
     [theme.breakpoints.down('sm')]: {
         fontSize: '14px',
         textAlign: 'center',
-        marginBottom: '20px',
         marginLeft: 'auto',
         marginRight: 'auto',
         maxWidth: '90%',
+        marginBottom: '28px',
     },
 }));
 
 const OrderButton = styled(Button)(({ theme }) => ({
     backgroundColor: primaryColor,
     color: '#fff',
-    borderRadius: '25px',
-    fontWeight: 500,
-    padding: '10px 28px',
+    borderRadius: '30px',
+    fontWeight: 600,
+    padding: '10px 32px',
     fontSize: '14px',
     textTransform: 'none',
     boxShadow: '0 4px 15px rgba(255,107,107,0.3)',
+    transition: 'all 0.3s ease',
     '&:hover': {
         backgroundColor: '#ff5252',
         transform: 'translateY(-2px)',
         boxShadow: '0 6px 20px rgba(255,107,107,0.4)',
     },
     [theme.breakpoints.down('md')]: {
-        padding: '9px 24px',
+        padding: '8px 28px',
         fontSize: '13px',
     },
     [theme.breakpoints.down('sm')]: {
-        padding: '8px 20px',
-        fontSize: '12px',
-        display: 'block',
-        margin: '0 auto',
-        width: 'fit-content',
+        padding: '8px 28px',
+        fontSize: '13px',
+        display: 'inline-block',
     },
 }));
 
@@ -174,12 +173,8 @@ const LoadingContainer = styled(Box)({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
-    '@media (max-width: 900px)': {
-        height: '500px',
-    },
-    '@media (max-width: 600px)': {
-        height: '400px',
-    },
+    '@media (max-width: 900px)': { height: '500px' },
+    '@media (max-width: 600px)': { height: '420px' },
 });
 
 const ErrorContainer = styled(Box)({
@@ -189,53 +184,32 @@ const ErrorContainer = styled(Box)({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f5f5f5',
-    '@media (max-width: 900px)': {
-        height: '500px',
-    },
-    '@media (max-width: 600px)': {
-        height: '400px',
-    },
+    '@media (max-width: 900px)': { height: '500px' },
+    '@media (max-width: 600px)': { height: '420px' },
 });
 
 // Animation variants
 const badgeVariants = {
     hidden: { opacity: 0, y: -20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.6, ease: "easeOut" }
-    }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
 };
 
 const titleVariants = {
-    hidden: { opacity: 0, x: -50 },
-    visible: {
-        opacity: 1,
-        x: 0,
-        transition: { duration: 0.8, ease: "easeOut" }
-    }
+    hidden: { opacity: 0, x: -40 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8 } }
 };
 
 const descriptionVariants = {
-    hidden: { opacity: 0, x: -50 },
-    visible: {
-        opacity: 1,
-        x: 0,
-        transition: { duration: 0.8, delay: 0.2, ease: "easeOut" }
-    }
+    hidden: { opacity: 0, x: -40 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, delay: 0.15 } }
 };
 
 const buttonVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.8, delay: 0.4, ease: "easeOut" }
-    }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.35 } }
 };
 
 const Banner = () => {
-    // Fetch banner data from API
     const { data, isLoading, error } = useQuery({
         queryKey: ['banner'],
         queryFn: async () => {
@@ -244,7 +218,6 @@ const Banner = () => {
         },
     });
 
-    // Process API data - only if data exists
     const slides = data?.data || [];
 
     if (isLoading) {
@@ -287,37 +260,33 @@ const Banner = () => {
                         <SlideContainer>
                             <SlideImage
                                 src={slide.image}
-                                alt={slide.smallTitle || slide.title || 'Banner slide'}
+                                alt={slide.title || 'Banner'}
                             />
                             <Overlay>
                                 <Container maxWidth="lg" fixed>
                                     <ContentWrapper
                                         initial="hidden"
                                         animate="visible"
-                                        variants={{
-                                            visible: {
-                                                transition: { staggerChildren: 0.2 }
-                                            }
-                                        }}
+                                        variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
                                     >
                                         <motion.div variants={badgeVariants}>
                                             <SectionTitleWrapper>
                                                 <SectionIcon>
-                                                    <PetsIcon sx={{ color: '#fff', fontSize: { xs: 16, sm: 18 } }} />
+                                                    <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
                                                 </SectionIcon>
-                                                <SectionTitle sx={{ color: '#fff' }}>Our Passion is Animals</SectionTitle>
+                                                <SectionTitle>Our Passion is Animals</SectionTitle>
                                             </SectionTitleWrapper>
                                         </motion.div>
 
                                         <motion.div variants={titleVariants}>
-                                            <SlideTitle variant="h3">
+                                            <SlideTitle>
                                                 {slide.title || slide.smallTitle}
                                             </SlideTitle>
                                         </motion.div>
 
                                         <motion.div variants={descriptionVariants}>
-                                            <SlideDescription variant="body1">
-                                                {slide.paragraph || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.'}
+                                            <SlideDescription>
+                                                {slide.paragraph || 'Discover our wide range of premium pet products and find the perfect companion for your furry friend.'}
                                             </SlideDescription>
                                         </motion.div>
 
@@ -325,9 +294,8 @@ const Banner = () => {
                                             <OrderButton
                                                 variant="contained"
                                                 href={slide.btnLink || '#'}
-                                                size="large"
                                             >
-                                                {slide.btnText || 'Learn More'}
+                                                {slide.btnText || 'Shop Now'}
                                             </OrderButton>
                                         </motion.div>
                                     </ContentWrapper>

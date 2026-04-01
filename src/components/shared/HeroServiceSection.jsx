@@ -1,3 +1,4 @@
+// HeroServiceSection.jsx
 import React from 'react';
 import {
   Container,
@@ -19,7 +20,7 @@ import img1 from '../../public/About/pet1.png';
 const primaryColor = '#ff6b6b';
 const iconColor = '#db89ca';
 
-// Styled components
+// Styled components with consistent font sizes
 const HeroSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#f9f9f9',
   padding: '80px 0',
@@ -27,73 +28,75 @@ const HeroSection = styled(Box)(({ theme }) => ({
   overflow: 'hidden',
 
   [theme.breakpoints.down('sm')]: {
-    padding: '40px 0',
+    padding: '50px 0',
   },
-}));;
+}));
 
 const SectionTitleWrapper = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  marginBottom: '15px',
+  marginBottom: '12px',
 });
 
 const SectionTitle = styled(Typography)({
-  fontSize: '14px',
+  fontSize: '10px',
   fontWeight: 600,
   letterSpacing: '1px',
   color: '#666',
   textTransform: 'uppercase',
 });
 
-
 const SectionIcon = styled(Box)({
-  width: 30,
-  height: 30,
+  width: 26,
+  height: 26,
   borderRadius: '50%',
-  backgroundColor: '#db89ca',
+  backgroundColor: iconColor,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 });
 
-const MainTitle = styled(Typography)({
-  fontSize: '38px',
+const MainTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '26px',
   fontWeight: 700,
   color: '#1a1a1a',
   lineHeight: 1.2,
   marginBottom: '20px',
-  '@media (max-width: 600px)': {
+  [theme.breakpoints.down('md')]: {
+    fontSize: '32px',
+  },
+  [theme.breakpoints.down('sm')]: {
     fontSize: '28px',
   },
-});
+}));
 
 const Description = styled(Typography)({
   fontSize: '15px',
   color: '#666',
-  lineHeight: 1.7,
-  marginBottom: '25px',
+  lineHeight: 1.65,
+  marginBottom: '28px',
 });
 
 const StyledButton = styled(Button)({
   backgroundColor: primaryColor,
   color: '#fff',
-  padding: '10px 24px',
+  padding: '10px 28px',
   fontSize: '14px',
-  fontWeight: 500,
+  fontWeight: 600,
   textTransform: 'none',
   borderRadius: '25px',
   boxShadow: 'none',
   whiteSpace: 'nowrap',
-  minWidth: '120px',
+  minWidth: '140px',
   '&:hover': {
     backgroundColor: '#ff5252',
     boxShadow: '0 5px 15px rgba(255,107,107,0.3)',
+    transform: 'translateY(-2px)',
   },
-  '@media (max-width: 400px)': {
-    padding: '8px 20px',
+  '@media (max-width: 600px)': {
+    padding: '9px 24px',
     fontSize: '13px',
-    minWidth: '100px',
   },
 });
 
@@ -117,7 +120,7 @@ const PhoneBox = styled(Box)({
 });
 
 const PhoneIconWrapper = styled(Box)({
-  backgroundColor: '#db89ca',
+  backgroundColor: iconColor,
   borderRadius: '50%',
   padding: '6px',
   display: 'flex',
@@ -125,35 +128,27 @@ const PhoneIconWrapper = styled(Box)({
   justifyContent: 'center',
   width: '36px',
   height: '36px',
-  '@media (max-width: 400px)': {
-    width: '32px',
-    height: '32px',
-    padding: '4px',
-  },
 });
 
 const PhoneNumber = styled(Typography)({
-  fontSize: '18px',
+  fontSize: '17px',
   fontWeight: 600,
   color: '#1a1a1a',
   whiteSpace: 'nowrap',
   '@media (max-width: 600px)': {
-    fontSize: '16px',
-  },
-  '@media (max-width: 400px)': {
-    fontSize: '14px',
+    fontSize: '15px',
   },
 });
 
 const ImageWrapper = styled(Box)({
   position: 'relative',
   width: '100%',
-  borderRadius: '10px',
+  borderRadius: '12px',
   overflow: 'hidden',
+  boxShadow: '0 8px 25px rgba(0,0,0,0.08)',
   '&:hover .testimonial-card': {
-    transform: 'scale(1.05) translateY(-5px)',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-    backgroundColor: '#ffffff',
+    transform: 'scale(1.03) translateY(-5px)',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
   },
   '&:hover img': {
     transform: 'scale(1.05)',
@@ -164,7 +159,7 @@ const HeroImage = styled('img')({
   width: '100%',
   height: 'auto',
   display: 'block',
-  borderRadius: '10px',
+  borderRadius: '12px',
   transition: 'transform 0.5s ease',
 });
 
@@ -173,38 +168,27 @@ const TestimonialCard = styled(Card)({
   bottom: '20px',
   right: '20px',
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  padding: '12px 16px',
-  borderRadius: '8px',
+  padding: '14px 18px',
+  borderRadius: '10px',
   boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-  backdropFilter: 'blur(5px)',
+  backdropFilter: 'blur(8px)',
   maxWidth: '220px',
   zIndex: 10,
-  opacity: 1,
-  visibility: 'visible',
-  transform: 'translateY(0)',
-  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+  transition: 'all 0.4s ease',
   '@media (max-width: 600px)': {
-    maxWidth: '180px',
-    padding: '8px 12px',
-    bottom: '10px',
-    right: '10px',
-  },
-  '@media (max-width: 400px)': {
-    maxWidth: '160px',
-    padding: '6px 10px',
+    maxWidth: '190px',
+    padding: '10px 14px',
+    bottom: '12px',
+    right: '12px',
   },
 });
 
 const TestimonialText = styled(Typography)({
-  fontSize: '12px',
+  fontSize: '13px',
   fontStyle: 'italic',
   color: '#444',
-  lineHeight: 1.4,
-  marginBottom: '8px',
-  fontWeight: 500,
-  '@media (max-width: 600px)': {
-    fontSize: '11px',
-  },
+  lineHeight: 1.45,
+  marginBottom: '10px',
 });
 
 const TestimonialAuthor = styled(Box)({
@@ -216,27 +200,17 @@ const TestimonialAuthor = styled(Box)({
 const AuthorAvatar = styled(Avatar)({
   width: '28px',
   height: '28px',
-  '@media (max-width: 600px)': {
-    width: '24px',
-    height: '24px',
-  },
 });
 
 const AuthorName = styled(Typography)({
-  fontSize: '12px',
+  fontSize: '13px',
   fontWeight: 600,
   color: '#333',
-  '@media (max-width: 600px)': {
-    fontSize: '11px',
-  },
 });
 
 const AuthorTitle = styled(Typography)({
-  fontSize: '10px',
+  fontSize: '11px',
   color: '#999',
-  '@media (max-width: 600px)': {
-    fontSize: '9px',
-  },
 });
 
 const HeroServiceSection = ({
@@ -269,16 +243,19 @@ const HeroServiceSection = ({
               </SectionIcon>
               <SectionTitle>{subtitle}</SectionTitle>
             </SectionTitleWrapper>
+
             <MainTitle>{title}</MainTitle>
             <Description>{description}</Description>
 
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 4 }}>
               {features.map((feature, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                  <Box sx={{ color: iconColor, display: 'flex' }}>
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.8 }}>
+                  <Box sx={{ color: iconColor }}>
                     <PetsIcon sx={{ fontSize: 20 }} />
                   </Box>
-                  <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '14px' }}>{feature}</Typography>
+                  <Typography sx={{ fontSize: '14px', fontWeight: 500, color: '#444' }}>
+                    {feature}
+                  </Typography>
                 </Box>
               ))}
             </Box>
@@ -287,6 +264,7 @@ const HeroServiceSection = ({
               <StyledButton endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}>
                 {buttonText}
               </StyledButton>
+
               <PhoneBox>
                 <PhoneIconWrapper>
                   <PhoneIcon sx={{ color: '#fff', fontSize: 18 }} />
@@ -299,13 +277,16 @@ const HeroServiceSection = ({
           <Grid size={{ xs: 12, md: 6 }}>
             <ImageWrapper>
               <HeroImage src={imageUrl} alt="Happy pet" />
+
               <TestimonialCard className="testimonial-card">
-                <Box sx={{ display: 'flex', mb: 0.5 }}>
+                <Box sx={{ display: 'flex', mb: 1 }}>
                   {[...Array(rating)].map((_, i) => (
-                    <StarIcon key={i} sx={{ color: iconColor, fontSize: '12px' }} />
+                    <StarIcon key={i} sx={{ color: iconColor, fontSize: '14px' }} />
                   ))}
                 </Box>
+
                 <TestimonialText>"{testimonial.text}"</TestimonialText>
+
                 <TestimonialAuthor>
                   <AuthorAvatar src={testimonial.avatar} />
                   <Box>

@@ -264,19 +264,20 @@ export const ResetPassword = () => {
                             textAlign: 'center',
                         }}
                     >
-                        <CircularProgress sx={{ color: BLUE_COLOR, mb: 3 }} />
+                        <CircularProgress size={32} sx={{ color: BLUE_COLOR, mb: 2 }} />
                         <Typography
                             sx={{
                                 color: TEXT_PRIMARY,
                                 fontWeight: 500,
-                                mb: 1,
+                                mb: 0.5,
+                                fontSize: '0.9rem',
                             }}
                         >
                             Validating reset link...
                         </Typography>
                         <Typography
                             variant="body2"
-                            sx={{ color: alpha(TEXT_PRIMARY, 0.7) }}
+                            sx={{ color: alpha(TEXT_PRIMARY, 0.7), fontSize: '0.75rem' }}
                         >
                             Please wait while we verify your reset link
                         </Typography>
@@ -320,7 +321,7 @@ export const ResetPassword = () => {
                                 fontWeight: 'bold',
                                 mb: 1,
                                 color: theme.palette.error.main,
-                                fontSize: '1.5rem',
+                                fontSize: '1.25rem', // Reduced from 1.5rem
                             }}
                         >
                             Reset Link {!token ? 'Invalid' : 'Expired'}
@@ -329,7 +330,7 @@ export const ResetPassword = () => {
                         <Alert
                             severity="info"
                             sx={{
-                                mb: 3,
+                                mb: 2.5, // Reduced from 3
                                 borderRadius: 2,
                                 backgroundColor: theme.palette.mode === 'dark'
                                     ? alpha(theme.palette.info.main, 0.1)
@@ -337,12 +338,15 @@ export const ResetPassword = () => {
                                 borderLeft: `4px solid ${theme.palette.info.main}`,
                                 color: TEXT_PRIMARY,
                                 textAlign: 'left',
+                                '& .MuiAlert-message': {
+                                    fontSize: '0.8rem',
+                                },
                             }}
                         >
-                            <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5, fontSize: '0.8rem' }}>
                                 For security reasons:
                             </Typography>
-                            <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                            <Typography variant="body2" sx={{ opacity: 0.8, fontSize: '0.75rem' }}>
                                 • Password reset links expire after 5 minutes<br />
                                 • Each link can only be used once<br />
                                 • Links are unique to each request
@@ -354,11 +358,12 @@ export const ResetPassword = () => {
                                 fullWidth
                                 variant="outlined"
                                 onClick={() => navigate('/login')}
-                                startIcon={<ArrowLeft size={18} />}
+                                startIcon={<ArrowLeft size={16} />} // Reduced from 18
                                 sx={{
-                                    py: 0.9,
+                                    py: 0.8, // Reduced from 0.9
                                     borderColor: alpha(TEXT_PRIMARY, 0.3),
                                     color: TEXT_PRIMARY,
+                                    fontSize: '0.8rem', // Added font size
                                     '&:hover': {
                                         borderColor: BLUE_COLOR,
                                         backgroundColor: alpha(BLUE_COLOR, 0.04),
@@ -402,17 +407,17 @@ export const ResetPassword = () => {
                         backgroundColor: theme.palette.background.paper,
                     }}
                 >
-                    <Box sx={{ textAlign: 'center', mb: 4 }}>
+                    <Box sx={{ textAlign: 'center', mb: 3 }}> {/* Reduced from 4 */}
                         <Typography
                             sx={{
                                 fontWeight: 'bold',
                                 mb: 0.5,
-                                fontSize: '1.5rem',
+                                fontSize: '1.25rem', // Reduced from 1.5rem
                             }}
                         >
                             Set New Password
                         </Typography>
-                        <Typography sx={{ color: TEXT_PRIMARY, fontSize: '0.9rem' }}>
+                        <Typography sx={{ color: TEXT_PRIMARY, fontSize: '0.8rem' }}> {/* Reduced from 0.9rem */}
                             Create a new password for your account
                         </Typography>
                         
@@ -429,15 +434,17 @@ export const ResetPassword = () => {
                                     borderLeft: `4px solid ${theme.palette.info.main}`,
                                     color: TEXT_PRIMARY,
                                     py: 0.5,
-                                    fontSize: '0.85rem',
+                                    '& .MuiAlert-message': {
+                                        fontSize: '0.75rem',
+                                    },
                                 }}
                             >
                                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
                                         Account: {tokenValidation.email}
                                     </Typography>
                                     {tokenValidation.expiresIn && (
-                                        <Typography variant="caption" sx={{ opacity: 0.8, mt: 0.5 }}>
+                                        <Typography variant="caption" sx={{ opacity: 0.8, mt: 0.5, fontSize: '0.7rem' }}>
                                             This link expires in {tokenValidation.expiresIn} minute(s)
                                         </Typography>
                                     )}
@@ -450,13 +457,16 @@ export const ResetPassword = () => {
                         <Alert
                             severity="error"
                             sx={{
-                                mb: 3,
+                                mb: 2.5, // Reduced from 3
                                 borderRadius: 2,
                                 backgroundColor: theme.palette.mode === 'dark'
                                     ? alpha(theme.palette.error.main, 0.1)
                                     : alpha(theme.palette.error.main, 0.05),
                                 borderLeft: `4px solid ${theme.palette.error.main}`,
                                 color: TEXT_PRIMARY,
+                                '& .MuiAlert-message': {
+                                    fontSize: '0.8rem',
+                                },
                             }}
                             onClose={() => setLocalError('')}
                         >
@@ -468,18 +478,21 @@ export const ResetPassword = () => {
                         <Alert
                             severity="success"
                             sx={{
-                                mb: 3,
+                                mb: 2.5, // Reduced from 3
                                 borderRadius: 2,
                                 backgroundColor: theme.palette.mode === 'dark'
                                     ? alpha(GREEN_COLOR, 0.1)
                                     : alpha(GREEN_COLOR, 0.05),
                                 borderLeft: `4px solid ${GREEN_COLOR}`,
                                 color: TEXT_PRIMARY,
+                                '& .MuiAlert-message': {
+                                    fontSize: '0.8rem',
+                                },
                             }}
-                            icon={<CheckCircle />}
+                            icon={<CheckCircle size={18} />}
                         >
                             {localSuccess}
-                            <Typography variant="body2" sx={{ mt: 1, opacity: 0.8 }}>
+                            <Typography variant="body2" sx={{ mt: 1, opacity: 0.8, fontSize: '0.75rem' }}>
                                 Redirecting to login page...
                             </Typography>
                         </Alert>
@@ -490,7 +503,7 @@ export const ResetPassword = () => {
                             fullWidth
                             label="New Password"
                             type={showPassword ? 'text' : 'password'}
-                            size='small'
+                            size="small"
                             value={formData.password}
                             onChange={handlePasswordChange}
                             placeholder="Enter new password"
@@ -506,18 +519,20 @@ export const ResetPassword = () => {
                                             size="small"
                                             sx={{ color: TEXT_PRIMARY }}
                                         >
-                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                         </IconButton>
                                     </InputAdornment>
                                 ),
                             }}
                             sx={{
-                                mb: 1.5,
+                                mb: 1,
                                 '& .MuiInputBase-input': {
                                     color: TEXT_PRIMARY,
+                                    fontSize: '0.85rem',
                                 },
                                 '& .MuiInputLabel-root': {
                                     color: TEXT_PRIMARY,
+                                    fontSize: '0.85rem',
                                 },
                                 '& .MuiOutlinedInput-root': {
                                     '& fieldset': {
@@ -532,6 +547,7 @@ export const ResetPassword = () => {
                                     '& input::placeholder': {
                                         color: TEXT_PRIMARY,
                                         opacity: 0.5,
+                                        fontSize: '0.85rem',
                                     },
                                     '&.Mui-disabled': {
                                         backgroundColor: alpha(TEXT_PRIMARY, 0.04),
@@ -542,13 +558,13 @@ export const ResetPassword = () => {
 
                         {/* Password strength indicator */}
                         {formData.password && (
-                            <Box sx={{ mb: 2, ml: 1 }}>
+                            <Box sx={{ mb: 1.5, ml: 1 }}> {/* Reduced from 2 */}
                                 <Typography
                                     variant="caption"
                                     sx={{
                                         color: getStrengthColor(),
                                         fontWeight: 500,
-                                        fontSize: '0.75rem',
+                                        fontSize: '0.7rem', // Reduced from 0.75rem
                                     }}
                                 >
                                     Password strength: {passwordStrength.message}
@@ -559,7 +575,7 @@ export const ResetPassword = () => {
                                             key={index}
                                             sx={{
                                                 flex: 1,
-                                                height: 4,
+                                                height: 3, // Reduced from 4
                                                 borderRadius: 1,
                                                 backgroundColor: index <= passwordStrength.score
                                                     ? getStrengthColor()
@@ -576,7 +592,7 @@ export const ResetPassword = () => {
                             fullWidth
                             label="Confirm New Password"
                             type={showConfirmPassword ? 'text' : 'password'}
-                            size='small'
+                            size="small"
                             value={formData.confirmPassword}
                             onChange={handleConfirmPasswordChange}
                             placeholder="Confirm new password"
@@ -596,18 +612,20 @@ export const ResetPassword = () => {
                                             size="small"
                                             sx={{ color: TEXT_PRIMARY }}
                                         >
-                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                         </IconButton>
                                     </InputAdornment>
                                 ),
                             }}
                             sx={{
-                                mb: 3,
+                                mb: 2.5, // Reduced from 3
                                 '& .MuiInputBase-input': {
                                     color: TEXT_PRIMARY,
+                                    fontSize: '0.85rem',
                                 },
                                 '& .MuiInputLabel-root': {
                                     color: TEXT_PRIMARY,
+                                    fontSize: '0.85rem',
                                 },
                                 '& .MuiOutlinedInput-root': {
                                     '& fieldset': {
@@ -622,6 +640,7 @@ export const ResetPassword = () => {
                                     '& input::placeholder': {
                                         color: TEXT_PRIMARY,
                                         opacity: 0.5,
+                                        fontSize: '0.85rem',
                                     },
                                     '&.Mui-disabled': {
                                         backgroundColor: alpha(TEXT_PRIMARY, 0.04),
@@ -633,6 +652,7 @@ export const ResetPassword = () => {
                                 '& .MuiFormHelperText-root': {
                                     marginLeft: 0,
                                     marginTop: 0.5,
+                                    fontSize: '0.7rem',
                                 },
                             }}
                         />
@@ -646,8 +666,9 @@ export const ResetPassword = () => {
                                 formData.password.length < 6 ||
                                 formData.password !== formData.confirmPassword}
                             sx={{
-                                mb: 2,
-                                py: 0.9,
+                                mb: 1.5, // Reduced from 2
+                                py: 0.8, // Reduced from 0.9
+                                fontSize: '0.85rem',
                                 opacity: (isLoading || !!localSuccess ||
                                     !formData.password || !formData.confirmPassword ||
                                     formData.password.length < 6 ||
@@ -660,7 +681,7 @@ export const ResetPassword = () => {
                         >
                             {isLoading ? (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'white' }}>
-                                    <CircularProgress size={20} sx={{ color: 'white' }} />
+                                    <CircularProgress size={18} sx={{ color: 'white' }} /> {/* Reduced from 20 */}
                                     Resetting Password...
                                 </Box>
                             ) : (
@@ -669,7 +690,7 @@ export const ResetPassword = () => {
                         </GradientButton>
 
                         <Box sx={{
-                            pt: 2,
+                            pt: 1.5, // Reduced from 2
                             textAlign: 'center',
                         }}>
                             <Link
@@ -678,20 +699,24 @@ export const ResetPassword = () => {
                                     textDecoration: 'none',
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '8px',
-                                    fontSize: '0.85rem',
+                                    gap: '6px', // Reduced from 8px
+                                    fontSize: '0.8rem', // Reduced from 0.85rem
                                     color: BLUE_COLOR,
                                     fontWeight: 500,
                                     pointerEvents: isLoading ? 'none' : 'auto',
                                     opacity: isLoading ? 0.5 : 1,
                                     transition: 'opacity 0.2s',
-                                    '&:hover': {
-                                        textDecoration: 'underline',
-                                        opacity: 0.8,
-                                    },
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.textDecoration = 'underline';
+                                    e.currentTarget.style.opacity = '0.8';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.textDecoration = 'none';
+                                    e.currentTarget.style.opacity = '1';
                                 }}
                             >
-                                <ArrowLeft size={16} />
+                                <ArrowLeft size={14} /> {/* Reduced from 16 */}
                                 Back to Login
                             </Link>
                         </Box>

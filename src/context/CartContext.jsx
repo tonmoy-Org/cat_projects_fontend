@@ -96,7 +96,7 @@ export const CartProvider = ({ children }) => {
       // Add to database cart
       try {
         setLoading(true);
-        await axiosInstance.post('/cart/add', {
+        await axiosInstance.post('/cart', {
           itemType,
           itemId: product._id,
           quantity

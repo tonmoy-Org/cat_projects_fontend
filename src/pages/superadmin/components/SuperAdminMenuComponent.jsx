@@ -13,6 +13,8 @@ import {
   LocalShipping as ShippingIcon,
   Receipt as ReceiptIcon,
   Payments as PaymentsIcon,
+  LocationOn as AddressIcon,
+  Reviews,
 } from "@mui/icons-material";
 
 export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
@@ -80,6 +82,11 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
           icon: <OrdersIcon />,
           path: "/superadmin-dashboard/order-management",
         },
+        {
+          text: 'My Orders',
+          icon: <OrdersIcon />,
+          path: '/superadmin-dashboard/my-orders'
+        },
         // {
         //   text: "Shipping",
         //   icon: <ShippingIcon />,
@@ -98,12 +105,22 @@ export const SuperAdminMenuComponent = ({ onMenuItemClick }) => {
       ],
     },
     {
-      sectionName: "Profile",
+      sectionName: "My Account",
       items: [
         {
           text: "My Profile",
           icon: <AccountIcon />,
           path: "/superadmin-dashboard/profile",
+        },
+        {
+          text: 'Manage Addresses',
+          icon: <AddressIcon />,
+          path: '/superadmin-dashboard/addresses'
+        },
+        {
+          text: 'My Reviews',
+          icon: <Reviews />,
+          path: '/superadmin-dashboard/my-review'
         },
       ],
     },

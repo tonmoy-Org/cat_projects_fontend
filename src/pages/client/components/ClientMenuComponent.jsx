@@ -5,6 +5,9 @@ import {
     AccountCircle as AccountIcon,
     ReceiptLong as OrdersIcon,
     Home as HomeIcon,
+    RateReview as ReviewIcon,
+    LocationOn as AddressIcon,
+    Person as ProfileIcon,
 } from '@mui/icons-material';
 
 export const ClientMenuComponent = ({ onMenuItemClick }) => {
@@ -26,15 +29,25 @@ export const ClientMenuComponent = ({ onMenuItemClick }) => {
                     icon: <OrdersIcon />,
                     path: '/client-dashboard/my-orders'
                 },
+                {
+                    text: 'My Reviews',
+                    icon: <ReviewIcon />,
+                    path: '/client-dashboard/my-review'
+                },
             ]
         },
         {
             sectionName: 'Profile',
             items: [
                 {
-                    text: 'My Profile',
-                    icon: <AccountIcon />,
+                    text: 'Account Information',
+                    icon: <ProfileIcon />,
                     path: '/client-dashboard/profile'
+                },
+                {
+                    text: 'Manage Addresses',
+                    icon: <AddressIcon />,
+                    path: '/client-dashboard/addresses'
                 },
             ]
         },

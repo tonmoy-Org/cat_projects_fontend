@@ -85,6 +85,16 @@ export const PublicLayout = ({ children, title, description }) => {
   const HOVER_COLOR = alpha("#43376A", 0.08);
   const LIGHT_BG = alpha("#43376A", 0.04);
 
+  // Determine user role (admin check)
+  const isAdmin = user?.role === "superadmin" || user?.role === "admin";
+  
+  // Get profile path based on user role
+  const getProfilePath = () => {
+    if (!user) return "/login";
+    if (isAdmin) return "/superadmin-dashboard/profile";
+    return "/client-dashboard/profile";
+  };
+
   const handleLogout = () => {
     handleUserMenuClose();
     logout();
@@ -110,7 +120,7 @@ export const PublicLayout = ({ children, title, description }) => {
   const handleNavigation = (path) => {
     navigate(path);
     if (isMobile) {
-      setMobileDrawerClose();
+      setMobileDrawerOpen(false);
     }
     handleUserMenuClose();
   };
@@ -144,12 +154,12 @@ export const PublicLayout = ({ children, title, description }) => {
   const userMenuItems = [
     {
       label: "Dashboard",
-      path: "/dashboard",
+      path: isAdmin ? "/superadmin-dashboard" : "/dashboard",
       icon: <DashboardIcon fontSize="small" />,
     },
     {
       label: "Profile",
-      path: "/profile",
+      path: getProfilePath(),
       icon: <PersonIcon fontSize="small" />,
     },
     {
@@ -173,6 +183,14 @@ export const PublicLayout = ({ children, title, description }) => {
       return user.email[0].toUpperCase();
     }
     return "U";
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (user?.displayName) return user.displayName;
+    if (user?.name) return user.name;
+    if (user?.email) return user.email.split("@")[0];
+    return "User";
   };
 
   return (
@@ -426,7 +444,7 @@ export const PublicLayout = ({ children, title, description }) => {
                           variant="body2"
                           sx={{ fontWeight: 600, fontSize: "0.9rem" }}
                         >
-                          {user?.name || "User"}
+                          {getUserDisplayName()}
                         </Typography>
                         <Typography
                           variant="caption"
@@ -435,6 +453,24 @@ export const PublicLayout = ({ children, title, description }) => {
                         >
                           {user?.email}
                         </Typography>
+                        {isAdmin && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: "inline-block",
+                              mt: 0.5,
+                              px: 1,
+                              py: 0.25,
+                              borderRadius: 1,
+                              backgroundColor: alpha(ACTIVE_COLOR, 0.1),
+                              color: ACTIVE_COLOR,
+                              fontSize: "0.65rem",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Admin
+                          </Typography>
+                        )}
                       </Box>
                       {userMenuItems.map((item) => (
                         <MenuItem
@@ -586,10 +622,75 @@ export const PublicLayout = ({ children, title, description }) => {
             </IconButton>
           </Box>
 
+          {/* User Info Section in Mobile Drawer when logged in */}
+          {user && (
+            <>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  p: 1.5,
+                  mb: 1,
+                  borderRadius: 2,
+                  background: LIGHT_BG,
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    bgcolor: ACTIVE_COLOR,
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    border: `2px solid ${alpha(ACTIVE_COLOR, 0.2)}`,
+                  }}
+                  src={user?.photoURL}
+                >
+                  {getUserInitials()}
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, fontSize: "0.9rem" }}
+                  >
+                    {getUserDisplayName()}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "block", fontSize: "0.7rem" }}
+                  >
+                    {user?.email}
+                  </Typography>
+                  {isAdmin && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: "inline-block",
+                        mt: 0.25,
+                        px: 1,
+                        py: 0.25,
+                        borderRadius: 1,
+                        backgroundColor: alpha(ACTIVE_COLOR, 0.1),
+                        color: ACTIVE_COLOR,
+                        fontSize: "0.6rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Admin
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+              <Divider sx={{ my: 1 }} />
+            </>
+          )}
+
           {/* Mobile Cart Section */}
           <ListItem disablePadding sx={{ mb: 1 }}>
             <ListItemButton
-              onClick={() => handleNavigation("/carts")}
+              onClick={() => handleNavigation("/cart")}
               sx={{
                 borderRadius: 2,
                 py: 1,
@@ -667,6 +768,73 @@ export const PublicLayout = ({ children, title, description }) => {
               </ListItem>
             ))}
           </List>
+
+          {/* Mobile Dashboard & Profile Links for Authenticated Users */}
+          {user && (
+            <>
+              <Divider sx={{ my: 1.5 }} />
+              <List sx={{ py: 0 }}>
+                <ListItem disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    onClick={() => {
+                      handleNavigation(isAdmin ? "/superadmin-dashboard" : "/dashboard");
+                    }}
+                    sx={{
+                      borderRadius: 2,
+                      py: 1,
+                      px: 1.5,
+                      gap: 1.5,
+                      ...(isActive(isAdmin ? "/superadmin-dashboard" : "/dashboard") && {
+                        bgcolor: alpha(ACTIVE_COLOR, 0.1),
+                        color: ACTIVE_COLOR,
+                      }),
+                      "&:hover": {
+                        bgcolor: HOVER_COLOR,
+                      },
+                    }}
+                  >
+                    <DashboardIcon sx={{ fontSize: "1.1rem" }} />
+                    <ListItemText
+                      primary="Dashboard"
+                      primaryTypographyProps={{
+                        fontSize: "0.9rem",
+                        fontWeight: 500,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    onClick={() => {
+                      handleNavigation(getProfilePath());
+                    }}
+                    sx={{
+                      borderRadius: 2,
+                      py: 1,
+                      px: 1.5,
+                      gap: 1.5,
+                      ...(isActive(getProfilePath()) && {
+                        bgcolor: alpha(ACTIVE_COLOR, 0.1),
+                        color: ACTIVE_COLOR,
+                      }),
+                      "&:hover": {
+                        bgcolor: HOVER_COLOR,
+                      },
+                    }}
+                  >
+                    <PersonIcon sx={{ fontSize: "1.1rem" }} />
+                    <ListItemText
+                      primary="Profile"
+                      primaryTypographyProps={{
+                        fontSize: "0.9rem",
+                        fontWeight: 500,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </>
+          )}
 
           {/* Mobile Authentication Actions */}
           {user ? (

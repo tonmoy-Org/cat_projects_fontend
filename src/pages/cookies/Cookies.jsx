@@ -25,7 +25,7 @@ const PageContainer = styled(Box)({
 });
 
 const MainTitle = styled(Typography)({
-  fontSize: '48px',
+  fontSize: '32px',
   fontWeight: 700,
   color: colors.primary,
   textAlign: 'center',
@@ -36,17 +36,17 @@ const MainTitle = styled(Typography)({
 });
 
 const SubTitle = styled(Typography)({
-  fontSize: '30px',
+  fontSize: '24px', // Reduced from 30px
   fontWeight: 700,
   color: colors.primary,
   paddingBottom: '20px',
 });
 
 const Paragraph = styled(Typography)({
-  fontSize: '16px',
+  fontSize: '14px', // Reduced from 16px
   color: colors.gray,
-  lineHeight: 1.8,
-  marginBottom: '25px',
+  lineHeight: 1.6, // Adjusted from 1.8
+  marginBottom: '20px', // Reduced from 25px
   width: '100%',
 });
 
@@ -129,18 +129,6 @@ const Cookies = () => {
 
         <Paragraph>
           <strong>9. Contact Us:</strong> If you have any questions or concerns about our use of cookies, please contact us at privacy@fatherofmaw.com, call us at +1 (234) 567-8910, or visit us at 0665 Broadway St, New York, NY 10234.
-        </Paragraph>
-
-        <Paragraph sx={{ textAlign: 'center', mt: 5, color: colors.primary, fontWeight: 600 }}>
-          Thank you for trusting Father of Maw with your pet care needs!
-        </Paragraph>
-
-        <Paragraph sx={{ textAlign: 'center', color: colors.gray }}>
-          Team Father of Maw
-        </Paragraph>
-
-        <Paragraph sx={{ textAlign: 'center', fontSize: '14px', color: colors.gray, mt: 4 }}>
-          © {new Date().getFullYear()} Father of Maw. All rights reserved.
         </Paragraph>
       </Container>
     </PageContainer>

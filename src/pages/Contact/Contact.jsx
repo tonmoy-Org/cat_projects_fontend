@@ -56,7 +56,7 @@ const IconWrapper = styled(Box)(({ theme }) => ({
 
 const ContactText = styled(Typography)({
   color: "#666",
-  fontSize: "16px",
+  fontSize: "14px",
   lineHeight: 1.5,
   "& a": {
     color: "#666",
@@ -85,7 +85,7 @@ const WorkTimeItem = styled(Box)({
 });
 
 const DayTitle = styled(Typography)({
-  fontSize: "16px",
+  fontSize: "14px",
   color: "#333",
   fontWeight: 500,
   minWidth: "90px",
@@ -98,12 +98,12 @@ const Dots = styled(Box)({
 });
 
 const TimeValue = styled(Typography)({
-  fontSize: "16px",
+  fontSize: "14px",
   color: "#666",
 });
 
 const SectionTitle = styled(Typography)({
-  fontSize: "24px",
+  fontSize: "20px",
   fontWeight: 600,
   color: "#333",
   marginBottom: "25px",
@@ -134,8 +134,21 @@ const StyledTextField = styled(TextField)({
     },
   },
   "& .MuiInputBase-input": {
-    padding: "12px 14px",
-    fontSize: "14px",
+    padding: "10px 14px",
+    fontSize: "13px",
+  },
+  "& .MuiInputLabel-root": {
+    fontSize: "13px",
+  },
+  "& .MuiFormLabel-root": {
+    fontSize: "13px",
+  },
+  "& .MuiSelect-select": {
+    fontSize: "13px",
+    padding: "10px 14px",
+  },
+  "& .MuiInputBase-multiline": {
+    padding: "10px 14px",
   },
 });
 
@@ -195,14 +208,14 @@ const Contact = () => {
 
                 <ContactItem>
                   <IconWrapper>
-                    <LocationOnIcon sx={{ fontSize: "20px" }} />
+                    <LocationOnIcon sx={{ fontSize: "18px" }} />
                   </IconWrapper>
                   <ContactText>0665 Broadway st. 10234 NY, USA</ContactText>
                 </ContactItem>
 
                 <ContactItem>
                   <IconWrapper>
-                    <PhoneIcon sx={{ fontSize: "20px" }} />
+                    <PhoneIcon sx={{ fontSize: "18px" }} />
                   </IconWrapper>
                   <ContactText>
                     <a href="tel:+1-234-567-8910">+1 234 567 8910</a>
@@ -211,7 +224,7 @@ const Contact = () => {
 
                 <ContactItem>
                   <IconWrapper>
-                    <EmailIcon sx={{ fontSize: "20px" }} />
+                    <EmailIcon sx={{ fontSize: "18px" }} />
                   </IconWrapper>
                   <ContactText>
                     <a href="mailto:hello@Pepito.com">hello@Pepito.com</a>
@@ -224,6 +237,7 @@ const Contact = () => {
                     variant="h5"
                     sx={{
                       marginBottom: "20px",
+                      fontSize: "20px",
                       "&::after": {
                         bottom: "-8px",
                       },
@@ -247,7 +261,7 @@ const Contact = () => {
                   <WorkTimeItem>
                     <DayTitle>Sunday</DayTitle>
                     <Dots />
-                    <TimeValue sx={{ color: "#999" }}>Closed</TimeValue>
+                    <TimeValue sx={{ color: "#999", fontSize: "14px" }}>Closed</TimeValue>
                   </WorkTimeItem>
                 </OpeningHoursBox>
               </LeftColumnWrapper>
@@ -312,13 +326,19 @@ const Contact = () => {
                         size="small"
                         SelectProps={{
                           displayEmpty: true,
+                          renderValue: (selected) => {
+                            if (!selected) {
+                              return <span style={{ color: "#999", fontSize: "13px" }}>Select Service</span>;
+                            }
+                            return selected;
+                          },
                         }}
                       >
-                        <MenuItem value="" disabled>
+                        <MenuItem value="" disabled sx={{ fontSize: "13px" }}>
                           Select Service
                         </MenuItem>
                         {services.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
+                          <MenuItem key={option.value} value={option.value} sx={{ fontSize: "13px" }}>
                             {option.label}
                           </MenuItem>
                         ))}
@@ -349,6 +369,15 @@ const Contact = () => {
                         multiline
                         rows={4}
                         variant="outlined"
+                        sx={{
+                          "& .MuiInputBase-root": {
+                            padding: "0",
+                          },
+                          "& textarea": {
+                            fontSize: "13px",
+                            padding: "10px 14px",
+                          },
+                        }}
                       />
                     </Grid>
 
@@ -365,11 +394,14 @@ const Contact = () => {
                               "&.Mui-checked": {
                                 color: (theme) => theme.palette.primary.main,
                               },
+                              "& .MuiSvgIcon-root": {
+                                fontSize: "18px",
+                              },
                             }}
                           />
                         }
                         label={
-                          <Typography sx={{ color: "#666", fontSize: "14px" }}>
+                          <Typography sx={{ color: "#666", fontSize: "13px" }}>
                             Schedule a free health consultation
                           </Typography>
                         }
@@ -380,8 +412,13 @@ const Contact = () => {
                       <GradientButton
                         type="submit"
                         variant="contained"
-                        startIcon={<CalendarTodayIcon />}
-                        sx={{ borderRadius: "30px", py: 1, px: 3 }}
+                        startIcon={<CalendarTodayIcon sx={{ fontSize: "16px" }} />}
+                        sx={{ 
+                          borderRadius: "30px", 
+                          py: 0.8, 
+                          px: 3,
+                          fontSize: "13px",
+                        }}
                       >
                         Make Appointment
                       </GradientButton>

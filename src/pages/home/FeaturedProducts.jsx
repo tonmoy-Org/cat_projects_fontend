@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
   Container, Grid, Box, Typography, styled, CircularProgress, Button, Snackbar, Alert,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Rating,
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { useQuery } from '@tanstack/react-query';
+import LockIcon from '@mui/icons-material/Lock';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../api/axios';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../auth/AuthProvider';
+import { useShopApi } from '../../hooks/useShopApi';
 
 // ── Colors ────────────────────────────────────────────────────────────────────
 const PRIMARY_COLOR = '#5C4D91';
 const PRIMARY_DARK = '#4A3D75';
-const iconColor = '#db89ca';
-const primaryColor = '#ff6b6b';
-const textColor = '#1a1a1a';
+const ACCENT = '#db89ca';
+const DISCOUNT_COLOR = '#10b981';
+const NO_IMAGE = 'https://via.placeholder.com/400x400?text=No+Image';
 
 // ── Styled Components ─────────────────────────────────────────────────────────
 
@@ -22,7 +25,7 @@ const ShopSection = styled(Box)({
   padding: '80px 0',
   backgroundColor: '#fff',
   '@media (max-width: 900px)': { padding: '60px 0' },
-  '@media (max-width: 600px)': { padding: '20px 0' },
+  '@media (max-width: 600px)': { padding: '40px 0' },
 });
 
 const SectionHeaderWrapper = styled(Box)({
@@ -35,255 +38,237 @@ const HeaderTopRow = styled(Box)({
   alignItems: 'center',
   justifyContent: 'center',
   gap: '10px',
-  marginBottom: '15px',
+  marginBottom: '10px',
   flexWrap: 'wrap',
 });
 
 const SectionIconWrapper = styled(Box)({
-  width: '30px',
-  height: '30px',
+  width: '26px',
+  height: '26px',
   borderRadius: '50%',
-  backgroundColor: iconColor,
+  backgroundColor: ACCENT,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 });
 
 const SectionSubtitle = styled(Typography)({
-  fontSize: '14px',
+  fontSize: '10px',
   fontWeight: 600,
   letterSpacing: '1px',
   color: '#666',
   textTransform: 'uppercase',
 });
 
-const SectionTitle = styled(Typography)({
-  fontSize: '38px',
+const SectionTitle = styled(Typography)(({ theme }) => ({
+  fontSize: '26px',
   fontWeight: 700,
-  color: textColor,
+  color: '#1a1a1a',
   lineHeight: 1.2,
-  '@media (max-width: 900px)': { fontSize: '32px' },
-  '@media (max-width: 600px)': { fontSize: '28px', padding: '0 15px' },
-});
+  [theme.breakpoints.down('md')]: { fontSize: '32px' },
+  [theme.breakpoints.down('sm')]: { fontSize: '28px', padding: '0 15px' },
+}));
 
-// ── Product Card ───────────────────────────────────────────────────────────────
-
-const ProductCard = styled(Box)({
+// Card design - Consistent with Product listing
+const ProductCard = styled(Box, { shouldForwardProp: p => p !== 'outOfStock' })(({ outOfStock }) => ({
   width: '100%',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  borderRadius: '10px',
   overflow: 'hidden',
-  cursor: 'pointer',
-  boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+  cursor: outOfStock ? 'not-allowed' : 'pointer',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.07)',
   transition: 'all 0.3s ease',
-  backgroundColor: '#ffffff',
+  backgroundColor: '#fff',
   border: '1px solid #f0f0f0',
-  '&:hover': { boxShadow: '0 10px 30px rgba(0,0,0,0.15)' },
-  '&:hover .product-image': { transform: 'scale(1.05)' },
-});
+  opacity: outOfStock ? 0.6 : 1,
+  filter: outOfStock ? 'grayscale(100%)' : 'none',
+  '&:hover': outOfStock ? {} : {
+    boxShadow: '0 8px 24px rgba(0,0,0,0.11)',
+  },
+  '&:hover .product-image': outOfStock ? {} : {
+    transform: 'scale(1.05)',
+  },
+}));
 
 const ImageWrapper = styled(Box)({
   position: 'relative',
   width: '100%',
   overflow: 'hidden',
-  flexShrink: 0,
+  backgroundColor: '#f5f5f5'
 });
 
 const ProductImage = styled('img')({
   width: '100%',
-  height: '280px',
+  height: '240px',
   objectFit: 'cover',
   display: 'block',
   transition: 'transform 0.5s ease',
-  '@media (max-width: 900px)': { height: '220px' },
-  '@media (max-width: 600px)': { height: '180px' },  // CHANGED: Much smaller on mobile
+  '@media (max-width: 900px)': { height: '200px' },
+  '@media (max-width: 600px)': { height: '170px' },
 });
 
-const PriceOverlay = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'isVisible',
-})(({ isVisible }) => ({
+const DiscountBadge = styled(Box)({
   position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  width: '100px',
-  height: '100px',
-  borderRadius: '50%',
+  top: '10px',
+  left: '10px',
+  backgroundColor: DISCOUNT_COLOR,
+  color: '#fff',
+  padding: '4px 10px',
+  borderRadius: '20px',
+  fontSize: '11px',
+  fontWeight: 700,
+  zIndex: 2,
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-  opacity: isVisible ? 1 : 0,
-  visibility: isVisible ? 'visible' : 'hidden',
-  transition: 'all 0.3s ease',
+  gap: '4px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+});
+
+const OutOfStockBadge = styled(Box)({
+  position: 'absolute',
+  top: '10px',
+  right: '10px',
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  color: '#fff',
+  padding: '3px 10px',
+  borderRadius: '20px',
+  fontSize: '10px',
+  fontWeight: 600,
   zIndex: 2,
-  '@media (max-width: 600px)': { width: '60px', height: '60px' },  // CHANGED: Smaller overlay
-}));
+});
 
 const FeaturedBadge = styled(Box)({
   position: 'absolute',
   top: '10px',
   right: '10px',
-  backgroundColor: '#ec407a',
+  backgroundColor: PRIMARY_COLOR,
   color: '#fff',
-  padding: '6px 12px',
+  padding: '4px 12px',
   borderRadius: '20px',
-  fontSize: '12px',
+  fontSize: '11px',
   fontWeight: 600,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  zIndex: 10,
-  boxShadow: '0 2px 8px rgba(236,64,122,0.3)',
-  '@media (max-width: 600px)': {  // ADDED: Smaller badge on mobile
-    padding: '4px 8px',
-    fontSize: '10px',
-  },
+  zIndex: 2,
 });
 
 const CardBody = styled(Box)({
-  padding: '14px 12px 16px',
-  textAlign: 'center',
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
-  justifyContent: 'space-between',
-  '@media (max-width: 600px)': {  // ADDED: Less padding on mobile
-    padding: '10px 8px 12px',
-  },
+  padding: '12px 12px 16px',
+  textAlign: 'start'
 });
 
 const ProductName = styled(Typography)({
-  fontSize: '16px',
+  fontSize: '13px',
   fontWeight: 600,
   color: '#1a1a1a',
-  marginBottom: '6px',
-  minHeight: '24px',
-  '@media (max-width: 600px)': {
-    fontSize: '13px',
-    minHeight: '18px',
-    marginBottom: '4px',
-  },
+  marginBottom: '4px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap'
 });
 
 const ProductCategory = styled(Typography)({
-  fontSize: '13px',
-  color: '#888',
-  marginBottom: '8px',
-  minHeight: '20px',
-  '@media (max-width: 600px)': {
-    fontSize: '11px',
-    minHeight: '16px',
-    marginBottom: '4px',
-  },
+  fontSize: '11px',
+  color: '#999',
+  marginBottom: '6px'
 });
 
-const ProductPrice = styled(Typography)({
-  fontSize: '16px',
+const PriceWrapper = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  marginBottom: '8px',
+  flexWrap: 'wrap'
+});
+
+const ProductPrice = styled(Typography, { shouldForwardProp: p => p !== 'isDiscounted' })(({ isDiscounted }) => ({
+  fontSize: '14px',
   fontWeight: 700,
-  color: PRIMARY_COLOR,
-  marginBottom: '12px',
-  minHeight: '24px',
-  '@media (max-width: 600px)': {
-    fontSize: '13px',
-    minHeight: '18px',
-    marginBottom: '8px',
-  },
+  color: isDiscounted ? DISCOUNT_COLOR : PRIMARY_COLOR,
+}));
+
+const OriginalPrice = styled(Typography)({
+  fontSize: '11px',
+  color: '#999',
+  textDecoration: 'line-through',
+});
+
+const RatingSection = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  marginBottom: '10px'
+});
+
+const RatingText = styled(Typography)({
+  fontSize: '11px',
+  color: '#999',
+  fontWeight: 500
+});
+
+const StyledRating = styled(Rating)({
+  '& .MuiRating-iconFilled': { color: '#ffb400', fontSize: '14px' },
+  '& .MuiRating-iconEmpty': { color: '#ddd', fontSize: '14px' },
 });
 
 const AddToCartBtn = styled(Button)({
-  backgroundColor: iconColor,
+  backgroundColor: ACCENT,
   color: '#fff',
-  fontSize: '13px',
+  fontSize: '11px',
   fontWeight: 600,
   textTransform: 'none',
   borderRadius: '30px',
-  padding: '7px 18px',
+  padding: '6px 14px',
   width: '100%',
-  gap: '6px',
+  gap: '5px',
   transition: 'all 0.3s ease',
-  minHeight: '36px',
-  '@media (max-width: 600px)': {
-    fontSize: '11px',
-    padding: '5px 10px',
-    minHeight: '30px',
-  },
   '&:hover': {
     backgroundColor: '#c96db8',
-    boxShadow: '0 4px 12px rgba(219,137,202,0.4)',
+    boxShadow: '0 4px 12px rgba(219,137,202,0.4)'
+  },
+  '&.Mui-disabled': {
+    backgroundColor: '#e0e0e0',
+    color: '#999',
+    cursor: 'not-allowed'
   },
 });
 
 const ViewCartBtn = styled(Button)({
   backgroundColor: 'transparent',
-  color: iconColor,
-  fontSize: '13px',
+  color: ACCENT,
+  fontSize: '11px',
   fontWeight: 600,
   textTransform: 'none',
   borderRadius: '30px',
-  padding: '7px 18px',
+  padding: '6px 14px',
   width: '100%',
-  gap: '6px',
-  border: `2px solid ${iconColor}`,
+  gap: '5px',
+  border: `2px solid ${ACCENT}`,
   transition: 'all 0.3s ease',
-  minHeight: '36px',
-  '@media (max-width: 600px)': {
-    fontSize: '11px',
-    padding: '5px 10px',
-    minHeight: '30px',
-  },
   '&:hover': {
-    backgroundColor: iconColor,
+    backgroundColor: ACCENT,
     color: '#fff',
-    boxShadow: '0 4px 12px rgba(219,137,202,0.4)',
+    boxShadow: '0 4px 12px rgba(219,137,202,0.4)'
   },
 });
 
-const LoadingContainer = styled(Box)({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '400px',
-});
-
-const SectionInfo = styled(Box)({
+const SectionInfo = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   marginTop: '50px',
   gap: '30px',
   flexWrap: 'wrap',
-  '@media (max-width: 600px)': {
+  [theme.breakpoints.down('sm')]: {
     flexDirection: 'column',
     gap: '20px',
     marginTop: '40px',
     padding: '0 20px',
   },
-});
+}));
 
-const ViewAllBtn = styled(Button)({
-  backgroundColor: PRIMARY_COLOR,
-  color: '#fff',
-  padding: '10px 24px',
-  fontSize: '14px',
-  fontWeight: 500,
-  textTransform: 'none',
-  borderRadius: '25px',
-  boxShadow: 'none',
-  minWidth: '140px',
-  whiteSpace: 'nowrap',
-  '&:hover': {
-    backgroundColor: PRIMARY_DARK,
-    boxShadow: '0 5px 15px rgba(92,77,145,0.3)',
-  },
-  '@media (max-width: 600px)': {
-    padding: '8px 20px',
-    fontSize: '13px',
-    minWidth: '120px',
-  },
+
+const LoadingContainer = styled(Box)({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '400px',
 });
 
 const NoProductsContainer = styled(Box)({
@@ -294,7 +279,7 @@ const NoProductsContainer = styled(Box)({
   textAlign: 'center',
 });
 
-// ── Helper ────────────────────────────────────────────────────────────────────
+// ── Helper Functions ─────────────────────────────────────────────────────────
 
 const shuffleArray = (array) => {
   const shuffled = [...array];
@@ -307,17 +292,27 @@ const shuffleArray = (array) => {
 
 // ── ProductCardItem ───────────────────────────────────────────────────────────
 
-const ProductCardItem = ({ product, onAddToCart }) => {
+const ProductCardItem = ({ product, onAddToCart, isAuthenticated, onAuthRequired }) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  const [hovered, setHovered] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      onAuthRequired();
+      return;
+    }
+
+    if (!product.inStock) {
+      onAddToCart(product.title, false);
+      return;
+    }
+
     addToCart(product, 1);
     setAddedToCart(true);
-    onAddToCart(product.title);
+    onAddToCart(product.title, true);
   };
 
   const handleViewCart = (e) => {
@@ -326,54 +321,76 @@ const ProductCardItem = ({ product, onAddToCart }) => {
   };
 
   const handleCardClick = () => {
+    if (!product.inStock) return;
     navigate(`/shop/${product.title_id}`);
   };
 
+  const averageRating = product.averageRating || 0;
+  const reviewCount = product.reviewCount || 0;
+  const discountedPrice = product.discountedPrice || product.price;
+  const discountPercentage = product.discountPercentage || 0;
+  const hasDiscount = discountPercentage > 0 && product.inStock;
+
   return (
     <ProductCard
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      outOfStock={!product.inStock}
       onClick={handleCardClick}
     >
       <ImageWrapper>
-        {product.isFeatured && (
-          <FeaturedBadge>♡ Featured</FeaturedBadge>
+        {!product.inStock && <OutOfStockBadge>Out of Stock</OutOfStockBadge>}
+
+        {hasDiscount && (
+          <DiscountBadge>
+            <LocalOfferIcon sx={{ fontSize: '12px' }} />
+            -{Math.round(discountPercentage)}%
+          </DiscountBadge>
         )}
+
+        {product.isFeatured && (
+          <FeaturedBadge>Featured</FeaturedBadge>
+        )}
+
         <ProductImage
           className="product-image"
           src={product.featuredImage}
           alt={product.title}
-          onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
-          }}
+          onError={(e) => { e.target.src = NO_IMAGE; }}
         />
-        <PriceOverlay isVisible={hovered}>
-          <Typography sx={{ 
-            fontWeight: 600, 
-            fontSize: { xs: '14px', sm: '20px' },  // CHANGED: Smaller price on mobile
-            color: primaryColor 
-          }}>
-            ৳{product.price}
-          </Typography>
-        </PriceOverlay>
       </ImageWrapper>
 
       <CardBody>
-        <Box>
-          <ProductName>Name : {product.title}</ProductName>
-          <ProductCategory>Category : {product.category}</ProductCategory>
-          <ProductPrice>Price : ৳ {product.price}</ProductPrice>
-        </Box>
+        <ProductName title={product.title}>
+          {product.title}
+        </ProductName>
+
+        <ProductCategory>
+          {product.category || 'General'}
+        </ProductCategory>
+
+        <PriceWrapper>
+          <ProductPrice isDiscounted={hasDiscount}>
+            ৳ {discountedPrice?.toLocaleString()}
+          </ProductPrice>
+          {hasDiscount && (
+            <OriginalPrice>৳ {product?.price?.toLocaleString()}</OriginalPrice>
+          )}
+        </PriceWrapper>
+
+        <RatingSection>
+          <StyledRating value={averageRating} readOnly precision={0.5} size="small" />
+          <RatingText>
+            {reviewCount > 0 ? `(${reviewCount})` : 'No reviews'}
+          </RatingText>
+        </RatingSection>
 
         {addedToCart ? (
-          <ViewCartBtn variant="outlined" onClick={handleViewCart}>
-            <ShoppingCartIcon sx={{ fontSize: { xs: '14px', sm: '17px' } }} />
-            View Cart
+          <ViewCartBtn onClick={handleViewCart}>
+            <ShoppingCartIcon sx={{ fontSize: '13px' }} /> View Cart
           </ViewCartBtn>
         ) : (
-          <AddToCartBtn onClick={handleAddToCart}>
-            <ShoppingCartIcon sx={{ fontSize: { xs: '14px', sm: '17px' } }} />
-            Add to Cart
+          <AddToCartBtn onClick={handleAddToCart} disabled={!product.inStock}>
+            <ShoppingCartIcon sx={{ fontSize: '13px' }} />
+            {product.inStock ? 'Add to Cart' : 'Out of Stock'}
           </AddToCartBtn>
         )}
       </CardBody>
@@ -389,7 +406,7 @@ const SectionHeader = () => (
       <SectionHeaderWrapper>
         <HeaderTopRow>
           <SectionIconWrapper>
-            <PetsIcon sx={{ color: '#fff', fontSize: 18 }} />
+            <PetsIcon sx={{ color: '#fff', fontSize: 15 }} />
           </SectionIconWrapper>
           <SectionSubtitle>Pet Shop</SectionSubtitle>
         </HeaderTopRow>
@@ -403,44 +420,64 @@ const SectionHeader = () => (
 
 const FeaturedProducts = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [displayProducts, setDisplayProducts] = useState([]);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  const { data: productsData, isLoading, error } = useQuery({
-    queryKey: ['products-featured'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/products');
-      const products = response.data.data || response.data || [];
-      return { data: Array.isArray(products) ? products : [] };
-    },
-    staleTime: 1000 * 60 * 5,
-  });
+  const { useProducts } = useShopApi();
+  const {
+    allProducts,
+    isLoading,
+    error,
+  } = useProducts();
 
   useEffect(() => {
-    const products = productsData?.data || [];
-    if (products.length > 0) {
-      const featured = products.filter((p) => p.isFeatured === true);
-      const nonFeatured = shuffleArray(products.filter((p) => p.isFeatured !== true));
-      const selected = [...featured, ...nonFeatured].slice(0, 4);
-      setDisplayProducts(selected);
-    }
-  }, [productsData]);
+    if (allProducts && allProducts.length > 0) {
+      const featuredProducts = allProducts.filter((p) => p.isFeatured === true);
+      const nonFeaturedProducts = shuffleArray(allProducts.filter((p) => p.isFeatured !== true));
 
-  const handleAddToCart = (productName) => {
-    setSnackbar({ open: true, message: `${productName} added to cart!`, severity: 'success' });
+      let selected = [...featuredProducts];
+      const remainingSlots = 4 - selected.length;
+
+      if (remainingSlots > 0) {
+        selected = [...selected, ...nonFeaturedProducts.slice(0, remainingSlots)];
+      }
+
+      setDisplayProducts(selected.slice(0, 4));
+    }
+  }, [allProducts]);
+
+  const handleAddToCart = (productName, success = true) => {
+    if (success) {
+      setSnackbar({ open: true, message: `${productName} added to cart!`, severity: 'success' });
+    } else {
+      setSnackbar({ open: true, message: `${productName} is out of stock!`, severity: 'warning' });
+    }
   };
 
-  const handleViewAllPets = () => {
+  const handleAuthRequired = () => {
+    setAuthDialogOpen(true);
+  };
+
+  const handleAuthDialogClose = () => setAuthDialogOpen(false);
+
+  const handleNavigateToLogin = () => {
+    setAuthDialogOpen(false);
+    navigate('/login', { state: { from: '/' } });
+  };
+
+  const handleViewAllProducts = () => {
     navigate('/shop');
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <ShopSection>
         <Container maxWidth="lg">
           <SectionHeader />
           <LoadingContainer>
-            <CircularProgress sx={{ color: primaryColor }} />
+            <CircularProgress sx={{ color: PRIMARY_COLOR }} />
           </LoadingContainer>
         </Container>
       </ShopSection>
@@ -453,9 +490,16 @@ const FeaturedProducts = () => {
         <Container maxWidth="lg">
           <SectionHeader />
           <NoProductsContainer>
-            <Typography variant="body1" sx={{ color: '#666' }}>
-              Unable to load products at the moment. Please try again later.
+            <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
+              Unable to load products at the moment.
             </Typography>
+            <Button
+              variant="contained"
+              onClick={() => window.location.reload()}
+              sx={{ backgroundColor: PRIMARY_COLOR }}
+            >
+              Try Again
+            </Button>
           </NoProductsContainer>
         </Container>
       </ShopSection>
@@ -467,11 +511,16 @@ const FeaturedProducts = () => {
       <Container maxWidth="lg">
         <SectionHeader />
 
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
           {displayProducts.length > 0 ? (
             displayProducts.map((product) => (
               <Grid size={{ xs: 6, sm: 6, md: 3 }} key={product._id}>
-                <ProductCardItem product={product} onAddToCart={handleAddToCart} />
+                <ProductCardItem
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                  isAuthenticated={isAuthenticated}
+                  onAuthRequired={handleAuthRequired}
+                />
               </Grid>
             ))
           ) : (
@@ -486,12 +535,74 @@ const FeaturedProducts = () => {
         </Grid>
 
         <SectionInfo>
-          <ViewAllBtn variant="contained" onClick={handleViewAllPets}>
+          <Button
+            variant="contained"
+            onClick={handleViewAllProducts}
+            sx={{
+              backgroundColor: PRIMARY_COLOR,
+              px: 3,
+              py: 0.9,
+              borderRadius: '25px',
+              fontSize: '14px',
+              '&:hover': { backgroundColor: PRIMARY_DARK },
+              textTransform: 'none',
+            }}
+          >
             View all products
-          </ViewAllBtn>
+          </Button>
         </SectionInfo>
       </Container>
 
+      {/* Authentication Required Dialog */}
+      <Dialog
+        open={authDialogOpen}
+        onClose={handleAuthDialogClose}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '8px',
+            maxWidth: '400px',
+            width: '90%',
+            margin: '16px',
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <LockIcon sx={{ color: PRIMARY_COLOR, fontSize: '28px' }} /> Sign In Required
+          <Typography variant="h6" component="span" fontWeight={700}>
+            Sign In Required
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: '#666', fontSize: '14px', lineHeight: 1.5 }}>
+            Please sign in to add items to your cart and continue shopping.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0, gap: 1.5 }}>
+          <Button
+            onClick={handleAuthDialogClose}
+            sx={{ color: '#888', textTransform: 'none', fontWeight: 500, borderRadius: '10px' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleNavigateToLogin}
+            variant="contained"
+            sx={{
+              backgroundColor: PRIMARY_COLOR,
+              textTransform: 'none',
+              fontWeight: 600,
+              borderRadius: '10px',
+              padding: '8px 20px',
+              '&:hover': { backgroundColor: PRIMARY_DARK },
+            }}
+          >
+            Sign In
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -501,6 +612,7 @@ const FeaturedProducts = () => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar((p) => ({ ...p, open: false }))}
+          sx={{ borderRadius: '12px' }}
         >
           {snackbar.message}
         </Alert>

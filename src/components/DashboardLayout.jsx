@@ -1501,8 +1501,9 @@ export default function DashboardLayout({ children, title, menuItems }) {
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              py: { xs: 1.2, sm: 1.8 },
-              px: { xs: 1, sm: 1.5 },
+              pt: { xs: 1.2, sm: 1.8 },
+              pb: { xs: 1, sm: 1 },
+              px: { xs: 1, sm: 1 },
               overflow: 'hidden',
             }}
           >
@@ -1512,7 +1513,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
                 display: 'flex',
                 flexDirection: 'column',
                 backgroundColor: theme.palette.background.paper,
-                borderRadius: 2,
+                borderRadius: 1,
                 boxShadow: theme.shadows[1],
                 border: `1px solid ${theme.palette.divider}`,
                 overflow: 'hidden',
@@ -1521,7 +1522,7 @@ export default function DashboardLayout({ children, title, menuItems }) {
               <Box
                 sx={{
                   flex: 1,
-                  p: { xs: 1.2, sm: 1.8 },
+                  p: { xs: 1.2, sm: 1.5 },
                   overflowY: 'auto',
                   overflowX: 'hidden',
                   '&::-webkit-scrollbar': {

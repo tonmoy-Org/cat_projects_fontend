@@ -32,7 +32,7 @@ const VideoSectionWrapper = styled(Box)({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.3)",
+        backgroundColor: "rgba(0,0,0,0.45)",
     },
     '@media (max-width: 900px)': {
         padding: "80px 0",
@@ -58,17 +58,17 @@ const SectionSubtitle = styled(Box)({
     alignItems: "center",
     justifyContent: "center",
     gap: "10px",
-    marginBottom: "15px",
+    marginBottom: "12px",
     color: "#fff",
-    fontSize: "15px",
+    fontSize: "10px",
     fontWeight: 600,
     letterSpacing: "1px",
     textTransform: "uppercase",
 });
 
 const IconWrapper = styled(Box)({
-    width: 40,
-    height: 40,
+    width: 26,
+    height: 26,
     borderRadius: "50%",
     backgroundColor: PRIMARY_COLOR,
     display: "flex",
@@ -76,12 +76,12 @@ const IconWrapper = styled(Box)({
     justifyContent: "center",
     '& svg': {
         color: "#fff",
-        fontSize: 20,
+        fontSize: 18,
     },
 });
 
-const SectionTitle = styled(Typography)({
-    fontSize: "44px",
+const SectionTitle = styled(Typography)(({ theme }) => ({
+    fontSize: "26px",
     fontWeight: 700,
     color: "#fff",
     lineHeight: 1.2,
@@ -90,48 +90,33 @@ const SectionTitle = styled(Typography)({
     maxWidth: "800px",
     marginLeft: "auto",
     marginRight: "auto",
-    '@media (max-width: 900px)': {
-        fontSize: "42px",
-        maxWidth: "600px",
-    },
-    '@media (max-width: 600px)': {
+    [theme.breakpoints.down('md')]: {
         fontSize: "32px",
-        marginBottom: "30px",
-        maxWidth: "400px",
     },
-});
+    [theme.breakpoints.down('sm')]: {
+        fontSize: "28px",
+        marginBottom: "30px",
+    },
+}));
 
-// Fixed play button size - made larger (was too small)
 const PlayButton = styled(IconButton)({
     backgroundColor: PRIMARY_COLOR,
     color: "#fff",
-    width: "70px",
-    height: "70px", 
-    position: "relative",
-    zIndex: 2,
+    width: "80px",
+    height: "80px",
     transition: "all 0.3s ease",
-    // border: "4px solid rgba(255,255,255,0.5)",
     '&:hover': {
         backgroundColor: PRIMARY_DARK,
-        borderColor: "#fff",
-        transform: "scale(1.1)",
+        transform: "scale(1.12)",
     },
     '& svg': {
-        fontSize: "40px", // Increased from 60px
-        color: "#fff",
-    },
-    '@media (max-width: 900px)': {
-        width: "100px",
-        height: "100px",
-        '& svg': {
-            fontSize: "55px",
-        },
+        fontSize: "42px",
     },
     '@media (max-width: 600px)': {
-        width: "80px",
-        height: "80px",
+        width: "70px",
+        height: "70px",
         '& svg': {
-            fontSize: "45px",
+            fontSize: "38px",
         },
     },
 });
@@ -143,17 +128,16 @@ const PlayButtonContainer = styled(Box)({
     width: "100%",
 });
 
-// Modal Styles - Fixed the dark overlay issue
+// Modal Styles
 const ModalWrapper = styled(Modal)({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
 });
 
-// Custom Backdrop with less darkness
 const CustomBackdrop = styled(Backdrop)({
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Less dark than default (was 0.9)
-    backdropFilter: 'blur(3px)', // Optional: adds slight blur effect
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backdropFilter: 'blur(4px)',
 });
 
 const ModalContent = styled(Box)({
@@ -161,10 +145,10 @@ const ModalContent = styled(Box)({
     width: '90%',
     maxWidth: '900px',
     backgroundColor: '#000',
-    borderRadius: '12px', // Slightly more rounded
+    borderRadius: '12px',
     overflow: 'hidden',
     outline: 'none',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.4)', // Added shadow for depth
+    boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
 });
 
 const CloseButton = styled(IconButton)({
@@ -174,14 +158,10 @@ const CloseButton = styled(IconButton)({
     backgroundColor: 'rgba(0,0,0,0.6)',
     color: '#fff',
     zIndex: 10,
-    width: '40px',
-    height: '40px',
+    width: '42px',
+    height: '42px',
     '&:hover': {
         backgroundColor: PRIMARY_COLOR,
-        transform: 'scale(1.1)',
-    },
-    '& svg': {
-        fontSize: '24px',
     },
 });
 
@@ -189,16 +169,15 @@ const VideoIframe = styled('iframe')({
     width: '100%',
     height: '500px',
     border: 'none',
-    display: 'block',
     '@media (max-width: 900px)': {
-        height: '400px',
+        height: '420px',
     },
     '@media (max-width: 600px)': {
-        height: '250px',
+        height: '280px',
     },
 });
 
-// Helper function to extract YouTube video ID from URL
+// Helper function to extract YouTube video ID
 const getYouTubeVideoId = (url) => {
     if (!url) return null;
 
@@ -211,7 +190,6 @@ const getYouTubeVideoId = (url) => {
         const match = url.match(pattern);
         if (match) return match[1];
     }
-
     return null;
 };
 
@@ -224,13 +202,8 @@ const VideoSection = ({
 }) => {
     const [open, setOpen] = useState(false);
 
-    const handleOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const videoId = getYouTubeVideoId(videoUrl);
     const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : '';
@@ -238,9 +211,7 @@ const VideoSection = ({
     return (
         <>
             <VideoSectionWrapper
-                style={{
-                    backgroundImage: `url(${backgroundImage})`,
-                }}
+                style={{ backgroundImage: `url(${backgroundImage})` }}
             >
                 <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
                     <ContentWrapper>
@@ -250,14 +221,10 @@ const VideoSection = ({
                                     <PetsIcon />
                                 </IconWrapper>
                             )}
-                            <Typography component="span" sx={{ color: '#fff' }}>
-                                {subtitle}
-                            </Typography>
+                            {subtitle}
                         </SectionSubtitle>
 
-                        <SectionTitle variant="h3">
-                            {title}
-                        </SectionTitle>
+                        <SectionTitle>{title}</SectionTitle>
 
                         <PlayButtonContainer>
                             <PlayButton onClick={handleOpen} aria-label="Play video">
@@ -268,21 +235,20 @@ const VideoSection = ({
                 </Container>
             </VideoSectionWrapper>
 
-            {/* Video Modal - Fixed backdrop darkness */}
+            {/* Video Modal */}
             <ModalWrapper
                 open={open}
                 onClose={handleClose}
                 closeAfterTransition
-                BackdropComponent={CustomBackdrop} // Using custom backdrop instead of default
-                BackdropProps={{
-                    timeout: 500,
-                }}
+                BackdropComponent={CustomBackdrop}
+                BackdropProps={{ timeout: 500 }}
             >
                 <Fade in={open}>
                     <ModalContent>
                         <CloseButton onClick={handleClose}>
                             <CloseIcon />
                         </CloseButton>
+
                         {embedUrl ? (
                             <VideoIframe
                                 src={embedUrl}

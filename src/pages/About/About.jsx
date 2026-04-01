@@ -31,19 +31,20 @@ const SectionTitleWrapper = styled(Box)({
   justifyContent: "center",
   alignItems: "center",
   gap: "10px",
-  marginBottom: "15px",
+  marginBottom: "12px",
 });
 
 const SectionTitle = styled(Typography)({
-  fontSize: "15px",
+  fontSize: "10px",
   fontWeight: 600,
   letterSpacing: "1px",
-  color: "#333",
+  color: "#666",
+  textTransform: "uppercase",
 });
 
 const SectionIcon = styled(Box)({
-  width: 30,
-  height: 30,
+  width: 26,
+  height: 26,
   borderRadius: '50%',
   backgroundColor: '#db89ca',
   display: 'flex',
@@ -51,30 +52,39 @@ const SectionIcon = styled(Box)({
   justifyContent: 'center',
 });
 
-const MainTitle = styled(Typography)({
-  fontSize: "36px",
+const MainTitle = styled(Typography)(({ theme }) => ({
+  fontSize: "26px",
   fontWeight: 700,
   color: "#1a1a1a",
   lineHeight: 1.2,
-  marginBottom: "20px",
+  marginBottom: "30px",
   textAlign: "center",
-  "@media (max-width: 600px)": {
+  [theme.breakpoints.down('md')]: {
     fontSize: "32px",
   },
-});
+  [theme.breakpoints.down('sm')]: {
+    fontSize: "28px",
+  },
+}));
 
 const GalleryCard = styled(Card)({
-  borderRadius: "10px",
+  borderRadius: "12px",
   overflow: "hidden",
   position: "relative",
   cursor: "pointer",
-  "&:hover .gallery-category": {
-    opacity: 1,
-    visibility: "visible",
-    transform: "translateY(0)",
+  boxShadow: '0 4px 12px rgba(0,0,0,0.07)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 15px 30px rgba(0,0,0,0.12)',
   },
-  "&:hover img": {
-    transform: "scale(1.05)",
+  '&:hover img': {
+    transform: 'scale(1.05)',
+  },
+  '&:hover .gallery-category': {
+    opacity: 1,
+    visibility: 'visible',
+    transform: 'translateY(0)',
   },
 });
 
@@ -91,10 +101,10 @@ const GalleryCategory = styled(Box)({
   left: "15px",
   backgroundColor: PRIMARY_COLOR,
   color: "#fff",
-  padding: "5px 15px",
+  padding: "5px 14px",
   borderRadius: "20px",
-  fontSize: "12px",
-  fontWeight: 500,
+  fontSize: "11px",
+  fontWeight: 600,
   zIndex: 2,
   opacity: 0,
   visibility: "hidden",
@@ -137,10 +147,9 @@ const About = () => {
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
-  // Process cats data to create gallery items with categories
+  // Process cats data to create gallery items
   useEffect(() => {
     if (catsData && catsData.length > 0) {
-      // Map cats to gallery format with category based on gender
       const galleryItems = catsData.map((cat) => ({
         id: cat._id,
         image: cat.featuredImage,
@@ -148,7 +157,6 @@ const About = () => {
         title: cat.name,
       }));
 
-      // Take up to 8 items for gallery display
       setDisplayGallery(galleryItems.slice(0, 8));
     }
   }, [catsData]);
@@ -184,7 +192,7 @@ const About = () => {
               <MainTitle>Looking & smelling great!</MainTitle>
             </Box>
             <LoadingContainer>
-              <CircularProgress />
+              <CircularProgress sx={{ color: PRIMARY_COLOR }} />
             </LoadingContainer>
           </Container>
         </GallerySection>
@@ -203,7 +211,7 @@ const About = () => {
       />
       <HeroServiceSection />
 
-      {/* Video Section - Using the reusable component */}
+      {/* Video Section */}
       <VideoSection
         videoUrl="https://youtu.be/545E1RCSzLw"
         backgroundImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/3.jpg"
