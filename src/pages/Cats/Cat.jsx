@@ -134,6 +134,31 @@ const StockToggleGroup = styled(ToggleButtonGroup)(({ theme }) => ({
     },
 }));
 
+const PriceSliderWrapper = styled(Box)(({ theme }) => ({
+    display: 'flex', flexDirection: 'column', gap: '8px', flex: '1 1 300px', minWidth: '200px',
+    [theme.breakpoints.down('sm')]: { width: '100%', flex: '1 1 100%' },
+}));
+
+const PriceInputRow = styled(Box)({ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' });
+
+const PriceInput = styled(TextField)({
+    width: '84px',
+    '& .MuiOutlinedInput-root': { borderRadius: '8px', backgroundColor: '#fff', fontSize: '11px', '& fieldset': { borderColor: '#e0d9f5' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY } },
+    '& input': { padding: '5px 6px', textAlign: 'center', fontWeight: 600, color: PRIMARY, fontSize: '11px' },
+});
+
+const StyledSlider = styled(Slider)({
+    color: PRIMARY, flex: 1, minWidth: '150px',
+    '& .MuiSlider-thumb': { width: '14px', height: '14px', '&:hover': { boxShadow: `0 0 0 8px rgba(92,77,145,0.1)` } },
+    '& .MuiSlider-rail': { backgroundColor: '#e0d9f5' },
+});
+
+const RefreshBtn = styled(IconButton)({
+    backgroundColor: '#f0ecfb', color: PRIMARY, padding: '6px',
+    '&:hover': { backgroundColor: PRIMARY, color: '#fff' },
+    '&.Mui-disabled': { backgroundColor: '#f0ecfb', opacity: 0.5 },
+});
+
 const ActiveFiltersRow = styled(Box)({ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '14px' });
 
 const ProductCard = styled(Box, { shouldForwardProp: p => p !== 'outOfStock' })(({ outOfStock }) => ({
@@ -146,12 +171,8 @@ const ProductCard = styled(Box, { shouldForwardProp: p => p !== 'outOfStock' })(
     border: '1px solid #f0f0f0',
     opacity: outOfStock ? 0.6 : 1,
     filter: outOfStock ? 'grayscale(100%)' : 'none',
-    '&:hover': outOfStock ? {} : {
-        boxShadow: '0 8px 24px rgba(0,0,0,0.11)',
-    },
-    '&:hover .product-image': outOfStock ? {} : {
-        transform: 'scale(1.05)',
-    },
+    '&:hover': outOfStock ? {} : { boxShadow: '0 8px 24px rgba(0,0,0,0.11)' },
+    '&:hover .product-image': outOfStock ? {} : { transform: 'scale(1.05)' },
 }));
 
 const ImageWrapper = styled(Box)({ position: 'relative', width: '100%', overflow: 'hidden', backgroundColor: '#f5f5f5' });
@@ -163,45 +184,22 @@ const ProductImage = styled('img')({
 });
 
 const DiscountBadge = styled(Box)({
-    position: 'absolute',
-    top: '10px',
-    left: '10px',
-    backgroundColor: DISCOUNT_COLOR,
-    color: '#fff',
-    padding: '4px 10px',
-    borderRadius: '20px',
-    fontSize: '11px',
-    fontWeight: 700,
-    zIndex: 2,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    position: 'absolute', top: '10px', left: '10px', backgroundColor: DISCOUNT_COLOR,
+    color: '#fff', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700,
+    zIndex: 2, display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
 });
 
 const CardBody = styled(Box)({ padding: '12px 12px 16px', textAlign: 'start' });
-
 const ProductName = styled(Typography)({ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
-
 const ProductCategory = styled(Typography)({ fontSize: '11px', color: '#999', marginBottom: '6px' });
-
 const PriceWrapper = styled(Box)({ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' });
 
 const ProductPrice = styled(Typography, { shouldForwardProp: p => p !== 'isDiscounted' })(({ isDiscounted }) => ({
-    fontSize: '14px',
-    fontWeight: 700,
-    color: isDiscounted ? DISCOUNT_COLOR : PRICE_COLOR,
-    marginBottom: '0',
+    fontSize: '14px', fontWeight: 700, color: isDiscounted ? DISCOUNT_COLOR : PRICE_COLOR, marginBottom: '0',
 }));
 
-const OriginalPrice = styled(Typography)({
-    fontSize: '11px',
-    color: '#999',
-    textDecoration: 'line-through',
-});
-
+const OriginalPrice = styled(Typography)({ fontSize: '11px', color: '#999', textDecoration: 'line-through' });
 const RatingSection = styled(Box)({ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '6px', marginBottom: '10px' });
-
 const RatingText = styled(Typography)({ fontSize: '11px', color: '#999', fontWeight: 500 });
 
 const StyledRating = styled(Rating)({
@@ -243,7 +241,7 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
     },
 }));
 
-// ── CatCardItem Component ───────────────────────────────────────────────────────────────
+// ── CatCardItem Component ─────────────────────────────────────────────────────
 const CatCardItem = ({ cat, onCardClick, isAuthenticated, onAuthRequired, onAddedToCart }) => {
     const { addToCart } = useCart();
     const navigate = useNavigate();
@@ -256,7 +254,6 @@ const CatCardItem = ({ cat, onCardClick, isAuthenticated, onAuthRequired, onAdde
         addToCart(cat, 1);
         setAddedToCart(true);
         onAddedToCart?.(cat);
-
         setTimeout(() => setAddedToCart(false), 3000);
     };
 
@@ -301,9 +298,7 @@ const CatCardItem = ({ cat, onCardClick, isAuthenticated, onAuthRequired, onAdde
                 </PriceWrapper>
                 <RatingSection>
                     <StyledRating value={averageRating} readOnly precision={0.5} size="small" />
-                    <RatingText>
-                        {reviewCount > 0 ? `(${reviewCount})` : 'No reviews'}
-                    </RatingText>
+                    <RatingText>{reviewCount > 0 ? `(${reviewCount})` : 'No reviews'}</RatingText>
                 </RatingSection>
                 {addedToCart ? (
                     <ViewCartBtn onClick={e => { e.stopPropagation(); navigate('/cart'); }}>
@@ -328,58 +323,106 @@ const Cat = () => {
     const { isAuthenticated, isLoading: authLoading } = useAuth();
     const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
-    // Local filter states
+    // Filter states
     const [search, setSearch] = useState('');
     const [breed, setBreed] = useState('');
     const [gender, setGender] = useState('all');
     const [stock, setStock] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const itemsPerPage = 12;
 
-    // Get cats data from hook
+    // Price range states
+    const [priceRange, setPriceRange] = useState([0, 0]);
+    const [minInput, setMinInput] = useState('');
+    const [maxInput, setMaxInput] = useState('');
+    const [priceMin, setPriceMin] = useState(0);
+    const [priceMax, setPriceMax] = useState(0);
+    const [priceInitialized, setPriceInitialized] = useState(false);
+
     const { cats, catsLoading } = useCatsManagement();
 
-    // Filter cats based on criteria
+    // Initialize price range once cats load
+    useEffect(() => {
+        if (cats && cats.length > 0 && !priceInitialized) {
+            const prices = cats.map(c => parseFloat(c.discountedPrice || c.price) || 0);
+            const min = Math.floor(Math.min(...prices));
+            const max = Math.ceil(Math.max(...prices));
+            setPriceMin(min);
+            setPriceMax(max);
+            setPriceRange([min, max]);
+            setMinInput(String(min));
+            setMaxInput(String(max));
+            setPriceInitialized(true);
+        }
+    }, [cats, priceInitialized]);
+
+    // Price slider handler
+    const handleSliderChange = (_, newValue) => {
+        setPriceRange(newValue);
+        setMinInput(String(newValue[0]));
+        setMaxInput(String(newValue[1]));
+    };
+
+    // Price min input handler
+    const handleMinInput = (e) => {
+        const val = e.target.value;
+        setMinInput(val);
+        const num = parseFloat(val);
+        if (!isNaN(num) && num >= priceMin && num <= priceRange[1]) {
+            setPriceRange([num, priceRange[1]]);
+        }
+    };
+
+    // Price max input handler
+    const handleMaxInput = (e) => {
+        const val = e.target.value;
+        setMaxInput(val);
+        const num = parseFloat(val);
+        if (!isNaN(num) && num <= priceMax && num >= priceRange[0]) {
+            setPriceRange([priceRange[0], num]);
+        }
+    };
+
+    // Refresh handler
+    const handleRefresh = () => {
+        setIsRefreshing(true);
+        setSearch('');
+        setBreed('');
+        setGender('all');
+        setStock('all');
+        setPriceRange([priceMin, priceMax]);
+        setMinInput(String(priceMin));
+        setMaxInput(String(priceMax));
+        setTimeout(() => setIsRefreshing(false), 600);
+    };
+
+    // Filter cats
     const filteredCats = useMemo(() => {
         if (!cats || cats.length === 0) return [];
-
         return cats.filter(cat => {
-            // Search filter
-            if (search && !cat.name.toLowerCase().includes(search.toLowerCase())) {
-                return false;
-            }
+            if (search && !cat.name.toLowerCase().includes(search.toLowerCase())) return false;
+            if (breed && cat.breed !== breed) return false;
+            if (gender !== 'all' && cat.gender !== gender) return false;
+            if (stock === 'instock' && !cat.inStock) return false;
 
-            // Breed filter
-            if (breed && cat.breed !== breed) {
-                return false;
-            }
-
-            // Gender filter
-            if (gender !== 'all' && cat.gender !== gender) {
-                return false;
-            }
-
-            // Stock filter
-            if (stock === 'instock' && !cat.inStock) {
-                return false;
+            // Price filter
+            if (priceInitialized && priceMin !== priceMax) {
+                const effectivePrice = parseFloat(cat.discountedPrice || cat.price) || 0;
+                if (effectivePrice < priceRange[0] || effectivePrice > priceRange[1]) return false;
             }
 
             return true;
         });
-    }, [cats, search, breed, gender, stock]);
+    }, [cats, search, breed, gender, stock, priceRange, priceInitialized, priceMin, priceMax]);
 
-    // Calculate pagination
     const totalPages = Math.ceil(filteredCats.length / itemsPerPage);
     const paginatedCats = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        return filteredCats.slice(start, end);
+        return filteredCats.slice(start, start + itemsPerPage);
     }, [filteredCats, currentPage]);
 
-    // Reset page when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [search, breed, gender, stock]);
+    useEffect(() => { setCurrentPage(1); }, [search, breed, gender, stock, priceRange]);
 
     const handlePageChange = (_, value) => {
         setCurrentPage(value);
@@ -391,35 +434,30 @@ const Cat = () => {
         navigate(`/adoption/${cat.title_id || cat._id}`);
     };
 
-    // Get unique breeds for filter
     const breedOptions = useMemo(() => {
         if (!cats || cats.length === 0) return [];
         return [...new Set(cats.map(cat => cat.breed).filter(Boolean))];
     }, [cats]);
 
-    // Active filters for display
+    // Active filters
     const activeFilters = [];
     if (search) activeFilters.push({ key: 'search', label: `Search: ${search}` });
     if (breed) activeFilters.push({ key: 'breed', label: `Breed: ${breed}` });
     if (gender !== 'all') activeFilters.push({ key: 'gender', label: `Gender: ${gender === 'male' ? 'Male' : 'Female'}` });
     if (stock !== 'all') activeFilters.push({ key: 'stock', label: 'Available Only' });
+    if (priceInitialized && priceMin !== priceMax && (priceRange[0] !== priceMin || priceRange[1] !== priceMax)) {
+        activeFilters.push({ key: 'price', label: `Price: ৳${priceRange[0]} – ৳${priceRange[1]}` });
+    }
 
     const clearFilter = (filterKey) => {
-        switch (filterKey) {
-            case 'search':
-                setSearch('');
-                break;
-            case 'breed':
-                setBreed('');
-                break;
-            case 'gender':
-                setGender('all');
-                break;
-            case 'stock':
-                setStock('all');
-                break;
-            default:
-                break;
+        if (filterKey === 'search') setSearch('');
+        else if (filterKey === 'breed') setBreed('');
+        else if (filterKey === 'gender') setGender('all');
+        else if (filterKey === 'stock') setStock('all');
+        else if (filterKey === 'price') {
+            setPriceRange([priceMin, priceMax]);
+            setMinInput(String(priceMin));
+            setMaxInput(String(priceMax));
         }
     };
 
@@ -428,6 +466,9 @@ const Cat = () => {
         setBreed('');
         setGender('all');
         setStock('all');
+        setPriceRange([priceMin, priceMax]);
+        setMinInput(String(priceMin));
+        setMaxInput(String(priceMax));
     };
 
     if (catsLoading || authLoading) {
@@ -452,6 +493,7 @@ const Cat = () => {
             <ProductSection id="cats-section">
                 <Container maxWidth="lg">
                     <FilterBar>
+                        {/* Row 1: Search + Breed */}
                         <FilterRow>
                             <SearchInput
                                 placeholder="Search by cat name..."
@@ -478,6 +520,7 @@ const Cat = () => {
                             </Box>
                         </FilterRow>
 
+                        {/* Row 2: Gender + Status + Price Range */}
                         <FilterRow>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                                 <FilterLabel>Gender</FilterLabel>
@@ -495,6 +538,52 @@ const Cat = () => {
                                     <ToggleButton value="instock">Available</ToggleButton>
                                 </StockToggleGroup>
                             </Box>
+
+                            {/* Price Range — only shown when there's a meaningful range */}
+                            {priceInitialized && priceMin !== priceMax && (
+                                <PriceSliderWrapper>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                        <FilterLabel>
+                                            <FilterListIcon sx={{ fontSize: '12px', mr: '4px', verticalAlign: 'middle' }} />
+                                            Price Range
+                                        </FilterLabel>
+                                        <Tooltip title="Refresh & reset filters">
+                                            <RefreshBtn onClick={handleRefresh} disabled={isRefreshing} size="small">
+                                                <RefreshIcon sx={{ fontSize: '15px', animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
+                                            </RefreshBtn>
+                                        </Tooltip>
+                                    </Box>
+                                    <PriceInputRow>
+                                        <PriceInput
+                                            size="small"
+                                            value={minInput}
+                                            onChange={handleMinInput}
+                                            inputProps={{ type: 'number', min: priceMin, max: priceRange[1] }}
+                                            InputProps={{
+                                                startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: '10px', color: PRIMARY, fontWeight: 700 }}>৳</Typography></InputAdornment>
+                                            }}
+                                        />
+                                        <Typography sx={{ fontSize: '11px', color: '#ccc' }}>–</Typography>
+                                        <PriceInput
+                                            size="small"
+                                            value={maxInput}
+                                            onChange={handleMaxInput}
+                                            inputProps={{ type: 'number', min: priceRange[0], max: priceMax }}
+                                            InputProps={{
+                                                startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: '10px', color: PRIMARY, fontWeight: 700 }}>৳</Typography></InputAdornment>
+                                            }}
+                                        />
+                                        <StyledSlider
+                                            value={priceRange}
+                                            onChange={handleSliderChange}
+                                            min={priceMin}
+                                            max={priceMax}
+                                            valueLabelDisplay="auto"
+                                            valueLabelFormat={v => `৳${v}`}
+                                        />
+                                    </PriceInputRow>
+                                </PriceSliderWrapper>
+                            )}
                         </FilterRow>
                     </FilterBar>
 
@@ -570,13 +659,20 @@ const Cat = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions sx={{ p: 2, pt: 0, gap: 1 }}>
-                    <Button onClick={() => setAuthDialogOpen(false)} sx={{ color: '#888', textTransform: 'none', fontSize: '13px', '&:hover': { backgroundColor: '#f5f5f5' } }}>Cancel</Button>
-                    <Button onClick={() => { setAuthDialogOpen(false); navigate('/login', { state: { from: '/cats' } }); }} variant="contained"
+                    <Button onClick={() => setAuthDialogOpen(false)}
+                        sx={{ color: '#888', textTransform: 'none', fontSize: '13px', '&:hover': { backgroundColor: '#f5f5f5' } }}>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={() => { setAuthDialogOpen(false); navigate('/login', { state: { from: '/cats' } }); }}
+                        variant="contained"
                         sx={{ backgroundColor: PRIMARY, textTransform: 'none', fontWeight: 600, fontSize: '13px', borderRadius: '8px', '&:hover': { backgroundColor: PRIMARY_DARK } }}>
                         Sign In
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
         </Box>
     );
 };
