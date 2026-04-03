@@ -246,7 +246,7 @@ export const PublicLayout = ({ children, title, description, onSearch }) => {
                 minHeight: { xs: 56, sm: 64 },
               }}
             >
-              {/* Left Side - Mobile Menu Icon and Logo */}
+              {/* Left Side - Mobile Menu Icon, Logo, and Desktop Navigation */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 {isMobile && (
                   <IconButton
@@ -291,58 +291,56 @@ export const PublicLayout = ({ children, title, description, onSearch }) => {
                     }}
                   />
                 </Box>
-              </Box>
 
-              {/* Desktop Navigation Links - Hidden on Mobile */}
-              {!isMobile && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 0.5,
-                    position: "absolute",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                  }}
-                >
-                  {navItems.map((item) => (
-                    <Button
-                      key={item.label}
-                      onClick={() => handleNavigation(item.path)}
-                      sx={{
-                        color: isActive(item.path)
-                          ? ACTIVE_COLOR
-                          : theme.palette.text.primary,
-                        fontSize: "0.9rem",
-                        fontWeight: isActive(item.path) ? 600 : 500,
-                        textTransform: "none",
-                        px: 1.5,
-                        py: 0.75,
-                        borderRadius: "20px",
-                        position: "relative",
-                        "&:hover": {
-                          color: ACTIVE_COLOR,
-                          backgroundColor: HOVER_COLOR,
-                        },
-                        ...(isActive(item.path) && {
-                          "&::after": {
-                            content: '""',
-                            position: "absolute",
-                            bottom: 4,
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            width: "4px",
-                            height: "4px",
-                            borderRadius: "50%",
-                            backgroundColor: ACTIVE_COLOR,
+                {/* Desktop Navigation Links - Now on Left side next to logo */}
+                {!isMobile && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 0.5,
+                      ml: 3,
+                    }}
+                  >
+                    {navItems.map((item) => (
+                      <Button
+                        key={item.label}
+                        onClick={() => handleNavigation(item.path)}
+                        sx={{
+                          color: isActive(item.path)
+                            ? ACTIVE_COLOR
+                            : theme.palette.text.primary,
+                          fontSize: "0.9rem",
+                          fontWeight: isActive(item.path) ? 600 : 500,
+                          textTransform: "none",
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: "20px",
+                          position: "relative",
+                          "&:hover": {
+                            color: ACTIVE_COLOR,
+                            backgroundColor: HOVER_COLOR,
                           },
-                        }),
-                      }}
-                    >
-                      {item.label}
-                    </Button>
-                  ))}
-                </Box>
-              )}
+                          ...(isActive(item.path) && {
+                            "&::after": {
+                              content: '""',
+                              position: "absolute",
+                              bottom: 4,
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              width: "4px",
+                              height: "4px",
+                              borderRadius: "50%",
+                              backgroundColor: ACTIVE_COLOR,
+                            },
+                          }),
+                        }}
+                      >
+                        {item.label}
+                      </Button>
+                    ))}
+                  </Box>
+                )}
+              </Box>
 
               {/* Right Side - Search, Cart, and Authentication */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>

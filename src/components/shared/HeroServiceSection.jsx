@@ -15,6 +15,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import StarIcon from '@mui/icons-material/Star';
 import img1 from '../../public/About/pet1.png';
+import { Link as RouterLink } from "react-router-dom";
 
 // Theme colors
 const primaryColor = '#ff6b6b';
@@ -261,7 +262,11 @@ const HeroServiceSection = ({
             </Box>
 
             <ActionButtons>
-              <StyledButton endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}>
+              <StyledButton
+                component={RouterLink}
+                to="/shop"
+                endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
+              >
                 {buttonText}
               </StyledButton>
 

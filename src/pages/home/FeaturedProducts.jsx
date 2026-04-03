@@ -85,7 +85,6 @@ const ProductCard = styled(Box, { shouldForwardProp: p => p !== 'outOfStock' })(
   filter: outOfStock ? 'grayscale(100%)' : 'none',
   '&:hover': outOfStock ? {} : {
     boxShadow: '0 8px 24px rgba(0,0,0,0.11)',
-    transform: 'translateY(-2px)',
   },
   '&:hover .product-image': outOfStock ? {} : {
     transform: 'scale(1.05)',

@@ -16,6 +16,7 @@ import WhyChooseSection from "../../components/shared/WhyChooseSectionComponent"
 import SectionTile from "../../components/SectionTile";
 import VideoSection from "../../components/shared/VideoSection";
 import axiosInstance from "../../api/axios";
+import { Link } from "react-router-dom";
 
 // Theme colors
 const PRIMARY_COLOR = '#5C4D91';
@@ -152,6 +153,7 @@ const About = () => {
     if (catsData && catsData.length > 0) {
       const galleryItems = catsData.map((cat) => ({
         id: cat._id,
+        title_id: cat.title_id,
         image: cat.featuredImage,
         category: cat.gender === "male" ? "Male" : "Female",
         title: cat.name,
@@ -240,18 +242,20 @@ const About = () => {
             {displayGallery.length > 0 ? (
               displayGallery.map((item) => (
                 <Grid size={{ xs: 6, sm: 6, md: 3 }} key={item.id}>
-                  <GalleryCard>
-                    <GalleryImage
-                      src={item.image}
-                      alt={item.title}
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/400x250?text=Gallery+Image';
-                      }}
-                    />
-                    <GalleryCategory className="gallery-category">
-                      {item.category}
-                    </GalleryCategory>
-                  </GalleryCard>
+                  <Link to={`/adoption/${item.title_id}`} style={{ textDecoration: 'none' }}>
+                    <GalleryCard>
+                      <GalleryImage
+                        src={item.image}
+                        alt={item.title}
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/400x250?text=Gallery+Image';
+                        }}
+                      />
+                      <GalleryCategory className="gallery-category">
+                        {item.category}
+                      </GalleryCategory>
+                    </GalleryCard>
+                  </Link>
                 </Grid>
               ))
             ) : (

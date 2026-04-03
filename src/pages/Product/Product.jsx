@@ -24,6 +24,7 @@ import { useShopApi } from '../../hooks/useShopApi';
 const PRIMARY = '#5C4D91';
 const PRIMARY_DARK = '#4A3D75';
 const ACCENT = '#db89ca';
+const PRICE_COLOR = '#ff6b6b';
 const DISCOUNT_COLOR = '#10b981';
 const NO_IMAGE = 'https://via.placeholder.com/400x400?text=No+Image';
 const HERO_IMAGE = 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/2.jpg';
@@ -194,7 +195,7 @@ const PriceWrapper = styled(Box)({ display: 'flex', alignItems: 'center', gap: '
 const ProductPrice = styled(Typography, { shouldForwardProp: p => p !== 'isDiscounted' })(({ isDiscounted }) => ({
     fontSize: '14px',
     fontWeight: 700,
-    color: isDiscounted ? DISCOUNT_COLOR : PRIMARY,
+    color: isDiscounted ? DISCOUNT_COLOR : PRICE_COLOR,
 }));
 
 const OriginalPrice = styled(Typography)({

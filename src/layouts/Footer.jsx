@@ -18,7 +18,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
-import logo from '../public/logo-1.png'
+import logo from '../public/logo-1.png';
 
 // Theme colors
 const PRIMARY_COLOR = '#5C4D91';
@@ -39,7 +39,7 @@ const FooterWrapper = styled(Box)({
         top: 0,
         left: 0,
         right: 0,
-        height: '4px',
+        height: '3px',
         background: `linear-gradient(90deg, ${PRIMARY_COLOR}, ${PRIMARY_LIGHT}, ${PRIMARY_COLOR})`,
         animation: 'gradientShift 3s ease infinite',
     },
@@ -51,49 +51,53 @@ const FooterWrapper = styled(Box)({
 });
 
 const TopSection = styled(Box)({
-    padding: '70px 0 50px',
+    padding: '50px 0 40px',
     position: 'relative',
     '@media (max-width: 600px)': {
-        padding: '50px 0 30px',
+        padding: '40px 0 25px',
     },
 });
 
 const FooterLogo = styled('img')({
-    maxWidth: '160px',
-    marginBottom: '20px',
-    marginTop: '-5px',
+    maxWidth: '140px',
+    marginBottom: '16px',
+    marginTop: '-3px',
     transition: 'transform 0.3s ease',
     '&:hover': {
-        transform: 'scale(1.05)',
+        transform: 'scale(1.03)',
     },
     '@media (max-width: 600px)': {
-        maxWidth: '140px',
-        marginTop: '-3px',
+        maxWidth: '120px',
+        marginBottom: '12px',
     },
 });
 
 const FooterText = styled(Typography)({
     color: textColor,
-    fontSize: '14px',
-    lineHeight: 1.8,
-    marginBottom: '25px',
-    opacity: 0.9,
-    maxWidth: '300px',
+    fontSize: '13px',
+    lineHeight: 1.6,
+    marginBottom: '20px',
+    opacity: 0.85,
+    maxWidth: '280px',
     '@media (max-width: 900px)': {
         maxWidth: '100%',
+    },
+    '@media (max-width: 600px)': {
+        fontSize: '12px',
+        marginBottom: '16px',
     },
 });
 
 const SocialIcons = styled(Box)({
     display: 'flex',
-    gap: '12px',
+    gap: '10px',
 });
 
 const SocialIcon = styled(IconButton)({
     color: textColor,
     backgroundColor: 'rgba(255,255,255,0.05)',
-    width: '42px',
-    height: '42px',
+    width: '36px',
+    height: '36px',
     transition: 'all 0.3s ease',
     position: 'relative',
     overflow: 'hidden',
@@ -111,49 +115,49 @@ const SocialIcon = styled(IconButton)({
         zIndex: 0,
     },
     '&:hover': {
-        transform: 'translateY(-5px)',
+        transform: 'translateY(-3px)',
         '&::before': {
             width: '100%',
             height: '100%',
         },
     },
     '& svg': {
-        fontSize: '18px',
+        fontSize: '16px',
         position: 'relative',
         zIndex: 1,
     },
     '@media (max-width: 600px)': {
-        width: '38px',
-        height: '38px',
+        width: '34px',
+        height: '34px',
         '& svg': {
-            fontSize: '16px',
+            fontSize: '14px',
         },
     },
 });
 
 const FooterTitle = styled(Typography)({
     color: lightText,
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: 600,
-    marginBottom: '25px',
+    marginBottom: '20px',
     position: 'relative',
     '&::after': {
         content: '""',
         position: 'absolute',
-        bottom: '-10px',
+        bottom: '-8px',
         left: '0',
-        width: '40px',
-        height: '3px',
+        width: '35px',
+        height: '2px',
         backgroundColor: PRIMARY_COLOR,
         borderRadius: '2px',
         transition: 'width 0.3s ease',
     },
     '&:hover::after': {
-        width: '60px',
+        width: '55px',
     },
     '@media (max-width: 600px)': {
-        fontSize: '18px',
-        marginBottom: '20px',
+        fontSize: '16px',
+        marginBottom: '16px',
         textAlign: 'center',
         '&::after': {
             left: '50%',
@@ -166,35 +170,41 @@ const ContactInfo = styled(Box)({
     '& .contact-item': {
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        marginBottom: '15px',
+        gap: '10px',
+        marginBottom: '12px',
         transition: 'transform 0.3s ease',
         '&:hover': {
-            transform: 'translateX(5px)',
+            transform: 'translateX(4px)',
         },
         '& svg': {
             color: PRIMARY_COLOR,
-            fontSize: '18px',
-            minWidth: '20px',
+            fontSize: '16px',
+            minWidth: '18px',
         },
         '& a, & span': {
             color: textColor,
             textDecoration: 'none',
-            fontSize: '14px',
-            lineHeight: 1.6,
+            fontSize: '13px',
+            lineHeight: 1.5,
             transition: 'color 0.3s ease',
             '&:hover': {
                 color: PRIMARY_COLOR,
             },
         },
     },
-    // ✅ ONLY CHANGE: center the whole contact block on mobile
     '@media (max-width: 600px)': {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         '& .contact-item': {
             width: 'fit-content',
+            marginBottom: '10px',
+            '& a, & span': {
+                fontSize: '12px',
+            },
+            '& svg': {
+                fontSize: '14px',
+            },
         },
     },
 });
@@ -202,7 +212,7 @@ const ContactInfo = styled(Box)({
 const NewsletterForm = styled('form')({
     display: 'flex',
     flexDirection: 'column',
-    marginTop: '20px',
+    marginTop: '16px',
     '& .MuiTextField-root': {
         width: '100%',
     },
@@ -226,12 +236,19 @@ const NewsletterForm = styled('form')({
         },
         '& input': {
             color: lightText,
-            padding: '14px 20px',
-            fontSize: '14px',
+            padding: '12px 18px',
+            fontSize: '13px',
             '&::placeholder': {
                 color: 'rgba(255,255,255,0.4)',
                 opacity: 1,
             },
+        },
+    },
+    '@media (max-width: 600px)': {
+        marginTop: '12px',
+        '& .MuiOutlinedInput-root input': {
+            padding: '10px 16px',
+            fontSize: '12px',
         },
     },
 });
@@ -239,8 +256,8 @@ const NewsletterForm = styled('form')({
 const SubscribeButton = styled(IconButton)({
     backgroundColor: PRIMARY_COLOR,
     color: lightText,
-    width: '48px',
-    height: '48px',
+    width: '42px',
+    height: '42px',
     borderRadius: '50%',
     transition: 'all 0.3s ease',
     position: 'relative',
@@ -260,111 +277,134 @@ const SubscribeButton = styled(IconButton)({
     },
     '&:hover': {
         backgroundColor: PRIMARY_DARK,
-        transform: 'scale(1.1)',
+        transform: 'scale(1.05)',
         '&::before': {
             width: '100%',
             height: '100%',
         },
     },
     '& svg': {
-        fontSize: '20px',
+        fontSize: '18px',
         position: 'relative',
         zIndex: 1,
         transition: 'transform 0.3s ease',
     },
     '&:hover svg': {
-        transform: 'translateX(3px)',
+        transform: 'translateX(2px)',
     },
     '@media (max-width: 600px)': {
-        width: '44px',
-        height: '44px',
+        width: '38px',
+        height: '38px',
         '& svg': {
-            fontSize: '18px',
+            fontSize: '16px',
         },
     },
 });
 
 const Divider = styled(Box)({
     height: '1px',
-    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
     width: '100%',
     margin: '0 auto',
 });
 
 const BottomSection = styled(Box)({
-    padding: '25px 0',
+    padding: '20px 0',
     '@media (max-width: 600px)': {
-        padding: '20px 0',
+        padding: '16px 0',
     },
 });
 
 const FooterLinks = styled(Box)({
     display: 'flex',
-    gap: '35px',
+    gap: '30px',
     flexWrap: 'wrap',
     '@media (max-width: 900px)': {
-        gap: '25px',
+        gap: '20px',
     },
     '@media (max-width: 600px)': {
         justifyContent: 'center',
-        gap: '20px',
+        gap: '16px',
     },
 });
 
 const FooterLink = styled(Link)({
     color: textColor,
     textDecoration: 'none',
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 500,
     transition: 'all 0.3s ease',
     position: 'relative',
-    padding: '5px 0',
+    padding: '3px 0',
     '&::after': {
         content: '""',
         position: 'absolute',
         bottom: '0',
         left: '50%',
         width: '0',
-        height: '2px',
+        height: '1.5px',
         backgroundColor: PRIMARY_COLOR,
         transition: 'all 0.3s ease',
         transform: 'translateX(-50%)',
     },
     '&:hover': {
         color: PRIMARY_COLOR,
-        transform: 'translateY(-2px)',
+        transform: 'translateY(-1px)',
         '&::after': {
             width: '100%',
         },
+    },
+    '@media (max-width: 600px)': {
+        fontSize: '12px',
+    },
+});
+
+const PolicyLinks = styled(Box)({
+    display: 'flex',
+    gap: '20px',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: '12px',
+    '@media (max-width: 600px)': {
+        gap: '15px',
+        marginBottom: '10px',
+    },
+});
+
+const PolicyLink = styled(Link)({
+    color: textColor,
+    textDecoration: 'none',
+    fontSize: '12px',
+    transition: 'color 0.3s ease',
+    position: 'relative',
+    '&:hover': {
+        color: PRIMARY_COLOR,
+    },
+    '@media (max-width: 600px)': {
+        fontSize: '11px',
     },
 });
 
 const CopyrightText = styled(Typography)({
     color: textColor,
-    fontSize: '14px',
+    fontSize: '12px',
     textAlign: 'right',
-    opacity: 0.8,
+    opacity: 0.7,
     '@media (max-width: 900px)': {
         textAlign: 'center',
-        marginTop: '20px',
+        marginTop: '16px',
+    },
+    '@media (max-width: 600px)': {
+        fontSize: '11px',
+        marginTop: '12px',
     },
     '& a': {
         color: PRIMARY_COLOR,
         textDecoration: 'none',
         fontWeight: 500,
-        position: 'relative',
-        '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: '-2px',
-            left: '0',
-            width: '0',
-            height: '1px',
-            backgroundColor: PRIMARY_COLOR,
-            transition: 'width 0.3s ease',
-        },
-        '&:hover::after': {
-            width: '100%',
+        transition: 'opacity 0.3s ease',
+        '&:hover': {
+            opacity: 0.8,
         },
     },
 });
@@ -380,12 +420,18 @@ const Footer = () => {
         console.log('Newsletter subscription');
     };
 
+    // Policy and legal links
+    const policyLinks = [
+        { label: 'Privacy Policy', path: '/privacy-policy' },
+        { label: 'Cookie Policy', path: '/cookie-policy' },
+    ];
+
     return (
         <FooterWrapper>
             {/* Top Section */}
             <TopSection>
                 <Container maxWidth="lg">
-                    <Grid container spacing={isMobile ? 4 : 6}>
+                    <Grid container spacing={isMobile ? 4 : 5}>
                         {/* Logo and Social Section */}
                         <Grid size={{ xs: 12, md: 4 }}>
                             <Box sx={{
@@ -396,7 +442,7 @@ const Footer = () => {
                             }}>
                                 <FooterLogo src={logo} alt="Logo" />
                                 <FooterText>
-                                    Lorem ipsum is simply dummy text of the printe and type setting industry in the fermen.
+                                    Premium cat products and accessories for your feline friends. Quality and comfort guaranteed.
                                 </FooterText>
                                 <SocialIcons>
                                     <SocialIcon aria-label="Instagram">
@@ -422,18 +468,18 @@ const Footer = () => {
                                     <Box className="contact-item">
                                         <LocationOnIcon />
                                         <span>
-                                            0665 Broadway st.
+                                            0665 Broadway St.
                                             <br />
                                             10234 NY, USA
                                         </span>
                                     </Box>
                                     <Box className="contact-item">
-                                        <PhoneIcon/>
+                                        <PhoneIcon />
                                         <Link href="tel:+1234567890">+123 456 7890</Link>
                                     </Box>
                                     <Box className="contact-item">
                                         <EmailIcon />
-                                        <Link href="mailto:hello@Pepito.com">hello@Pepito.com</Link>
+                                        <Link href="mailto:hello@fatherofmeow.com">hello@fatherofmeow.com</Link>
                                     </Box>
                                 </ContactInfo>
                             </Box>
@@ -446,12 +492,12 @@ const Footer = () => {
                             }}>
                                 <FooterTitle>Subscribe</FooterTitle>
                                 <FooterText sx={{ maxWidth: '100%' }}>
-                                    Want to be notified about our services. Just sign up and we'll send you a notification by email.
+                                    Get the latest updates on new products and exclusive offers.
                                 </FooterText>
                                 <NewsletterForm onSubmit={handleSubmit}>
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                         <TextField
-                                            placeholder="Email Address"
+                                            placeholder="Your email address"
                                             type="email"
                                             required
                                             variant="outlined"
@@ -481,6 +527,7 @@ const Footer = () => {
             {/* Bottom Section */}
             <BottomSection>
                 <Container maxWidth="lg">
+                    {/* Policy Links Row */}
                     <Grid container alignItems="center">
                         <Grid size={{ xs: 12, lg: 7 }}>
                             <FooterLinks>
@@ -491,15 +538,18 @@ const Footer = () => {
                                 <FooterLink href="/blog">Blog</FooterLink>
                                 <FooterLink href="/videos">Video</FooterLink>
                                 <FooterLink href="/contact">Contact</FooterLink>
+                                <FooterLink href="/privacy-policy">Privacy Policy</FooterLink>
+                                <FooterLink href="/cookie-policy">Cookie Policy</FooterLink>
                             </FooterLinks>
                         </Grid>
                         <Grid size={{ xs: 12, lg: 5 }}>
                             <CopyrightText>
-                                Copyright © {currentYear} | All rights reserved by {' '}
+                                Copyright © {currentYear} | All rights reserved by{' '}
                                 <Link
                                     href="https://fatherofmeow.com"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    sx={{ textDecoration: 'none' }}
                                 >
                                     Father Of Meow
                                 </Link>

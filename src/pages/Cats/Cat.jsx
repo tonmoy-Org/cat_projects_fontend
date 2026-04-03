@@ -190,7 +190,7 @@ const PriceWrapper = styled(Box)({ display: 'flex', alignItems: 'center', justif
 const ProductPrice = styled(Typography, { shouldForwardProp: p => p !== 'isDiscounted' })(({ isDiscounted }) => ({
     fontSize: '14px',
     fontWeight: 700,
-    color: isDiscounted ? DISCOUNT_COLOR : PRIMARY,
+    color: isDiscounted ? DISCOUNT_COLOR : PRICE_COLOR,
     marginBottom: '0',
 }));
 
@@ -256,7 +256,7 @@ const CatCardItem = ({ cat, onCardClick, isAuthenticated, onAuthRequired, onAdde
         addToCart(cat, 1);
         setAddedToCart(true);
         onAddedToCart?.(cat);
-        
+
         setTimeout(() => setAddedToCart(false), 3000);
     };
 
@@ -327,7 +327,7 @@ const Cat = () => {
     const navigate = useNavigate();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
     const [authDialogOpen, setAuthDialogOpen] = useState(false);
-    
+
     // Local filter states
     const [search, setSearch] = useState('');
     const [breed, setBreed] = useState('');
@@ -335,35 +335,35 @@ const Cat = () => {
     const [stock, setStock] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 12;
-    
+
     // Get cats data from hook
     const { cats, catsLoading } = useCatsManagement();
 
     // Filter cats based on criteria
     const filteredCats = useMemo(() => {
         if (!cats || cats.length === 0) return [];
-        
+
         return cats.filter(cat => {
             // Search filter
             if (search && !cat.name.toLowerCase().includes(search.toLowerCase())) {
                 return false;
             }
-            
+
             // Breed filter
             if (breed && cat.breed !== breed) {
                 return false;
             }
-            
+
             // Gender filter
             if (gender !== 'all' && cat.gender !== gender) {
                 return false;
             }
-            
+
             // Stock filter
             if (stock === 'instock' && !cat.inStock) {
                 return false;
             }
-            
+
             return true;
         });
     }, [cats, search, breed, gender, stock]);
@@ -405,7 +405,7 @@ const Cat = () => {
     if (stock !== 'all') activeFilters.push({ key: 'stock', label: 'Available Only' });
 
     const clearFilter = (filterKey) => {
-        switch(filterKey) {
+        switch (filterKey) {
             case 'search':
                 setSearch('');
                 break;
@@ -543,11 +543,11 @@ const Cat = () => {
                             {totalPages > 1 && (
                                 <PaginationWrapper>
                                     <StyledPagination
-                                        count={totalPages} 
-                                        page={currentPage} 
+                                        count={totalPages}
+                                        page={currentPage}
                                         onChange={handlePageChange}
-                                        variant="outlined" 
-                                        shape="rounded" 
+                                        variant="outlined"
+                                        shape="rounded"
                                         size={isMobile ? 'small' : 'medium'}
                                         renderItem={item => <PaginationItem {...item} components={{ next: ChevronRightIcon, previous: ChevronLeftIcon }} />}
                                     />
