@@ -215,8 +215,8 @@ const About = () => {
       <VideoSection
         videoUrl="https://youtu.be/545E1RCSzLw"
         backgroundImage="https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/3.jpg"
-        subtitle="Promo video"
-        title="Watch pepito video"
+        subtitle="Watch our promo video"
+        title="Discover the world of Father Of Meow"
         icon={true}
       />
 

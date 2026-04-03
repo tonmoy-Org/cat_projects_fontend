@@ -271,7 +271,7 @@ export default function BlogManagement() {
   return (
     <Box>
       <Helmet>
-        <title>Blog Management - PetCare</title>
+        <title>Blog Management - FatherOfMeow</title>
         <meta name="description" content="Manage your pet blog posts" />
       </Helmet>
 

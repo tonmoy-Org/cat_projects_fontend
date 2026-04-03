@@ -285,7 +285,7 @@ export default function OrderManagement() {
     return (
         <Box>
             <Helmet>
-                <title>Order Management — Admin</title>
+                <title>Order Management | FatherOfMeow</title>
             </Helmet>
 
             {/* ── Header ──────────────────────────────────────────────────── */}
@@ -625,7 +625,7 @@ export default function OrderManagement() {
                                                 }}
                                                 onError={(e) => { e.target.src = 'https://via.placeholder.com/60'; }}
                                             />
-                                            
+
                                             {/* Product Details */}
                                             <Box sx={{ flex: 1 }}>
                                                 <Typography variant="body2" sx={{ fontWeight: 600, color: TEXT, fontSize: '0.85rem', mb: 0.5 }}>
@@ -640,7 +640,7 @@ export default function OrderManagement() {
                                                     </Typography>
                                                 )}
                                             </Box>
-                                            
+
                                             {/* Price and Quantity */}
                                             <Box sx={{ textAlign: 'right' }}>
                                                 <Typography variant="body2" sx={{ fontWeight: 700, color: '#2e7d32', fontSize: '0.85rem' }}>

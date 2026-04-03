@@ -10,7 +10,6 @@ const ITEMS_PER_PAGE = 8;
 
 // ==================== API FUNCTIONS ====================
 
-// ── Listing & Fetching ─────────────────────────────────────────────────────
 const fetchAllProducts = async () => {
     const res = await axiosInstance.get('/products?limit=1000');
     return res.data?.data || res.data || [];
@@ -28,10 +27,10 @@ const fetchAllProductsSimple = async () => {
 
 const fetchProductReviews = async (titleId) => {
     const res = await axiosInstance.get(`/products/${titleId}/reviews`);
-    return res.data?.data || res.data || [];
+    const productData = res.data?.data || res.data;
+    return productData?.reviews || [];
 };
 
-// ── Create Product ─────────────────────────────────────────────────────────
 const createProduct = async (formData) => {
     const res = await axiosInstance.post('/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -39,7 +38,6 @@ const createProduct = async (formData) => {
     return res.data?.data || res.data;
 };
 
-// ── Update Product ─────────────────────────────────────────────────────────
 const updateProduct = async ({ id, formData }) => {
     const res = await axiosInstance.put(`/products/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -47,13 +45,11 @@ const updateProduct = async ({ id, formData }) => {
     return res.data?.data || res.data;
 };
 
-// ── Delete Product ─────────────────────────────────────────────────────────
 const deleteProduct = async (id) => {
     const res = await axiosInstance.delete(`/products/${id}`);
     return res.data;
 };
 
-// ── Quick Stock Update ─────────────────────────────────────────────────────
 const updateProductStock = async ({ id, stock, inStock }) => {
     const formData = new FormData();
     formData.append('stock', stock);
@@ -64,7 +60,6 @@ const updateProductStock = async ({ id, stock, inStock }) => {
     return res.data?.data || res.data;
 };
 
-// ── Toggle In Stock Status ─────────────────────────────────────────────────
 const toggleProductInStock = async ({ id, inStock }) => {
     const formData = new FormData();
     formData.append('inStock', inStock);
@@ -74,19 +69,21 @@ const toggleProductInStock = async ({ id, inStock }) => {
     return res.data?.data || res.data;
 };
 
-// ── Submit Review ──────────────────────────────────────────────────────────
 const submitProductReview = async ({ titleId, reviewData }) => {
     const res = await axiosInstance.post(`/products/${titleId}/reviews`, reviewData);
     return res.data;
 };
 
-// ── Delete Review ──────────────────────────────────────────────────────────
 const deleteProductReview = async ({ productId, reviewId }) => {
     const res = await axiosInstance.delete(`/products/${productId}/reviews/${reviewId}`);
     return res.data;
 };
 
-// ── Bulk Operations ────────────────────────────────────────────────────────
+const approveProductReview = async ({ productId, reviewId }) => {
+    const res = await axiosInstance.put(`/products/${productId}/reviews/${reviewId}`, { approved: true });
+    return res.data;
+};
+
 const bulkUpdateProducts = async (updates) => {
     const res = await axiosInstance.post('/products/bulk-update', { updates });
     return res.data;
@@ -104,7 +101,7 @@ const getRandomFour = (arr, excludeId) =>
 
 const enrichProductWithDiscount = (product) => {
     if (!product) return product;
-    
+
     const hasDiscount = product.discount?.isActive && product.discount.value > 0;
     let discountedPrice = product.price;
     let discountPercentage = 0;
@@ -119,12 +116,27 @@ const enrichProductWithDiscount = (product) => {
         }
     }
 
+    const embeddedReviews = product.reviews || [];
+
+    // ✅ Change to `r.approved === true` to show only approved reviews on cards
+    const visibleReviews = embeddedReviews;
+
+    const computedReviewCount =
+        visibleReviews.length > 0 ? visibleReviews.length : (product.reviewCount || 0);
+
+    const computedAverageRating =
+        visibleReviews.length > 0
+            ? visibleReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / visibleReviews.length
+            : (product.averageRating || 0);
+
     return {
         ...product,
         discountedPrice,
         discountPercentage,
         isDiscountActive: hasDiscount,
         currentPrice: discountedPrice,
+        averageRating: computedAverageRating,
+        reviewCount: computedReviewCount,
     };
 };
 
@@ -341,7 +353,7 @@ export const useShopApi = () => {
         const reviewsQuery = useQuery({
             queryKey: ['product-reviews', titleId],
             queryFn: () => fetchProductReviews(titleId),
-            enabled: !!titleId && activeTab === 'reviews',
+            enabled: !!titleId,
             staleTime: 1000 * 60 * 2,
         });
 
@@ -350,9 +362,11 @@ export const useShopApi = () => {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['product-reviews', titleId] });
                 queryClient.invalidateQueries({ queryKey: ['product', titleId] });
+                queryClient.invalidateQueries({ queryKey: ['products-listing'] });
                 setReviewForm({ name: '', email: '', comment: '', rating: 0 });
                 setFormError('');
                 showSnackbar('Review submitted successfully!', 'success');
+                setActiveTab('reviews');
             },
             onError: (err) => {
                 showSnackbar(err.response?.data?.message || 'Failed to submit review.', 'error');
@@ -362,6 +376,11 @@ export const useShopApi = () => {
         const product = productQuery.data ? enrichProductWithDiscount(productQuery.data) : null;
         const allProducts = (allProductsQuery.data || []).map(enrichProductWithDiscount);
         const relatedProducts = product ? getRandomFour(allProducts, product._id) : [];
+
+        const reviews = reviewsQuery.data || [];
+        const averageRating = product?.averageRating || 0;
+        const reviewCount = product?.reviewCount || reviews.length || 0;
+        const approvedReviews = reviews.filter(review => review.approved === true);
 
         const currentPrice = useMemo(() => {
             let price = parseFloat(product?.price) || 0;
@@ -396,7 +415,9 @@ export const useShopApi = () => {
 
         const handleTabChange = (tab) => {
             setActiveTab(tab);
-            if (tab === 'reviews') queryClient.invalidateQueries({ queryKey: ['product-reviews', titleId] });
+            if (tab === 'reviews') {
+                queryClient.invalidateQueries({ queryKey: ['product-reviews', titleId] });
+            }
         };
 
         const handleOptionChange = (optionId, valueId, valueObj) => {
@@ -443,8 +464,12 @@ export const useShopApi = () => {
             formError,
             authDialogOpen,
             setAuthDialogOpen,
-            reviewsData: reviewsQuery.data,
+            reviews: approvedReviews,
+            allReviews: reviews,
+            averageRating,
+            reviewCount,
             reviewsLoading: reviewsQuery.isLoading,
+            reviewsError: reviewsQuery.error,
             submitReviewMutation,
             isLoading: productQuery.isLoading,
             error: productQuery.error,
@@ -471,23 +496,20 @@ export const useShopApi = () => {
         const allProducts = (productsQuery.data || []).map(enrichProductWithDiscount);
         const paginatedProducts = allProducts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-        // ── Create Mutation ────────────────────────────────────────────────
+        // ── Create ─────────────────────────────────────────────────────────
         const createMutation = useMutation({
             mutationFn: createProduct,
-            onSuccess: (data) => {
+            onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['products-admin'] });
                 queryClient.invalidateQueries({ queryKey: ['products-listing'] });
                 showSnackbar('Product created successfully!', 'success');
             },
             onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to create product.',
-                    'error'
-                );
+                showSnackbar(error.response?.data?.message || 'Failed to create product.', 'error');
             },
         });
 
-        // ── Update Mutation ────────────────────────────────────────────────
+        // ── Update ─────────────────────────────────────────────────────────
         const updateMutation = useMutation({
             mutationFn: updateProduct,
             onSuccess: (data) => {
@@ -497,14 +519,11 @@ export const useShopApi = () => {
                 showSnackbar('Product updated successfully!', 'success');
             },
             onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to update product.',
-                    'error'
-                );
+                showSnackbar(error.response?.data?.message || 'Failed to update product.', 'error');
             },
         });
 
-        // ── Delete Mutation ────────────────────────────────────────────────
+        // ── Delete ─────────────────────────────────────────────────────────
         const deleteMutation = useMutation({
             mutationFn: deleteProduct,
             onSuccess: () => {
@@ -513,14 +532,11 @@ export const useShopApi = () => {
                 showSnackbar('Product deleted successfully!', 'success');
             },
             onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to delete product.',
-                    'error'
-                );
+                showSnackbar(error.response?.data?.message || 'Failed to delete product.', 'error');
             },
         });
 
-        // ── Stock Update Mutation ──────────────────────────────────────────
+        // ── Stock Update ───────────────────────────────────────────────────
         const updateStockMutation = useMutation({
             mutationFn: updateProductStock,
             onSuccess: () => {
@@ -529,14 +545,11 @@ export const useShopApi = () => {
                 showSnackbar('Stock updated successfully!', 'success');
             },
             onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to update stock.',
-                    'error'
-                );
+                showSnackbar(error.response?.data?.message || 'Failed to update stock.', 'error');
             },
         });
 
-        // ── Toggle InStock Mutation ────────────────────────────────────────
+        // ── Toggle InStock ─────────────────────────────────────────────────
         const toggleInStockMutation = useMutation({
             mutationFn: toggleProductInStock,
             onSuccess: () => {
@@ -545,25 +558,91 @@ export const useShopApi = () => {
                 showSnackbar('Stock status updated!', 'success');
             },
             onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to update stock status.',
-                    'error'
-                );
+                showSnackbar(error.response?.data?.message || 'Failed to update stock status.', 'error');
             },
         });
 
-        // ── Delete Review Mutation ─────────────────────────────────────────
+        // ── Delete Review — with optimistic update ─────────────────────────
         const deleteReviewMutation = useMutation({
             mutationFn: deleteProductReview,
+
+            // 1. Instantly remove from cache before the request completes
+            onMutate: async ({ productId, reviewId }) => {
+                await queryClient.cancelQueries({ queryKey: ['admin-reviews', productId] });
+                const previousReviews = queryClient.getQueryData(['admin-reviews', productId]);
+
+                queryClient.setQueryData(['admin-reviews', productId], (old) => {
+                    if (!old) return old;
+                    const updated = old.reviews.filter(r => r._id !== reviewId);
+                    return {
+                        ...old,
+                        reviews: updated,
+                        reviewCount: Math.max(0, updated.length),
+                    };
+                });
+
+                return { previousReviews, productId };
+            },
+
+            // 2. Roll back if the request fails
+            onError: (error, _vars, context) => {
+                if (context?.previousReviews !== undefined) {
+                    queryClient.setQueryData(['admin-reviews', context.productId], context.previousReviews);
+                }
+                showSnackbar(error.response?.data?.message || 'Failed to delete review.', 'error');
+            },
+
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['products-admin'] });
                 showSnackbar('Review deleted successfully!', 'success');
             },
-            onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to delete review.',
-                    'error'
-                );
+
+            // 3. Always resync from server when done
+            onSettled: (_data, _error, { productId }) => {
+                queryClient.invalidateQueries({ queryKey: ['admin-reviews', productId] });
+                queryClient.invalidateQueries({ queryKey: ['products-admin'] });
+                queryClient.invalidateQueries({ queryKey: ['products-listing'] });
+            },
+        });
+
+        // ── Approve Review — with optimistic update ────────────────────────
+        const approveReviewMutation = useMutation({
+            mutationFn: approveProductReview,
+
+            // 1. Instantly flip approved=true in cache before the request completes
+            onMutate: async ({ productId, reviewId }) => {
+                await queryClient.cancelQueries({ queryKey: ['admin-reviews', productId] });
+                const previousReviews = queryClient.getQueryData(['admin-reviews', productId]);
+
+                queryClient.setQueryData(['admin-reviews', productId], (old) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        reviews: old.reviews.map(r =>
+                            r._id === reviewId ? { ...r, approved: true } : r
+                        ),
+                    };
+                });
+
+                return { previousReviews, productId };
+            },
+
+            // 2. Roll back if the request fails
+            onError: (error, _vars, context) => {
+                if (context?.previousReviews !== undefined) {
+                    queryClient.setQueryData(['admin-reviews', context.productId], context.previousReviews);
+                }
+                showSnackbar(error.response?.data?.message || 'Failed to approve review.', 'error');
+            },
+
+            onSuccess: () => {
+                showSnackbar('Review approved successfully!', 'success');
+            },
+
+            // 3. Always resync from server when done
+            onSettled: (_data, _error, { productId }) => {
+                queryClient.invalidateQueries({ queryKey: ['admin-reviews', productId] });
+                queryClient.invalidateQueries({ queryKey: ['products-admin'] });
+                queryClient.invalidateQueries({ queryKey: ['products-listing'] });
             },
         });
 
@@ -576,10 +655,7 @@ export const useShopApi = () => {
                 showSnackbar('Products updated successfully!', 'success');
             },
             onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to update products.',
-                    'error'
-                );
+                showSnackbar(error.response?.data?.message || 'Failed to update products.', 'error');
             },
         });
 
@@ -591,10 +667,7 @@ export const useShopApi = () => {
                 showSnackbar('Products deleted successfully!', 'success');
             },
             onError: (error) => {
-                showSnackbar(
-                    error.response?.data?.message || 'Failed to delete products.',
-                    'error'
-                );
+                showSnackbar(error.response?.data?.message || 'Failed to delete products.', 'error');
             },
         });
 
@@ -650,7 +723,6 @@ export const useShopApi = () => {
         }, [allProducts]);
 
         return {
-            // Query & Data
             allProducts,
             paginatedProducts,
             isLoading: productsQuery.isLoading,
@@ -660,18 +732,15 @@ export const useShopApi = () => {
             rowsPerPage,
             setRowsPerPage,
             stats,
-
-            // Mutations
             createMutation,
             updateMutation,
             deleteMutation,
             updateStockMutation,
             toggleInStockMutation,
             deleteReviewMutation,
+            approveReviewMutation,
             bulkUpdateMutation,
             bulkDeleteMutation,
-
-            // Refetch
             refetch: productsQuery.refetch,
         };
     };
@@ -684,20 +753,13 @@ export const useShopApi = () => {
     const invalidateReviews = (titleId) => queryClient.invalidateQueries({ queryKey: ['product-reviews', titleId] });
 
     return {
-        // Listing & Detail
         useProducts,
         useProductDetail,
-
-        // Admin Management
         useProductsManagement,
-
-        // Cache Invalidation
         invalidateProducts,
         invalidateProductsAdmin,
         invalidateProduct,
         invalidateReviews,
-
-        // Direct API Functions (for advanced usage)
         createProduct,
         updateProduct,
         deleteProduct,
@@ -705,6 +767,7 @@ export const useShopApi = () => {
         toggleProductInStock,
         submitProductReview,
         deleteProductReview,
+        approveProductReview,
         bulkUpdateProducts,
         bulkDeleteProducts,
     };

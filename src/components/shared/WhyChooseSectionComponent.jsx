@@ -14,7 +14,7 @@ const iconColor = '#db89ca';
 // Styled components with consistent font sizes
 const WhyChooseSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#fff',
-  padding: '80px 0',
+  padding: '20px 0',
 
   [theme.breakpoints.down('sm')]: {
     padding: '50px 0',

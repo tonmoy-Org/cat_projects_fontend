@@ -231,7 +231,7 @@ const PaymentFail = () => {
     };
 
     const handleContactSupport = () => {
-        window.location.href = 'mailto:support@petcare.com?subject=Payment%20Issue%20-%20Order%20#' + (orderId || 'Unknown');
+        window.location.href = 'mailto:support@FatherOfMeow.com?subject=Payment%20Issue%20-%20Order%20#' + (orderId || 'Unknown');
     };
 
     return (

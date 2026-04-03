@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
     Container, Grid, Box, Typography, styled, Button, Pagination,
     PaginationItem, InputAdornment, TextField, ToggleButton, ToggleButtonGroup,
@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import SectionTile from '../../components/SectionTile';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../auth/AuthProvider';
-import { usePetApi } from '../../hooks/usePetApi';
+import { useCatsManagement } from '../../hooks/usePetApi';
 
 const PRIMARY = '#5C4D91';
 const PRIMARY_DARK = '#4A3D75';
@@ -133,31 +133,6 @@ const StockToggleGroup = styled(ToggleButtonGroup)(({ theme }) => ({
         '& .MuiToggleButton-root': { padding: '5px 10px', fontSize: '11px', marginRight: 0, flex: '1 1 auto' },
     },
 }));
-
-const PriceSliderWrapper = styled(Box)(({ theme }) => ({
-    display: 'flex', flexDirection: 'column', gap: '8px', flex: '1 1 300px', minWidth: '200px',
-    [theme.breakpoints.down('sm')]: { width: '100%', flex: '1 1 100%' },
-}));
-
-const PriceInputRow = styled(Box)({ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' });
-
-const PriceInput = styled(TextField)({
-    width: '84px',
-    '& .MuiOutlinedInput-root': { borderRadius: '8px', backgroundColor: '#fff', fontSize: '11px', '& fieldset': { borderColor: '#e0d9f5' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY } },
-    '& input': { padding: '5px 6px', textAlign: 'center', fontWeight: 600, color: PRIMARY, fontSize: '11px' },
-});
-
-const StyledSlider = styled(Slider)({
-    color: PRIMARY, flex: 1, minWidth: '150px',
-    '& .MuiSlider-thumb': { width: '14px', height: '14px', '&:hover': { boxShadow: `0 0 0 8px rgba(92,77,145,0.1)` } },
-    '& .MuiSlider-rail': { backgroundColor: '#e0d9f5' },
-});
-
-const RefreshBtn = styled(IconButton)({
-    backgroundColor: '#f0ecfb', color: PRIMARY, padding: '6px',
-    '&:hover': { backgroundColor: PRIMARY, color: '#fff' },
-    '&.Mui-disabled': { backgroundColor: '#f0ecfb', opacity: 0.5 },
-});
 
 const ActiveFiltersRow = styled(Box)({ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginBottom: '14px' });
 
@@ -281,6 +256,8 @@ const CatCardItem = ({ cat, onCardClick, isAuthenticated, onAuthRequired, onAdde
         addToCart(cat, 1);
         setAddedToCart(true);
         onAddedToCart?.(cat);
+        
+        setTimeout(() => setAddedToCart(false), 3000);
     };
 
     const handleCardClick = () => {
@@ -295,10 +272,7 @@ const CatCardItem = ({ cat, onCardClick, isAuthenticated, onAuthRequired, onAdde
     const hasDiscount = discountPercentage > 0 && cat.inStock;
 
     return (
-        <ProductCard
-            outOfStock={!cat.inStock}
-            onClick={handleCardClick}
-        >
+        <ProductCard outOfStock={!cat.inStock} onClick={handleCardClick}>
             <ImageWrapper>
                 {!cat.inStock && <OutOfStockBadge>Adopted</OutOfStockBadge>}
                 {hasDiscount && (
@@ -319,20 +293,18 @@ const CatCardItem = ({ cat, onCardClick, isAuthenticated, onAuthRequired, onAdde
                 <ProductCategory>{cat.breed || 'Mixed Breed'}</ProductCategory>
                 <PriceWrapper>
                     <ProductPrice isDiscounted={hasDiscount}>
-                        ৳ {discountedPrice}
+                        ৳ {parseFloat(discountedPrice).toFixed(2)}
                     </ProductPrice>
                     {hasDiscount && (
-                        <OriginalPrice>৳ {cat.price}</OriginalPrice>
+                        <OriginalPrice>৳ {parseFloat(cat.price).toFixed(2)}</OriginalPrice>
                     )}
                 </PriceWrapper>
-
                 <RatingSection>
                     <StyledRating value={averageRating} readOnly precision={0.5} size="small" />
                     <RatingText>
                         {reviewCount > 0 ? `(${reviewCount})` : 'No reviews'}
                     </RatingText>
                 </RatingSection>
-
                 {addedToCart ? (
                     <ViewCartBtn onClick={e => { e.stopPropagation(); navigate('/cart'); }}>
                         <ShoppingCartIcon sx={{ fontSize: '13px' }} /> View Cart
@@ -355,27 +327,110 @@ const Cat = () => {
     const navigate = useNavigate();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
     const [authDialogOpen, setAuthDialogOpen] = useState(false);
+    
+    // Local filter states
+    const [search, setSearch] = useState('');
+    const [breed, setBreed] = useState('');
+    const [gender, setGender] = useState('all');
+    const [stock, setStock] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 12;
+    
+    // Get cats data from hook
+    const { cats, catsLoading } = useCatsManagement();
 
-    const { useCats } = usePetApi();
-    const {
-        filteredCats, paginatedCats, isLoading, error,
-        page, setPage, totalPages,
-        search, setSearch, breed, setBreed, gender, setGender, stock, setStock,
-        priceRange, minInput, maxInput, priceMin, priceMax, priceInitialized,
-        breedOptions, activeFilters, isRefreshing,
-        handleRefresh, handleSliderChange, handleMinInput, handleMaxInput,
-        clearFilter, clearAll, handleCatClick,
-    } = useCats();
+    // Filter cats based on criteria
+    const filteredCats = useMemo(() => {
+        if (!cats || cats.length === 0) return [];
+        
+        return cats.filter(cat => {
+            // Search filter
+            if (search && !cat.name.toLowerCase().includes(search.toLowerCase())) {
+                return false;
+            }
+            
+            // Breed filter
+            if (breed && cat.breed !== breed) {
+                return false;
+            }
+            
+            // Gender filter
+            if (gender !== 'all' && cat.gender !== gender) {
+                return false;
+            }
+            
+            // Stock filter
+            if (stock === 'instock' && !cat.inStock) {
+                return false;
+            }
+            
+            return true;
+        });
+    }, [cats, search, breed, gender, stock]);
 
-    useEffect(() => { setPage(1); }, [search, breed, gender, stock, priceRange]);
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredCats.length / itemsPerPage);
+    const paginatedCats = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return filteredCats.slice(start, end);
+    }, [filteredCats, currentPage]);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, breed, gender, stock]);
 
     const handlePageChange = (_, value) => {
-        setPage(value);
+        setCurrentPage(value);
         const el = document.getElementById('cats-section');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 80, behavior: 'smooth' });
     };
 
-    if (isLoading || authLoading) {
+    const handleCatClick = (cat) => {
+        navigate(`/adoption/${cat.title_id || cat._id}`);
+    };
+
+    // Get unique breeds for filter
+    const breedOptions = useMemo(() => {
+        if (!cats || cats.length === 0) return [];
+        return [...new Set(cats.map(cat => cat.breed).filter(Boolean))];
+    }, [cats]);
+
+    // Active filters for display
+    const activeFilters = [];
+    if (search) activeFilters.push({ key: 'search', label: `Search: ${search}` });
+    if (breed) activeFilters.push({ key: 'breed', label: `Breed: ${breed}` });
+    if (gender !== 'all') activeFilters.push({ key: 'gender', label: `Gender: ${gender === 'male' ? 'Male' : 'Female'}` });
+    if (stock !== 'all') activeFilters.push({ key: 'stock', label: 'Available Only' });
+
+    const clearFilter = (filterKey) => {
+        switch(filterKey) {
+            case 'search':
+                setSearch('');
+                break;
+            case 'breed':
+                setBreed('');
+                break;
+            case 'gender':
+                setGender('all');
+                break;
+            case 'stock':
+                setStock('all');
+                break;
+            default:
+                break;
+        }
+    };
+
+    const clearAll = () => {
+        setSearch('');
+        setBreed('');
+        setGender('all');
+        setStock('all');
+    };
+
+    if (catsLoading || authLoading) {
         return (
             <Box>
                 <SectionTile bgImage={HERO_IMAGE} subtitle="Find Your Perfect Companion" title="Cats for Adoption" icon iconClass="flaticon-custom-icon" />
@@ -384,21 +439,6 @@ const Cat = () => {
                         <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                             <CircularProgress sx={{ color: PRIMARY }} />
                         </Box>
-                    </Container>
-                </ProductSection>
-            </Box>
-        );
-    }
-
-    if (error) {
-        return (
-            <Box>
-                <SectionTile bgImage={HERO_IMAGE} subtitle="Find Your Perfect Companion" title="Cats for Adoption" icon iconClass="flaticon-custom-icon" />
-                <ProductSection>
-                    <Container maxWidth="lg">
-                        <Typography textAlign="center" color="error" sx={{ py: 4, fontSize: '13px' }}>
-                            Error loading cats: {error.message}
-                        </Typography>
                     </Container>
                 </ProductSection>
             </Box>
@@ -455,34 +495,6 @@ const Cat = () => {
                                     <ToggleButton value="instock">Available</ToggleButton>
                                 </StockToggleGroup>
                             </Box>
-
-                            {priceInitialized && priceMin !== priceMax && (
-                                <PriceSliderWrapper>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                                        <FilterLabel>
-                                            <FilterListIcon sx={{ fontSize: '12px', mr: '4px', verticalAlign: 'middle' }} />
-                                            Price Range
-                                        </FilterLabel>
-                                        <Tooltip title="Refresh & reset filters">
-                                            <RefreshBtn onClick={handleRefresh} disabled={isRefreshing} size="small">
-                                                <RefreshIcon sx={{ fontSize: '15px', animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
-                                            </RefreshBtn>
-                                        </Tooltip>
-                                    </Box>
-                                    <PriceInputRow>
-                                        <PriceInput size="small" value={minInput} onChange={handleMinInput}
-                                            inputProps={{ type: 'text', min: priceMin, max: priceRange[1] }}
-                                            InputProps={{ startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: '10px', color: PRIMARY, fontWeight: 700 }}>৳</Typography></InputAdornment> }}
-                                        />
-                                        <Typography sx={{ fontSize: '11px', color: '#ccc' }}>–</Typography>
-                                        <PriceInput size="small" value={maxInput} onChange={handleMaxInput}
-                                            inputProps={{ type: 'text', min: priceRange[0], max: priceMax }}
-                                            InputProps={{ startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: '10px', color: PRIMARY, fontWeight: 700 }}>৳</Typography></InputAdornment> }}
-                                        />
-                                        <StyledSlider value={priceRange} onChange={handleSliderChange} min={priceMin} max={priceMax} valueLabelDisplay="auto" valueLabelFormat={v => `৳${v}`} />
-                                    </PriceInputRow>
-                                </PriceSliderWrapper>
-                            )}
                         </FilterRow>
                     </FilterBar>
 
@@ -531,8 +543,12 @@ const Cat = () => {
                             {totalPages > 1 && (
                                 <PaginationWrapper>
                                     <StyledPagination
-                                        count={totalPages} page={page} onChange={handlePageChange}
-                                        variant="outlined" shape="rounded" size={isMobile ? 'small' : 'medium'}
+                                        count={totalPages} 
+                                        page={currentPage} 
+                                        onChange={handlePageChange}
+                                        variant="outlined" 
+                                        shape="rounded" 
+                                        size={isMobile ? 'small' : 'medium'}
                                         renderItem={item => <PaginationItem {...item} components={{ next: ChevronRightIcon, previous: ChevronLeftIcon }} />}
                                     />
                                 </PaginationWrapper>
@@ -561,8 +577,6 @@ const Cat = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-
-            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
         </Box>
     );
 };

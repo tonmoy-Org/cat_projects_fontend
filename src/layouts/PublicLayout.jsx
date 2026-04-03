@@ -23,13 +23,13 @@ import {
   useScrollTrigger,
   Slide,
   Badge,
+  Paper,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
 import InfoIcon from "@mui/icons-material/Info";
 import PetsIcon from "@mui/icons-material/Pets";
@@ -38,10 +38,13 @@ import ArticleIcon from "@mui/icons-material/Article";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import ContactMailIcon from "@mui/icons-material/ContactMail";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import SearchIcon from "@mui/icons-material/Search";
+import InputBase from "@mui/material/InputBase";
 import GradientButton from "../components/ui/GradientButton";
+import SearchBar from "../components/Searchbar";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "../auth/AuthProvider";
-import { useCart } from "../context/CartContext"; // Import your cart context
+import { useCart } from "../context/CartContext";
 import logo from "../public/High-quality logo of.png";
 import Footer from "./Footer";
 
@@ -59,9 +62,9 @@ function HideOnScroll(props) {
   );
 }
 
-export const PublicLayout = ({ children, title, description }) => {
+export const PublicLayout = ({ children, title, description, onSearch }) => {
   const { user, logout } = useAuth();
-  const { cartItems } = useCart(); // Get cart items from context
+  const { cartItems } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -87,7 +90,7 @@ export const PublicLayout = ({ children, title, description }) => {
 
   // Determine user role (admin check)
   const isAdmin = user?.role === "superadmin" || user?.role === "admin";
-  
+
   // Get profile path based on user role
   const getProfilePath = () => {
     if (!user) return "/login";
@@ -123,6 +126,16 @@ export const PublicLayout = ({ children, title, description }) => {
       setMobileDrawerOpen(false);
     }
     handleUserMenuClose();
+  };
+
+  const handleSearch = (searchTerm) => {
+    if (onSearch) {
+      onSearch(searchTerm);
+    }
+    // Navigate to search results page if search term is not empty
+    if (searchTerm && searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    }
   };
 
   const isActive = (path) => location.pathname === path;
@@ -222,10 +235,10 @@ export const PublicLayout = ({ children, title, description }) => {
             boxShadow: "none",
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
             py: { xs: 0.8, md: 1 },
-            px: { xs: 1.5, md: 0 },
+            px: { xs: 1.5, md: 8 },
           }}
         >
-          <Container maxWidth="lg">
+          <Container maxWidth="xl">
             <Toolbar
               disableGutters
               sx={{
@@ -233,8 +246,8 @@ export const PublicLayout = ({ children, title, description }) => {
                 minHeight: { xs: 56, sm: 64 },
               }}
             >
-              {/* Left Side - Mobile Menu Icon (3 bars) */}
-              <Box sx={{ display: "flex", alignItems: "center" }}>
+              {/* Left Side - Mobile Menu Icon and Logo */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 {isMobile && (
                   <IconButton
                     color="inherit"
@@ -244,7 +257,6 @@ export const PublicLayout = ({ children, title, description }) => {
                     sx={{
                       color: theme.palette.text.primary,
                       p: 0.5,
-                      mr: 1,
                       "&:hover": {
                         backgroundColor: HOVER_COLOR,
                       },
@@ -254,7 +266,7 @@ export const PublicLayout = ({ children, title, description }) => {
                   </IconButton>
                 )}
 
-                {/* Logo - Visible on mobile next to menu, on desktop as left element */}
+                {/* Logo */}
                 <Box
                   sx={{
                     display: "flex",
@@ -273,8 +285,8 @@ export const PublicLayout = ({ children, title, description }) => {
                     src={logo}
                     alt="FatherOfMeow Logo"
                     sx={{
-                      height: 'auto',
-                      width: { xs: 100, sm: 150 },
+                      height: "auto",
+                      width: { xs: 100, sm: 140 },
                       display: "block",
                     }}
                   />
@@ -332,8 +344,11 @@ export const PublicLayout = ({ children, title, description }) => {
                 </Box>
               )}
 
-              {/* Right Side - Cart Icon and Authentication */}
+              {/* Right Side - Search, Cart, and Authentication */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                {/* Search Bar Component */}
+                <SearchBar onSearch={handleSearch} isMobile={isMobile} />
+
                 {/* Cart Icon with Badge */}
                 <IconButton
                   onClick={() => navigate("/cart")}
@@ -371,7 +386,7 @@ export const PublicLayout = ({ children, title, description }) => {
 
                 {user ? (
                   <>
-                    {/* User Avatar for Desktop */}
+                    {/* User Avatar */}
                     <IconButton
                       onClick={handleUserMenuClick}
                       size="small"
@@ -723,6 +738,42 @@ export const PublicLayout = ({ children, title, description }) => {
                 }}
               />
             </ListItemButton>
+          </ListItem>
+
+          {/* Mobile Search Section */}
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                border: `1px solid ${alpha(ACTIVE_COLOR, 0.15)}`,
+                borderRadius: "25px",
+                px: 1.5,
+                py: 0.5,
+                backgroundColor: alpha(ACTIVE_COLOR, 0.02),
+              }}
+            >
+              <SearchIcon sx={{ color: alpha(ACTIVE_COLOR, 0.6), fontSize: "20px" }} />
+              <InputBase
+                placeholder="Search..."
+                fullWidth
+                sx={{
+                  ml: 1,
+                  fontSize: "0.85rem",
+                  "& input": {
+                    padding: "8px 0",
+                  },
+                }}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" && e.target.value.trim()) {
+                    handleSearch(e.target.value);
+                    handleMobileDrawerClose();
+                  }
+                }}
+              />
+            </Paper>
           </ListItem>
 
           <Divider sx={{ my: 1 }} />

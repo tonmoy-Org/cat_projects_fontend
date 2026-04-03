@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Container, Grid, Box, Typography, styled, CircularProgress, Button, Snackbar, Alert,
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Rating,
+  Tooltip, Chip
 } from '@mui/material';
 import PetsIcon from '@mui/icons-material/Pets';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import LockIcon from '@mui/icons-material/Lock';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import StarIcon from '@mui/icons-material/Star';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../auth/AuthProvider';
@@ -14,6 +16,7 @@ import { useShopApi } from '../../hooks/useShopApi';
 
 // ── Colors ────────────────────────────────────────────────────────────────────
 const PRIMARY_COLOR = '#5C4D91';
+const PRICE_COLOR = '#ff6b6b';
 const PRIMARY_DARK = '#4A3D75';
 const ACCENT = '#db89ca';
 const DISCOUNT_COLOR = '#10b981';
@@ -22,7 +25,7 @@ const NO_IMAGE = 'https://via.placeholder.com/400x400?text=No+Image';
 // ── Styled Components ─────────────────────────────────────────────────────────
 
 const ShopSection = styled(Box)({
-  padding: '80px 0',
+  padding: '40px 0',
   backgroundColor: '#fff',
   '@media (max-width: 900px)': { padding: '60px 0' },
   '@media (max-width: 600px)': { padding: '40px 0' },
@@ -82,6 +85,7 @@ const ProductCard = styled(Box, { shouldForwardProp: p => p !== 'outOfStock' })(
   filter: outOfStock ? 'grayscale(100%)' : 'none',
   '&:hover': outOfStock ? {} : {
     boxShadow: '0 8px 24px rgba(0,0,0,0.11)',
+    transform: 'translateY(-2px)',
   },
   '&:hover .product-image': outOfStock ? {} : {
     transform: 'scale(1.05)',
@@ -180,7 +184,7 @@ const PriceWrapper = styled(Box)({
 const ProductPrice = styled(Typography, { shouldForwardProp: p => p !== 'isDiscounted' })(({ isDiscounted }) => ({
   fontSize: '14px',
   fontWeight: 700,
-  color: isDiscounted ? DISCOUNT_COLOR : PRIMARY_COLOR,
+  color: isDiscounted ? DISCOUNT_COLOR : PRICE_COLOR,
 }));
 
 const OriginalPrice = styled(Typography)({
@@ -193,7 +197,8 @@ const RatingSection = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  marginBottom: '10px'
+  marginBottom: '10px',
+  flexWrap: 'wrap',
 });
 
 const RatingText = styled(Typography)({
@@ -263,7 +268,6 @@ const SectionInfo = styled(Box)(({ theme }) => ({
   },
 }));
 
-
 const LoadingContainer = styled(Box)({
   display: 'flex',
   justifyContent: 'center',
@@ -277,11 +281,14 @@ const NoProductsContainer = styled(Box)({
   alignItems: 'center',
   minHeight: '300px',
   textAlign: 'center',
+  flexDirection: 'column',
+  gap: '16px',
 });
 
 // ── Helper Functions ─────────────────────────────────────────────────────────
 
 const shuffleArray = (array) => {
+  if (!array || array.length === 0) return [];
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -313,6 +320,11 @@ const ProductCardItem = ({ product, onAddToCart, isAuthenticated, onAuthRequired
     addToCart(product, 1);
     setAddedToCart(true);
     onAddToCart(product.title, true);
+
+    // Reset the "Added to Cart" state after 3 seconds
+    setTimeout(() => {
+      setAddedToCart(false);
+    }, 3000);
   };
 
   const handleViewCart = (e) => {
@@ -347,7 +359,10 @@ const ProductCardItem = ({ product, onAddToCart, isAuthenticated, onAuthRequired
         )}
 
         {product.isFeatured && (
-          <FeaturedBadge>Featured</FeaturedBadge>
+          <FeaturedBadge>
+            <StarIcon sx={{ fontSize: '12px', mr: 0.5 }} />
+            Featured
+          </FeaturedBadge>
         )}
 
         <ProductImage
@@ -355,6 +370,7 @@ const ProductCardItem = ({ product, onAddToCart, isAuthenticated, onAuthRequired
           src={product.featuredImage}
           alt={product.title}
           onError={(e) => { e.target.src = NO_IMAGE; }}
+          loading="lazy"
         />
       </ImageWrapper>
 
@@ -377,9 +393,14 @@ const ProductCardItem = ({ product, onAddToCart, isAuthenticated, onAuthRequired
         </PriceWrapper>
 
         <RatingSection>
-          <StyledRating value={averageRating} readOnly precision={0.5} size="small" />
+          <StyledRating 
+            value={averageRating} 
+            readOnly 
+            precision={0.5} 
+            size="small" 
+          />
           <RatingText>
-            {reviewCount > 0 ? `(${reviewCount})` : 'No reviews'}
+            {reviewCount > 0 ? `(${reviewCount} ${reviewCount === 1 ? 'review' : 'reviews'})` : 'No reviews yet'}
           </RatingText>
         </RatingSection>
 
@@ -411,6 +432,9 @@ const SectionHeader = () => (
           <SectionSubtitle>Pet Shop</SectionSubtitle>
         </HeaderTopRow>
         <SectionTitle>Our featured products</SectionTitle>
+        <Typography variant="body2" sx={{ color: '#666', mt: 1, maxWidth: '600px', mx: 'auto' }}>
+          Discover our handpicked selection of premium pet products
+        </Typography>
       </SectionHeaderWrapper>
     </Grid>
   </Grid>
@@ -430,23 +454,44 @@ const FeaturedProducts = () => {
     allProducts,
     isLoading,
     error,
+    refetch,
   } = useProducts();
 
-  useEffect(() => {
-    if (allProducts && allProducts.length > 0) {
-      const featuredProducts = allProducts.filter((p) => p.isFeatured === true);
-      const nonFeaturedProducts = shuffleArray(allProducts.filter((p) => p.isFeatured !== true));
+  // Memoize featured products selection for better performance
+  const featuredAndRandomProducts = useMemo(() => {
+    if (!allProducts || allProducts.length === 0) return [];
 
-      let selected = [...featuredProducts];
-      const remainingSlots = 4 - selected.length;
+    // First, get all featured products
+    const featuredProducts = allProducts.filter((p) => p.isFeatured === true);
+    
+    // Then, get non-featured products (excluding already selected featured ones)
+    const featuredIds = new Set(featuredProducts.map(p => p._id));
+    const nonFeaturedProducts = shuffleArray(
+      allProducts.filter((p) => !featuredIds.has(p._id))
+    );
 
-      if (remainingSlots > 0) {
-        selected = [...selected, ...nonFeaturedProducts.slice(0, remainingSlots)];
-      }
+    // Combine: all featured products + fill remaining slots with random products
+    let selected = [...featuredProducts];
+    const remainingSlots = 4 - selected.length;
 
-      setDisplayProducts(selected.slice(0, 4));
+    if (remainingSlots > 0 && nonFeaturedProducts.length > 0) {
+      selected = [...selected, ...nonFeaturedProducts.slice(0, remainingSlots)];
     }
+
+    // If still not enough products, repeat some (fallback)
+    if (selected.length < 4 && allProducts.length > 0) {
+      while (selected.length < 4 && selected.length < allProducts.length) {
+        selected.push(allProducts[selected.length % allProducts.length]);
+      }
+    }
+
+    return selected.slice(0, 4);
   }, [allProducts]);
+
+  // Update display products when memoized value changes
+  useEffect(() => {
+    setDisplayProducts(featuredAndRandomProducts);
+  }, [featuredAndRandomProducts]);
 
   const handleAddToCart = (productName, success = true) => {
     if (success) {
@@ -464,11 +509,15 @@ const FeaturedProducts = () => {
 
   const handleNavigateToLogin = () => {
     setAuthDialogOpen(false);
-    navigate('/login', { state: { from: '/' } });
+    navigate('/login', { state: { from: window.location.pathname } });
   };
 
   const handleViewAllProducts = () => {
     navigate('/shop');
+  };
+
+  const handleRetry = () => {
+    refetch();
   };
 
   if (isLoading || authLoading) {
@@ -477,7 +526,7 @@ const FeaturedProducts = () => {
         <Container maxWidth="lg">
           <SectionHeader />
           <LoadingContainer>
-            <CircularProgress sx={{ color: PRIMARY_COLOR }} />
+            <CircularProgress sx={{ color: PRIMARY_COLOR }} size={50} />
           </LoadingContainer>
         </Container>
       </ShopSection>
@@ -490,13 +539,20 @@ const FeaturedProducts = () => {
         <Container maxWidth="lg">
           <SectionHeader />
           <NoProductsContainer>
-            <Typography variant="body1" sx={{ color: '#666', mb: 2 }}>
+            <Typography variant="body1" sx={{ color: '#666' }}>
               Unable to load products at the moment.
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
+              {error.message || 'Please check your connection and try again.'}
             </Typography>
             <Button
               variant="contained"
-              onClick={() => window.location.reload()}
-              sx={{ backgroundColor: PRIMARY_COLOR }}
+              onClick={handleRetry}
+              sx={{ 
+                backgroundColor: PRIMARY_COLOR,
+                '&:hover': { backgroundColor: PRIMARY_DARK },
+                textTransform: 'none'
+              }}
             >
               Try Again
             </Button>
@@ -513,8 +569,18 @@ const FeaturedProducts = () => {
 
         <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
           {displayProducts.length > 0 ? (
-            displayProducts.map((product) => (
-              <Grid size={{ xs: 6, sm: 6, md: 3 }} key={product._id}>
+            displayProducts.map((product, index) => (
+              <Grid 
+                size={{ xs: 6, sm: 6, md: 3 }} 
+                key={product._id || index}
+                sx={{
+                  animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
+                  '@keyframes fadeInUp': {
+                    from: { opacity: 0, transform: 'translateY(20px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' }
+                  }
+                }}
+              >
                 <ProductCardItem
                   product={product}
                   onAddToCart={handleAddToCart}
@@ -527,30 +593,41 @@ const FeaturedProducts = () => {
             <Grid size={{ xs: 12 }}>
               <NoProductsContainer>
                 <Typography variant="body1" sx={{ color: '#666' }}>
-                  No products available at the moment.
+                  No featured products available at the moment.
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#999' }}>
+                  Check back soon for new products!
                 </Typography>
               </NoProductsContainer>
             </Grid>
           )}
         </Grid>
 
-        <SectionInfo>
-          <Button
-            variant="contained"
-            onClick={handleViewAllProducts}
-            sx={{
-              backgroundColor: PRIMARY_COLOR,
-              px: 3,
-              py: 0.9,
-              borderRadius: '25px',
-              fontSize: '14px',
-              '&:hover': { backgroundColor: PRIMARY_DARK },
-              textTransform: 'none',
-            }}
-          >
-            View all products
-          </Button>
-        </SectionInfo>
+        {displayProducts.length > 0 && (
+          <SectionInfo>
+            <Button
+              variant="contained"
+              onClick={handleViewAllProducts}
+              sx={{
+                backgroundColor: PRIMARY_COLOR,
+                px: 4,
+                py: 1,
+                borderRadius: '30px',
+                fontSize: '14px',
+                fontWeight: 600,
+                '&:hover': { 
+                  backgroundColor: PRIMARY_DARK,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(92,77,145,0.3)'
+                },
+                textTransform: 'none',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              View All Products
+            </Button>
+          </SectionInfo>
+        )}
       </Container>
 
       {/* Authentication Required Dialog */}
@@ -568,7 +645,7 @@ const FeaturedProducts = () => {
         }}
       >
         <DialogTitle sx={{ pb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <LockIcon sx={{ color: PRIMARY_COLOR, fontSize: '28px' }} /> Sign In Required
+          <LockIcon sx={{ color: PRIMARY_COLOR, fontSize: '28px' }} />
           <Typography variant="h6" component="span" fontWeight={700}>
             Sign In Required
           </Typography>
@@ -581,7 +658,13 @@ const FeaturedProducts = () => {
         <DialogActions sx={{ p: 2, pt: 0, gap: 1.5 }}>
           <Button
             onClick={handleAuthDialogClose}
-            sx={{ color: '#888', textTransform: 'none', fontWeight: 500, borderRadius: '10px' }}
+            sx={{ 
+              color: '#888', 
+              textTransform: 'none', 
+              fontWeight: 500, 
+              borderRadius: '10px',
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.05)' }
+            }}
           >
             Cancel
           </Button>
@@ -612,7 +695,10 @@ const FeaturedProducts = () => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar((p) => ({ ...p, open: false }))}
-          sx={{ borderRadius: '12px' }}
+          sx={{ 
+            borderRadius: '12px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          }}
         >
           {snackbar.message}
         </Alert>

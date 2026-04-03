@@ -134,9 +134,9 @@ export default function MyReview() {
     }
 
     return (
-        <Box sx={{ px: { xs: 1, sm: 2, md: 0 } }}>
+        <Box>
             <Helmet>
-                <title>My Reviews | PetCare</title>
+                <title>My Reviews | FatherOfMeow</title>
             </Helmet>
 
             <Box mb={isMobile ? 2 : 3}>

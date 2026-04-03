@@ -20,7 +20,7 @@ const PRIMARY_DARK = '#4A3D75';
 
 const VideoSectionWrapper = styled(Box)({
     position: "relative",
-    padding: "100px 0",
+    padding: "60px 0",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",

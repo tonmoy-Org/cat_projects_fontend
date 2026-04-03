@@ -188,7 +188,7 @@ export default function OrdersClient() {
     return (
         <Box>
             <Helmet>
-                <title>My Orders | PetCare</title>
+                <title>My Orders | FatherOfMeow</title>
             </Helmet>
 
             <Box mb={3}>

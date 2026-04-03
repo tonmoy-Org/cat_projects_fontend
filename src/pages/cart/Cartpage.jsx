@@ -307,7 +307,7 @@ const CartPage = ({ cartItems = [], onRemove, onUpdateQty, onClearCart }) => {
   };
 
   const handleApplyCoupon = () => {
-    if (coupon.trim().toUpperCase() === 'PETCARE10') {
+    if (coupon.trim().toUpperCase() === 'FatherOfMeow10') {
       setDiscount(0.1);
       setCouponApplied(true);
     } else {

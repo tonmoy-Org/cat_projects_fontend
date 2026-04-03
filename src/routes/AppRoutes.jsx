@@ -49,6 +49,7 @@ import MyReview from "../pages/client/MyReview";
 import Privacy from "../pages/privacy/Privacy";
 import Cookies from "../pages/cookies/Cookies";
 import PaymentFail from "../pages/cart/PaymentFail";
+import Search from "../pages/Search/Search";
 
 
 export const AppRoutes = () => {
@@ -213,6 +214,14 @@ export const AppRoutes = () => {
           element={
             <PublicLayout title="Pet Detail" description="Detailed information about our pets">
               <PetDetail />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <PublicLayout title="Search" description="Search for cats, products, or articles">
+              <Search />
             </PublicLayout>
           }
         />

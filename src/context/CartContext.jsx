@@ -65,7 +65,7 @@ export const CartProvider = ({ children }) => {
     } else {
       // Load from localStorage for guest users
       try {
-        const saved = localStorage.getItem('petcare_cart');
+        const saved = localStorage.getItem('FatherOfMeow_cart');
         if (saved) {
           setCartItems(JSON.parse(saved));
         }
@@ -78,7 +78,7 @@ export const CartProvider = ({ children }) => {
   // Save to localStorage for guest users
   useEffect(() => {
     if (!user) {
-      localStorage.setItem('petcare_cart', JSON.stringify(cartItems));
+      localStorage.setItem('FatherOfMeow_cart', JSON.stringify(cartItems));
     }
   }, [cartItems, user]);
 

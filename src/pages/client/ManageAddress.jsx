@@ -13,6 +13,7 @@ import StyledTextField from '../../components/ui/StyledTextField';
 import GradientButton from '../../components/ui/GradientButton';
 import OutlineButton from '../../components/ui/OutlineButton';
 import { useClientApi } from '../../hooks/useClientApi';
+import { Helmet } from 'react-helmet-async';
 
 const EMPTY_FORM = {
     label: 'home', fullName: '', phoneNumber: '',
@@ -22,7 +23,7 @@ const EMPTY_FORM = {
 const ManageAddress = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    
+
     const {
         useAddresses,
         useCreateAddress,
@@ -122,23 +123,26 @@ const ManageAddress = () => {
     }
 
     return (
-        <Box sx={{ px: { xs: 1, sm: 2, md: 0 } }}>
-            <Box sx={{ 
-                display: 'flex', 
+        <Box >
+            <Helmet>
+                <title>Manage Addresses | FatherOfMeow</title>
+            </Helmet>
+            <Box sx={{
+                display: 'flex',
                 flexDirection: { xs: 'column', sm: 'row' },
-                justifyContent: 'space-between', 
-                alignItems: { xs: 'flex-start', sm: 'center' }, 
+                justifyContent: 'space-between',
+                alignItems: { xs: 'flex-start', sm: 'center' },
                 gap: { xs: 2, sm: 0 },
-                mb: 3 
+                mb: 3
             }}>
                 <Box>
                     <Typography sx={{
-                        fontWeight: 600, 
-                        mb: 0.5, 
+                        fontWeight: 600,
+                        mb: 0.5,
                         fontSize: isMobile ? '0.9rem' : '1rem',
                         background: `linear-gradient(135deg, ${BLUE_DARK} 0%, ${BLUE_COLOR} 100%)`,
-                        WebkitBackgroundClip: 'text', 
-                        WebkitTextFillColor: 'transparent', 
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
                     }}>
                         Manage Addresses
@@ -152,9 +156,9 @@ const ManageAddress = () => {
                     startIcon={<AddIcon sx={{ fontSize: isMobile ? '0.8rem' : '0.85rem' }} />}
                     onClick={() => handleOpenDialog()}
                     size="small"
-                    sx={{ 
-                        fontSize: isMobile ? '0.75rem' : '0.78rem', 
-                        py: 0.6, 
+                    sx={{
+                        fontSize: isMobile ? '0.75rem' : '0.78rem',
+                        py: 0.6,
                         px: isMobile ? 1.2 : 1.5,
                         width: { xs: '100%', sm: 'auto' }
                     }}
@@ -172,25 +176,25 @@ const ManageAddress = () => {
                                 borderRadius: 1.5,
                                 backgroundColor: theme.palette.background.paper,
                                 transition: 'all 0.2s ease',
-                                '&:hover': { 
-                                    boxShadow: theme.shadows[2], 
-                                    transform: 'translateY(-2px)' 
+                                '&:hover': {
+                                    boxShadow: theme.shadows[2],
+                                    transform: 'translateY(-2px)'
                                 },
-                                position: 'relative', 
+                                position: 'relative',
                                 overflow: 'visible',
                             }}>
                                 {address.isDefault && (
                                     <Box sx={{
-                                        position: 'absolute', 
-                                        top: -10, 
+                                        position: 'absolute',
+                                        top: -10,
                                         right: 16,
-                                        backgroundColor: BLUE_COLOR, 
+                                        backgroundColor: BLUE_COLOR,
                                         color: 'white',
-                                        px: isMobile ? 1 : 1.5, 
-                                        py: 0.5, 
+                                        px: isMobile ? 1 : 1.5,
+                                        py: 0.5,
                                         borderRadius: 1,
-                                        fontSize: isMobile ? '0.65rem' : '0.68rem', 
-                                        fontWeight: 600, 
+                                        fontSize: isMobile ? '0.65rem' : '0.68rem',
+                                        fontWeight: 600,
                                         zIndex: 1,
                                     }}>
                                         DEFAULT
@@ -200,11 +204,11 @@ const ManageAddress = () => {
                                     <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1.5}>
                                         <Box display="flex" alignItems="center" gap={1}>
                                             <Box sx={{
-                                                width: isMobile ? 24 : 28, 
-                                                height: isMobile ? 24 : 28, 
+                                                width: isMobile ? 24 : 28,
+                                                height: isMobile ? 24 : 28,
                                                 borderRadius: 1,
-                                                display: 'flex', 
-                                                alignItems: 'center', 
+                                                display: 'flex',
+                                                alignItems: 'center',
                                                 justifyContent: 'center',
                                                 backgroundColor: alpha(getAddressTypeColor(address.label), 0.1),
                                                 color: getAddressTypeColor(address.label),
@@ -248,22 +252,22 @@ const ManageAddress = () => {
                                     </Typography>
 
                                     {!address.isDefault && (
-                                        <Button 
-                                            variant="outlined" 
+                                        <Button
+                                            variant="outlined"
                                             size="small"
                                             fullWidth={isMobile}
                                             onClick={() => defaultMutation.mutate(address._id)}
                                             disabled={isMutating}
                                             sx={{
-                                                fontSize: isMobile ? '0.65rem' : '0.68rem', 
-                                                textTransform: 'none', 
-                                                py: 0.5, 
+                                                fontSize: isMobile ? '0.65rem' : '0.68rem',
+                                                textTransform: 'none',
+                                                py: 0.5,
                                                 px: 1.5,
-                                                borderColor: alpha(BLUE_COLOR, 0.3), 
+                                                borderColor: alpha(BLUE_COLOR, 0.3),
                                                 color: BLUE_COLOR,
-                                                '&:hover': { 
-                                                    borderColor: BLUE_COLOR, 
-                                                    backgroundColor: alpha(BLUE_COLOR, 0.05) 
+                                                '&:hover': {
+                                                    borderColor: BLUE_COLOR,
+                                                    backgroundColor: alpha(BLUE_COLOR, 0.05)
                                                 },
                                             }}>
                                             Set as Default
@@ -276,8 +280,8 @@ const ManageAddress = () => {
                 </Grid>
             ) : (
                 <Paper elevation={0} sx={{
-                    p: isMobile ? 3 : 4, 
-                    textAlign: 'center', 
+                    p: isMobile ? 3 : 4,
+                    textAlign: 'center',
                     borderRadius: 1.5,
                     backgroundColor: theme.palette.background.paper,
                     border: `1px solid ${theme.palette.divider}`,
@@ -289,10 +293,10 @@ const ManageAddress = () => {
                     <Typography sx={{ fontSize: isMobile ? '0.68rem' : '0.72rem', display: 'block', mb: 2, color: TEXT_PRIMARY }}>
                         Add your first delivery address to get started
                     </Typography>
-                    <GradientButton 
-                        variant="contained" 
+                    <GradientButton
+                        variant="contained"
                         startIcon={<AddIcon />}
-                        onClick={() => handleOpenDialog()} 
+                        onClick={() => handleOpenDialog()}
                         size="small"
                         sx={{ fontSize: isMobile ? '0.75rem' : '0.78rem', py: 0.6, px: 1.5 }}>
                         Add Address
@@ -300,28 +304,28 @@ const ManageAddress = () => {
                 </Paper>
             )}
 
-            <Dialog 
-                open={openDialog} 
-                onClose={handleCloseDialog} 
-                maxWidth="sm" 
+            <Dialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                maxWidth="sm"
                 fullWidth
-                PaperProps={{ 
-                    sx: { 
-                        borderRadius: 2, 
-                        backgroundColor: theme.palette.background.paper, 
+                PaperProps={{
+                    sx: {
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.background.paper,
                         p: isMobile ? 0.5 : 1,
                         m: isMobile ? 1 : 0,
-                    } 
+                    }
                 }}
             >
                 <DialogTitle sx={{
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    color: TEXT_PRIMARY, 
-                    fontWeight: 600, 
-                    fontSize: isMobile ? '0.88rem' : '0.92rem', 
-                    py: isMobile ? 1 : 1.5, 
+                    color: TEXT_PRIMARY,
+                    fontWeight: 600,
+                    fontSize: isMobile ? '0.88rem' : '0.92rem',
+                    py: isMobile ? 1 : 1.5,
                     px: isMobile ? 1.5 : 2,
                 }}>
                     {editingAddress ? 'Edit Address' : 'Add New Address'}
@@ -333,17 +337,17 @@ const ManageAddress = () => {
                 <DialogContent sx={{ px: isMobile ? 1.5 : 2, py: 1 }}>
                     <Grid container spacing={isMobile ? 1 : 1.5}>
                         <Grid size={{ xs: 12 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                select 
-                                name="label" 
-                                value={formData.label} 
+                            <StyledTextField
+                                fullWidth
+                                select
+                                name="label"
+                                value={formData.label}
                                 onChange={handleInputChange}
-                                SelectProps={{ native: true }} 
+                                SelectProps={{ native: true }}
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
                                 }}>
                                 <option value="home">Home</option>
                                 <option value="work">Work</option>
@@ -352,126 +356,126 @@ const ManageAddress = () => {
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                label="Full Name" 
+                            <StyledTextField
+                                fullWidth
+                                label="Full Name"
                                 name="fullName"
-                                value={formData.fullName} 
+                                value={formData.fullName}
                                 onChange={handleInputChange}
-                                required 
+                                required
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
-                                }} 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
+                                }}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                label="Phone Number" 
+                            <StyledTextField
+                                fullWidth
+                                label="Phone Number"
                                 name="phoneNumber"
-                                value={formData.phoneNumber} 
+                                value={formData.phoneNumber}
                                 onChange={handleInputChange}
-                                required 
+                                required
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
-                                }} 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
+                                }}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                label="Street Address" 
+                            <StyledTextField
+                                fullWidth
+                                label="Street Address"
                                 name="street"
-                                value={formData.street} 
+                                value={formData.street}
                                 onChange={handleInputChange}
-                                required 
+                                required
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
-                                }} 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
+                                }}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                label="City" 
+                            <StyledTextField
+                                fullWidth
+                                label="City"
                                 name="city"
-                                value={formData.city} 
+                                value={formData.city}
                                 onChange={handleInputChange}
-                                required 
+                                required
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
-                                }} 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
+                                }}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                label="State / Province" 
+                            <StyledTextField
+                                fullWidth
+                                label="State / Province"
                                 name="state"
-                                value={formData.state} 
+                                value={formData.state}
                                 onChange={handleInputChange}
-                                required 
+                                required
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
-                                }} 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
+                                }}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                label="ZIP / Postal Code" 
+                            <StyledTextField
+                                fullWidth
+                                label="ZIP / Postal Code"
                                 name="postalCode"
-                                value={formData.postalCode} 
+                                value={formData.postalCode}
                                 onChange={handleInputChange}
-                                required 
+                                required
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
-                                }} 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
+                                }}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12, sm: 6 }}>
-                            <StyledTextField 
-                                fullWidth 
-                                label="Country" 
+                            <StyledTextField
+                                fullWidth
+                                label="Country"
                                 name="country"
-                                value={formData.country} 
+                                value={formData.country}
                                 onChange={handleInputChange}
-                                required 
+                                required
                                 size="small"
-                                sx={{ 
-                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY }, 
-                                    mb: 1 
-                                }} 
+                                sx={{
+                                    '& .MuiInputBase-input': { fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY },
+                                    mb: 1
+                                }}
                             />
                         </Grid>
 
                         <Grid size={{ xs: 12 }}>
                             <Box display="flex" alignItems="center" gap={1} sx={{ mt: 1 }}>
-                                <input 
-                                    type="checkbox" 
-                                    id="isDefault" 
+                                <input
+                                    type="checkbox"
+                                    id="isDefault"
                                     name="isDefault"
                                     checked={formData.isDefault}
                                     onChange={(e) => setFormData(prev => ({ ...prev, isDefault: e.target.checked }))}
-                                    style={{ cursor: 'pointer' }} 
+                                    style={{ cursor: 'pointer' }}
                                 />
                                 <label htmlFor="isDefault"
                                     style={{ fontSize: isMobile ? '0.75rem' : '0.78rem', color: TEXT_PRIMARY, cursor: 'pointer' }}>
@@ -482,31 +486,31 @@ const ManageAddress = () => {
                     </Grid>
                 </DialogContent>
 
-                <DialogActions sx={{ 
-                    px: isMobile ? 1.5 : 2, 
+                <DialogActions sx={{
+                    px: isMobile ? 1.5 : 2,
                     py: isMobile ? 1 : 1.5,
                     flexDirection: { xs: 'column', sm: 'row' },
                     gap: { xs: 1, sm: 0 }
                 }}>
-                    <OutlineButton 
-                        onClick={handleCloseDialog} 
+                    <OutlineButton
+                        onClick={handleCloseDialog}
                         disabled={isMutating}
-                        size="small" 
-                        sx={{ 
-                            fontSize: isMobile ? '0.75rem' : '0.78rem', 
-                            py: 0.4, 
+                        size="small"
+                        sx={{
+                            fontSize: isMobile ? '0.75rem' : '0.78rem',
+                            py: 0.4,
                             px: 1.5,
                             width: { xs: '100%', sm: 'auto' }
                         }}>
                         Cancel
                     </OutlineButton>
-                    <GradientButton 
-                        onClick={handleSaveAddress} 
+                    <GradientButton
+                        onClick={handleSaveAddress}
                         disabled={isMutating}
-                        size="small" 
-                        sx={{ 
-                            fontSize: isMobile ? '0.75rem' : '0.78rem', 
-                            py: 0.4, 
+                        size="small"
+                        sx={{
+                            fontSize: isMobile ? '0.75rem' : '0.78rem',
+                            py: 0.4,
                             px: 1.5,
                             width: { xs: '100%', sm: 'auto' }
                         }}>

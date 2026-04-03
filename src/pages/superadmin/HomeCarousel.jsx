@@ -259,7 +259,7 @@ export const HomeCarousel = () => {
   return (
     <Box>
       <Helmet>
-        <title>Carousel Management | Admin</title>
+        <title>Carousel Management | FatherOfMeow</title>
         <meta name="description" content="Manage homepage carousel slides" />
       </Helmet>
 

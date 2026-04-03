@@ -1,20 +1,22 @@
-import React from 'react';
+import React, { useEffect } from "react";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import {
     Container, Grid, Box, Typography, styled, Button, TextField,
-    Rating, Avatar, CircularProgress, FormControl, Select, MenuItem,
-    Stack, Paper, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+    Rating, Avatar, CircularProgress, Stack, Paper,
+    Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
 } from '@mui/material';
 import {
     Pets as PetsIcon, Recycling as RecyclingIcon, Favorite as FavoriteIcon,
     Inventory as InventoryIcon, LocalShipping as LocalShippingIcon,
     CheckCircle as CheckCircleIcon, Cancel as CancelIcon, Warning as WarningIcon,
     AddShoppingCart as AddShoppingCartIcon, ShoppingCartCheckout as ShoppingCartCheckoutIcon,
-    Lock as LockIcon, LocalOffer as LocalOfferIcon,
+    Lock as LockIcon, Female as FemaleIcon, Male as MaleIcon, LocalOffer as LocalOfferIcon,
 } from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
 import SectionTile from '../../components/SectionTile';
 import { useAuth } from '../../auth/AuthProvider';
-import { useShopApi } from '../../hooks/useShopApi';
+import { useSearchApi } from '../../hooks/useSearchApi'; // Fixed import
+
+// ── Constants ────────────────────────────────────────────────────────────────
 
 const C = {
     primary: '#db89ca', primaryDark: '#c06bb0', text: '#1a1a1a', textLight: '#666',
@@ -25,15 +27,24 @@ const C = {
 const HERO_IMAGE = 'https://shthemes.net/demosd/pepito/wp-content/uploads/2025/03/1.jpg';
 const NO_IMAGE = 'https://via.placeholder.com';
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 const stripHtml = html => html ? html.replace(/<[^>]*>/g, '').trim() : '';
 const getInitials = (name = '') => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+const getGenderIcon = gender => gender?.toLowerCase() === 'male'
+    ? <MaleIcon sx={{ fontSize: '15px' }} />
+    : <FemaleIcon sx={{ fontSize: '15px' }} />;
+const formatBool = val => val ? 'Yes' : 'No';
+const getAgeLabel = age => `${age} ${parseInt(age) === 1 ? 'year' : 'years'}`;
 
 const getStockLevel = (stock, inStock) => {
-    if (!inStock || stock <= 0) return { level: 'out', label: 'Out of Stock', icon: <CancelIcon sx={{ fontSize: '15px' }} /> };
+    if (!inStock || stock <= 0) return { level: 'out', label: 'Adopted', icon: <CancelIcon sx={{ fontSize: '15px' }} /> };
     if (stock <= 5) return { level: 'low', label: 'Low Stock', icon: <WarningIcon sx={{ fontSize: '15px' }} /> };
     if (stock <= 20) return { level: 'medium', label: 'Limited Stock', icon: <InventoryIcon sx={{ fontSize: '15px' }} /> };
-    return { level: 'high', label: 'In Stock', icon: <CheckCircleIcon sx={{ fontSize: '15px' }} /> };
+    return { level: 'high', label: 'Available', icon: <CheckCircleIcon sx={{ fontSize: '15px' }} /> };
 };
+
+// ── Styled Components (same as PetDetail) ────────────────────────────────────
 
 const Section = styled(Box)(({ theme }) => ({
     backgroundColor: '#fff', padding: '60px 0', width: '100%',
@@ -50,19 +61,10 @@ const MainImageWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const DiscountBadgeLarge = styled(Box)({
-    position: 'absolute',
-    top: '16px',
-    left: '16px',
-    backgroundColor: C.discount,
-    color: '#fff',
-    padding: '6px 14px',
-    borderRadius: '30px',
-    fontSize: '13px',
-    fontWeight: 700,
-    zIndex: 2,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
+    position: 'absolute', top: '16px', left: '16px',
+    backgroundColor: C.discount, color: '#fff',
+    padding: '6px 14px', borderRadius: '30px', fontSize: '13px', fontWeight: 700,
+    zIndex: 2, display: 'flex', alignItems: 'center', gap: '6px',
     boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
 });
 
@@ -168,6 +170,14 @@ const FeaturesList = styled('ul')({
     '& li': { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', fontSize: '13px', color: C.textLight, '& svg': { color: C.primary, fontSize: '16px' } },
 });
 
+const InfoList = styled('ul')({
+    listStyle: 'none', padding: 0, margin: 0, marginBottom: '20px',
+    '& li': { display: 'flex', alignItems: 'center', borderBottom: `1px solid ${C.border}`, padding: '10px 0', fontSize: '13px', '&:last-child': { borderBottom: 'none' } },
+});
+
+const InfoLabel = styled(Box)({ minWidth: '100px', fontSize: '13px', fontWeight: 500, color: C.text });
+const InfoValue = styled(Box)({ fontSize: '13px', color: C.textLight, display: 'flex', alignItems: 'center', gap: '6px' });
+
 const ReviewItem = styled(Box)(({ theme }) => ({
     display: 'flex', gap: '14px', padding: '18px 0', borderBottom: `1px solid ${C.border}`,
     [theme.breakpoints.down('sm')]: { flexDirection: 'column', gap: '10px', padding: '14px 0' },
@@ -194,6 +204,7 @@ const SubmitBtn = styled(Button)({
 
 const RelatedCard = styled(Box)({
     cursor: 'pointer', transition: 'transform 0.2s ease',
+    '&:hover': { transform: 'translateY(-4px)' },
 });
 
 const RelatedImgWrapper = styled(Box)({
@@ -222,31 +233,79 @@ const RatingSummary = styled(Box)({
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-const ProductDetail = () => {
-    const { title_id } = useParams();
+export default function Search() {
+    const [searchParams] = useSearchParams();
+    const location = useLocation();
+    const navigate = useNavigate();
     const { isLoading: authLoading } = useAuth();
-    const { useProductDetail } = useShopApi();
 
+    // Get query from URL params
+    const query = searchParams.get('q');
+    const resultData = location.state?.result;
+    const title_id = resultData?.title_id;
+
+    // Initialize the hook properly - FIXED
+    const { usePetDetail } = useSearchApi();
+
+    // Call the hook with title_id (only if we have a valid title_id)
+    const petDetailState = title_id ? usePetDetail(title_id) : null;
+
+    // Destructure state from hook (or use defaults if no title_id)
     const {
-        product, allImages, mainImage, relatedProducts, currentPrice, maxQuantity,
-        setActiveImage, activeTab, handleTabChange, quantity, handleQuantityChange,
-        addedToCart, selectedOptions, handleOptionChange, reviewForm, setReviewForm,
-        formError, authDialogOpen, setAuthDialogOpen,
-        reviews,              // ✅ Approved reviews only
-        allReviews,          // ✅ All reviews (including unapproved)
-        reviewsLoading,      // ✅ Loading state
-        reviewsError,        // ✅ Error state
-        averageRating,
-        reviewCount,
-        submitReviewMutation, 
-        isLoading, 
-        error, 
-        handleAddToCart, 
+        pet,
+        allImages,
+        mainImage,
+        relatedCats,
+        currentPrice,
+        maxQuantity,
+        setActiveImage,
+        activeTab,
+        handleTabChange,
+        quantity,
+        handleQuantityChange,
+        addedToCart,
+        selectedOptions,
+        handleOptionChange,
+        reviewForm,
+        setReviewForm,
+        formError,
+        authDialogOpen,
+        setAuthDialogOpen,
+        reviewsData,
+        reviewsLoading,
+        submitReviewMutation,
+        isLoading,
+        error,
+        handleAddToCart,
         handleReviewSubmit,
-        handleNavigateToLogin, 
-        navigate,
-    } = useProductDetail(title_id);
+        handleNavigateToLogin,
+    } = petDetailState || {};
 
+    // Debug effect
+    useEffect(() => {
+        
+    }, [query, resultData, title_id, petDetailState]);
+
+    // ── No result passed (initial search or page refresh) ─────────────────────
+    if (!resultData || !title_id) {
+        return (
+            <Box>
+                <SectionTile bgImage={HERO_IMAGE} subtitle="Find a new friend" title="Search Results" icon iconClass="flaticon-custom-icon" />
+                <Section>
+                    <Container maxWidth="lg">
+                        <Typography sx={{ fontSize: '18px', fontWeight: 600, color: C.text, mb: 1 }}>
+                            Results for: <span style={{ color: C.primary }}>{query}</span>
+                        </Typography>
+                        <Typography sx={{ fontSize: '13px', color: C.textLight }}>
+                            No specific result data found. Please try searching again.
+                        </Typography>
+                    </Container>
+                </Section>
+            </Box>
+        );
+    }
+
+    // ── Loading ────────────────────────────────────────────────────────────────
     if (isLoading || authLoading) {
         return (
             <Section>
@@ -259,30 +318,36 @@ const ProductDetail = () => {
         );
     }
 
-    if (error || !product) {
+    // ── Error / not found ──────────────────────────────────────────────────────
+    if (error || !pet) {
         return (
             <Section>
                 <Container maxWidth="lg">
                     <Typography textAlign="center" color="error" sx={{ py: 4, fontSize: '13px' }}>
-                        {error ? `Error: ${error.message}` : 'Product not found'}
+                        {error ? `Error: ${error.message}` : 'Cat not found'}
                     </Typography>
                 </Container>
             </Section>
         );
     }
 
-    const stockInfo = getStockLevel(product.stock, product.inStock);
-    const discountedPrice = product.discountedPrice || product.price;
-    const discountPercentage = product.discountPercentage || 0;
-    const hasDiscount = discountPercentage > 0 && product.inStock;
+    // ── Derived values (same as PetDetail) ────────────────────────────────────
+    const stockInfo = getStockLevel(pet.stock, pet.inStock);
+    const averageRating = pet.averageRating || 0;
+    const reviewCount = pet.reviewCount || 0;
+    const discountedPrice = pet.discountedPrice || pet.price;
+    const discountPercentage = pet.discountPercentage || 0;
+    const hasDiscount = discountPercentage > 0 && pet.inStock;
 
+    // ── Render ─────────────────────────────────────────────────────────────────
     return (
         <Box>
-            <SectionTile bgImage={HERO_IMAGE} subtitle="Pet Shop" title="Shop Detail" icon iconClass="flaticon-custom-icon" />
+            <SectionTile bgImage={HERO_IMAGE} subtitle={`Results for: ${query}`} title="Cat Details" icon iconClass="flaticon-custom-icon" />
 
             <Section>
                 <Container maxWidth="lg">
                     <Grid container spacing={{ xs: 2, md: 4 }}>
+                        {/* ── Left: Images ── */}
                         <Grid size={{ xs: 12, md: 6 }}>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <MainImageWrapper>
@@ -292,32 +357,36 @@ const ProductDetail = () => {
                                             {Math.round(discountPercentage)}% OFF
                                         </DiscountBadgeLarge>
                                     )}
-                                    <Box component="img" src={mainImage} alt={product.title} onError={e => { e.target.src = `${NO_IMAGE}/450x450?text=No+Image`; }}
+                                    <Box component="img" src={mainImage} alt={pet.name}
+                                        onError={e => { e.target.src = `${NO_IMAGE}/450x450?text=No+Image`; }}
                                         sx={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                                 </MainImageWrapper>
-                                {allImages.length > 1 && (
+                                {allImages && allImages.length > 1 && (
                                     <Box sx={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                         {allImages.map((img, i) => (
-                                            <Thumbnail key={i} src={img} alt={`Thumb ${i + 1}`} active={mainImage === img}
-                                                onClick={() => setActiveImage(img)} onError={e => { e.target.src = `${NO_IMAGE}/80x80?text=No+Image`; }} />
+                                            <Thumbnail key={i} src={img} alt={`Thumb ${i + 1}`}
+                                                active={mainImage === img}
+                                                onClick={() => setActiveImage && setActiveImage(img)}
+                                                onError={e => { e.target.src = `${NO_IMAGE}/80x80?text=No+Image`; }} />
                                         ))}
                                     </Box>
                                 )}
                             </Box>
                         </Grid>
 
+                        {/* ── Right: Info ── */}
                         <Grid size={{ xs: 12, md: 6 }}>
                             <InfoWrapper>
-                                <PTitle variant="h1">{product.title}</PTitle>
+                                <PTitle variant="h1">{pet.name}</PTitle>
 
                                 <BadgeRow>
-                                    {product.category && <InfoBadge variant="category">{product.category}</InfoBadge>}
-                                    {product.material && <InfoBadge variant="material">{product.material}</InfoBadge>}
-                                    <InfoBadge variant="stock">{product.inStock && product.stock > 0 ? 'In Stock' : 'Out of Stock'}</InfoBadge>
+                                    {pet.breed && <InfoBadge variant="category">{pet.breed}</InfoBadge>}
+                                    {pet.size && <InfoBadge variant="material">{pet.size}</InfoBadge>}
+                                    <InfoBadge variant="stock">{pet.inStock && pet.stock > 0 ? 'Available' : 'Adopted'}</InfoBadge>
                                     {hasDiscount && <InfoBadge variant="category" sx={{ backgroundColor: '#e8f5e9', color: C.discount }}>Sale</InfoBadge>}
                                 </BadgeRow>
 
-                                <PDesc>{stripHtml(product.description)}</PDesc>
+                                <PDesc>{stripHtml(pet.about)}</PDesc>
 
                                 <StockCard elevation={0}>
                                     <Stack spacing={1.5}>
@@ -325,18 +394,18 @@ const ProductDetail = () => {
                                             <StockIndicator stocklevel={stockInfo.level}>
                                                 {stockInfo.icon} {stockInfo.label}
                                             </StockIndicator>
-                                            {product.stock > 0 && (
-                                                <Typography sx={{ color: C.textLight, fontSize: '12px' }}>{product.stock} units available</Typography>
+                                            {pet.stock > 0 && (
+                                                <Typography sx={{ color: C.textLight, fontSize: '12px' }}>{pet.stock} cats available</Typography>
                                             )}
                                         </Box>
-                                        {product.stock > 0 && (
+                                        {pet.stock > 0 && (
                                             <>
-                                                <StockBar percentage={Math.min((product.stock / (product.stock + 20)) * 100, 100)} />
-                                                {product.stock <= 5 && (
+                                                <StockBar percentage={Math.min((pet.stock / (pet.stock + 20)) * 100, 100)} />
+                                                {pet.stock <= 5 && (
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
                                                         <WarningIcon sx={{ fontSize: '13px', color: C.error }} />
                                                         <Typography variant="caption" sx={{ color: C.error, fontWeight: 500 }}>
-                                                            Only {product.stock} items left! Order soon.
+                                                            Only {pet.stock} cats left! Adopt soon.
                                                         </Typography>
                                                     </Box>
                                                 )}
@@ -345,13 +414,12 @@ const ProductDetail = () => {
                                     </Stack>
                                 </StockCard>
 
-                                {/* Rating Summary - Using values from hook */}
                                 {reviewCount > 0 && (
                                     <RatingSummary>
                                         <StyledRating value={averageRating} readOnly precision={0.5} size="small" />
                                         <Box>
                                             <Typography sx={{ fontSize: '13px', fontWeight: 600, color: C.text }}>
-                                                {averageRating.toFixed(1)} out of 5
+                                                {averageRating?.toFixed(1)} out of 5
                                             </Typography>
                                             <Typography sx={{ fontSize: '11px', color: C.textLight }}>
                                                 Based on {reviewCount} review{reviewCount !== 1 ? 's' : ''}
@@ -360,49 +428,18 @@ const ProductDetail = () => {
                                     </RatingSummary>
                                 )}
 
-                                {product.options?.length > 0 && (
-                                    <Box sx={{ mb: '20px' }}>
-                                        {product.options.map(option => (
-                                            <Box key={option.id} sx={{ mb: '14px' }}>
-                                                <Typography sx={{ fontSize: '12px', fontWeight: 600, color: C.text, mb: '6px', display: 'block' }}>{option.name}</Typography>
-                                                <FormControl fullWidth size="small">
-                                                    <Select value={selectedOptions[option.id]?.id || ''} displayEmpty sx={{ borderRadius: '10px', fontSize: '13px' }}
-                                                        onChange={e => {
-                                                            const val = option.values.find(v => v.id === e.target.value);
-                                                            if (val) handleOptionChange(option.id, val.id, val);
-                                                        }}>
-                                                        <MenuItem value="" disabled sx={{ fontSize: '13px' }}>Select {option.name}</MenuItem>
-                                                        {option.values.map(v => (
-                                                            <MenuItem key={v.id} value={v.id} sx={{ fontSize: '13px' }}>
-                                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                                                                    <span>{v.value}</span>
-                                                                    {v.priceModifier !== 0 && (
-                                                                        <span style={{ color: v.priceModifier > 0 ? C.price : C.success, fontSize: '12px' }}>
-                                                                            {v.priceModifier > 0 ? `+৳${v.priceModifier}` : `-৳${Math.abs(v.priceModifier)}`}
-                                                                        </span>
-                                                                    )}
-                                                                </Box>
-                                                            </MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                </FormControl>
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                )}
-
                                 <PriceDisplay>
-                                    ৳{currentPrice.toFixed(2)}
+                                    ৳{discountedPrice?.toFixed(2)}
                                     {hasDiscount && (
                                         <>
-                                            <span className="orig">৳{parseFloat(product.price).toFixed(2)}</span>
-                                            <span className="discount">-{Math.round(discountPercentage)}% OFF</span>
+                                            <span className="orig">৳{parseFloat(pet.price).toFixed(2)}</span>
+                                            <span className="discount">-{Math.round(discountPercentage)}%</span>
                                         </>
                                     )}
                                 </PriceDisplay>
 
                                 <CartWrapper>
-                                    {product.inStock && product.stock > 0 ? (
+                                    {pet.inStock && pet.stock > 0 ? (
                                         <>
                                             <QtyInput type="text" value={quantity} onChange={handleQuantityChange}
                                                 inputProps={{ min: 1, max: maxQuantity }} size="small" />
@@ -418,40 +455,80 @@ const ProductDetail = () => {
                                         </>
                                     ) : (
                                         <AddBtn variant="contained" disabled>
-                                            <CancelIcon sx={{ mr: 0.8, fontSize: '15px' }} /> Out of Stock
+                                            <CancelIcon sx={{ mr: 0.8, fontSize: '15px' }} /> Not Available
                                         </AddBtn>
                                     )}
                                 </CartWrapper>
 
                                 <Box>
-                                    <FeatureItem><PetsIcon /><p>Give the fun to your best friend!</p></FeatureItem>
-                                    <FeatureItem><RecyclingIcon /><p>100% quality guaranteed</p></FeatureItem>
-                                    {product.stock > 0 && <FeatureItem><LocalShippingIcon /><p>Free shipping on orders over ৳500</p></FeatureItem>}
+                                    <FeatureItem><PetsIcon /><p>Give a loving home to your new best friend!</p></FeatureItem>
+                                    <FeatureItem><RecyclingIcon /><p>100% health guaranteed</p></FeatureItem>
+                                    {pet.stock > 0 && <FeatureItem><LocalShippingIcon /><p>Free delivery on all adoptions</p></FeatureItem>}
                                 </Box>
+
+                                <InfoList>
+                                    <li>
+                                        <InfoLabel>Gender:</InfoLabel>
+                                        <InfoValue>
+                                            {getGenderIcon(pet.gender)}
+                                            <span style={{ textTransform: 'capitalize' }}>{pet.gender || 'N/A'}</span>
+                                        </InfoValue>
+                                    </li>
+                                    <li>
+                                        <InfoLabel>Age:</InfoLabel>
+                                        <InfoValue>{getAgeLabel(pet.age ?? '0')}</InfoValue>
+                                    </li>
+                                    <li>
+                                        <InfoLabel>Breed:</InfoLabel>
+                                        <InfoValue>{pet.breed || 'N/A'}</InfoValue>
+                                    </li>
+                                    <li>
+                                        <InfoLabel>Size:</InfoLabel>
+                                        <InfoValue style={{ textTransform: 'capitalize' }}>{pet.size || 'N/A'}</InfoValue>
+                                    </li>
+                                    <li>
+                                        <InfoLabel>Neutered:</InfoLabel>
+                                        <InfoValue>{formatBool(pet.neutered)}</InfoValue>
+                                    </li>
+                                    <li>
+                                        <InfoLabel>Vaccinated:</InfoLabel>
+                                        <InfoValue>{formatBool(pet.vaccinated)}</InfoValue>
+                                    </li>
+                                    {pet.stock > 0 && (
+                                        <li>
+                                            <InfoLabel>Availability:</InfoLabel>
+                                            <InfoValue>
+                                                <CheckCircleIcon sx={{ color: C.success, fontSize: '15px' }} />
+                                                <span>{pet.stock} cats available</span>
+                                            </InfoValue>
+                                        </li>
+                                    )}
+                                </InfoList>
                             </InfoWrapper>
                         </Grid>
                     </Grid>
 
+                    {/* ── Tabs: Details & Reviews ── */}
                     <Box sx={{ mt: { xs: '30px', md: '56px' } }}>
                         <TabHeaders>
-                            <TabHeader active={activeTab === 'features'} onClick={() => handleTabChange('features')}>Features</TabHeader>
-                            <TabHeader active={activeTab === 'reviews'} onClick={() => handleTabChange('reviews')}>
+                            <TabHeader active={activeTab === 'details'} onClick={() => handleTabChange && handleTabChange('details')}>Details</TabHeader>
+                            <TabHeader active={activeTab === 'reviews'} onClick={() => handleTabChange && handleTabChange('reviews')}>
                                 Reviews {reviewCount > 0 ? `(${reviewCount})` : ''}
                             </TabHeader>
                         </TabHeaders>
 
-                        {activeTab === 'features' && (
+                        {activeTab === 'details' && (
                             <Box>
-                                {product.features && product.features !== '<p><br></p>' ? (
+                                {pet.features && pet.features !== '<p><br></p>' ? (
                                     <Box sx={{ fontSize: '13px', color: C.textLight, lineHeight: 1.6, '& ul, & ol': { paddingLeft: '1.5rem' }, '& li': { marginBottom: '8px' } }}
-                                        dangerouslySetInnerHTML={{ __html: product.features }} />
+                                        dangerouslySetInnerHTML={{ __html: pet.features }} />
                                 ) : (
                                     <FeaturesList>
-                                        {product.category && <li><FavoriteIcon />Category: {product.category}</li>}
-                                        {product.material && <li><FavoriteIcon />Material: {product.material}</li>}
-                                        <li><FavoriteIcon />High quality pet product</li>
-                                        <li><FavoriteIcon />Safe for your pets</li>
-                                        {product.stock > 0 && <li><InventoryIcon />Stock: {product.stock} units</li>}
+                                        {pet.breed && <li><FavoriteIcon />Breed: {pet.breed}</li>}
+                                        {pet.size && <li><FavoriteIcon />Size: {pet.size}</li>}
+                                        <li><FavoriteIcon />Healthy and vaccinated</li>
+                                        <li><FavoriteIcon />Ready for a loving home</li>
+                                        {pet.stock > 0 && <li><InventoryIcon />Available: {pet.stock} cats</li>}
                                     </FeaturesList>
                                 )}
                             </Box>
@@ -459,35 +536,26 @@ const ProductDetail = () => {
 
                         {activeTab === 'reviews' && (
                             <Box>
-                                {/* ✅ Fixed: Use 'reviews' (approved reviews) instead of 'reviewsData' */}
                                 {reviewsLoading ? (
                                     <Box sx={{ textAlign: 'center', py: 4 }}>
                                         <CircularProgress sx={{ color: C.primary }} size={28} />
                                     </Box>
-                                ) : reviewsError ? (
-                                    <Typography sx={{ color: C.error, mb: 3, fontSize: '13px' }}>
-                                        Failed to load reviews. Please try again later.
-                                    </Typography>
-                                ) : !reviews || reviews.length === 0 ? (
+                                ) : !reviewsData || reviewsData.length === 0 ? (
                                     <Typography sx={{ color: C.textLight, mb: 3, fontSize: '13px' }}>
                                         No reviews yet. Be the first to leave a review!
                                     </Typography>
                                 ) : (
                                     <Box sx={{ mb: 4 }}>
-                                        {reviews.map(review => (
+                                        {reviewsData.map(review => (
                                             <ReviewItem key={review._id}>
                                                 <ReviewAvatar>{getInitials(review.name)}</ReviewAvatar>
                                                 <Box flex={1}>
                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.8, flexWrap: 'wrap', gap: '6px' }}>
                                                         <Typography sx={{ fontSize: '13px', fontWeight: 600, color: C.text }}>{review.name}</Typography>
-                                                        <Typography sx={{ fontSize: '11px', color: C.textLight }}>
-                                                            {new Date(review.createdAt).toLocaleDateString()}
-                                                        </Typography>
+                                                        <Typography sx={{ fontSize: '11px', color: C.textLight }}>{new Date(review.createdAt).toLocaleDateString()}</Typography>
                                                     </Box>
                                                     <StyledRating value={review.rating} readOnly size="small" />
-                                                    <Typography sx={{ fontSize: '13px', color: C.textLight, lineHeight: 1.5, mt: 0.8 }}>
-                                                        {review.comment}
-                                                    </Typography>
+                                                    <Typography sx={{ fontSize: '13px', color: C.textLight, lineHeight: 1.5, mt: 0.8 }}>{review.comment}</Typography>
                                                 </Box>
                                             </ReviewItem>
                                         ))}
@@ -498,98 +566,48 @@ const ProductDetail = () => {
                                     <Typography sx={{ fontSize: '15px', fontWeight: 600, color: C.text, mb: '18px' }}>Write a Review</Typography>
                                     <Box sx={{ mb: 1.5 }}>
                                         <Typography sx={{ mb: 0.8, fontWeight: 500, fontSize: '12px' }}>Rating *</Typography>
-                                        <StyledRating 
-                                            value={reviewForm.rating} 
-                                            onChange={(_, val) => setReviewForm(p => ({ ...p, rating: val || 0 }))} 
-                                            size="medium" 
-                                        />
+                                        <StyledRating value={reviewForm?.rating || 0} onChange={(_, val) => setReviewForm && setReviewForm(p => ({ ...p, rating: val }))} size="medium" />
                                     </Box>
-                                    <StyledField 
-                                        fullWidth 
-                                        placeholder="Name *" 
-                                        size="small" 
-                                        value={reviewForm.name} 
-                                        onChange={e => setReviewForm(p => ({ ...p, name: e.target.value }))} 
-                                    />
-                                    <StyledField 
-                                        fullWidth 
-                                        placeholder="Email *" 
-                                        type="email" 
-                                        size="small" 
-                                        value={reviewForm.email} 
-                                        onChange={e => setReviewForm(p => ({ ...p, email: e.target.value }))} 
-                                    />
-                                    <StyledField 
-                                        fullWidth 
-                                        placeholder="Your Review *" 
-                                        multiline 
-                                        rows={4} 
-                                        value={reviewForm.comment} 
-                                        onChange={e => setReviewForm(p => ({ ...p, comment: e.target.value }))} 
-                                    />
-                                    {formError && (
-                                        <Typography variant="caption" sx={{ color: C.error, display: 'block', mb: 1.5 }}>
-                                            {formError}
-                                        </Typography>
-                                    )}
-                                    <SubmitBtn 
-                                        variant="contained" 
-                                        onClick={handleReviewSubmit} 
-                                        disabled={submitReviewMutation?.isPending || false}
-                                    >
-                                        {submitReviewMutation?.isPending ? (
-                                            <CircularProgress size={18} sx={{ color: '#fff' }} />
-                                        ) : (
-                                            'Submit Review'
-                                        )}
+                                    <StyledField fullWidth placeholder="Name *" size="small" value={reviewForm?.name || ''} onChange={e => setReviewForm && setReviewForm(p => ({ ...p, name: e.target.value }))} />
+                                    <StyledField fullWidth placeholder="Email *" type="email" size="small" value={reviewForm?.email || ''} onChange={e => setReviewForm && setReviewForm(p => ({ ...p, email: e.target.value }))} />
+                                    <StyledField fullWidth placeholder="Your Review *" multiline rows={4} value={reviewForm?.comment || ''} onChange={e => setReviewForm && setReviewForm(p => ({ ...p, comment: e.target.value }))} />
+                                    {formError && <Typography variant="caption" sx={{ color: C.error, display: 'block', mb: 1.5 }}>{formError}</Typography>}
+                                    <SubmitBtn variant="contained" onClick={handleReviewSubmit} disabled={submitReviewMutation?.isPending}>
+                                        {submitReviewMutation?.isPending ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Submit Review'}
                                     </SubmitBtn>
                                 </ReviewFormWrapper>
                             </Box>
                         )}
                     </Box>
 
-                    {relatedProducts.length > 0 && (
+                    {/* ── Related Cats ── */}
+                    {relatedCats && relatedCats.length > 0 && (
                         <Box sx={{ mt: { xs: '30px', md: '56px' } }}>
                             <Typography sx={{ fontSize: '20px', fontWeight: 700, color: C.text, mb: '28px', textAlign: 'center' }}>
-                                You May Also Like
+                                Other Cats You Might Like
                             </Typography>
                             <Grid container spacing={{ xs: 2, sm: 2, md: 3 }}>
-                                {relatedProducts.map(rp => {
-                                    const rpDiscount = rp.discountPercentage || 0;
-                                    const rpHasDiscount = rpDiscount > 0 && rp.inStock;
-                                    const rpDiscountedPrice = rp.discountedPrice || rp.price;
-
+                                {relatedCats.map(rc => {
+                                    const rcDiscount = rc.discountPercentage || 0;
+                                    const rcHasDiscount = rcDiscount > 0 && rc.inStock;
                                     return (
-                                        <Grid size={{ xs: 6, sm: 6, md: 3 }} key={rp._id}>
-                                            <RelatedCard onClick={() => navigate(`/shop/${rp.title_id}`)}>
+                                        <Grid size={{ xs: 6, sm: 6, md: 3 }} key={rc._id}>
+                                            <RelatedCard onClick={() => navigate(`/adoption/${rc.title_id}`)}>
                                                 <RelatedImgWrapper>
-                                                    {rpHasDiscount && (
-                                                        <DiscountBadgeLarge sx={{ 
-                                                            top: '12px', 
-                                                            left: '12px', 
-                                                            padding: '5px 11px', 
-                                                            fontSize: '11px' 
-                                                        }}>
+                                                    {rcHasDiscount && (
+                                                        <DiscountBadgeLarge sx={{ top: '12px', left: '12px', padding: '4px 10px', fontSize: '11px' }}>
                                                             <LocalOfferIcon sx={{ fontSize: '14px' }} />
-                                                            {Math.round(rpDiscount)}% OFF
+                                                            {Math.round(rcDiscount)}% OFF
                                                         </DiscountBadgeLarge>
                                                     )}
-                                                    <img 
-                                                        src={rp.featuredImage} 
-                                                        alt={rp.title} 
-                                                        onError={e => { e.target.src = `${NO_IMAGE}/300x300?text=No+Image`; }} 
-                                                    />
+                                                    <img src={rc.featuredImage} alt={rc.name}
+                                                        onError={e => { e.target.src = `${NO_IMAGE}/300x300?text=No+Image`; }} />
                                                     <RelatedPriceTag>
                                                         <Typography variant="body2">
-                                                            ৳{rpDiscountedPrice}
-                                                            {rpHasDiscount && (
-                                                                <span style={{ 
-                                                                    textDecoration: 'line-through', 
-                                                                    color: '#999', 
-                                                                    fontSize: '10px', 
-                                                                    marginLeft: '6px' 
-                                                                }}>
-                                                                    ৳{rp.price}
+                                                            ৳{rc.discountedPrice ? rc.discountedPrice : rc.price}
+                                                            {rcHasDiscount && (
+                                                                <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '10px', marginLeft: '4px' }}>
+                                                                    ৳{rc.price}
                                                                 </span>
                                                             )}
                                                         </Typography>
@@ -597,7 +615,10 @@ const ProductDetail = () => {
                                                 </RelatedImgWrapper>
                                                 <Box sx={{ mt: '10px', textAlign: 'center' }}>
                                                     <Typography sx={{ fontSize: '12px', fontWeight: 500, color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                        {rp.title}
+                                                        {rc.name}
+                                                    </Typography>
+                                                    <Typography sx={{ fontSize: '10px', color: C.textLight, mt: '2px' }}>
+                                                        {rc.breed || 'Mixed Breed'}
                                                     </Typography>
                                                 </Box>
                                             </RelatedCard>
@@ -610,7 +631,8 @@ const ProductDetail = () => {
                 </Container>
             </Section>
 
-            <Dialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)}
+            {/* ── Auth Dialog ── */}
+            <Dialog open={authDialogOpen || false} onClose={() => setAuthDialogOpen && setAuthDialogOpen(false)}
                 PaperProps={{ sx: { borderRadius: '18px', padding: '8px', maxWidth: '400px', width: '90%', margin: '16px' } }}>
                 <DialogTitle sx={{ pb: 1, display: 'flex', alignItems: 'center', gap: 1.2 }}>
                     <LockIcon sx={{ color: C.primary, fontSize: '22px' }} />
@@ -618,11 +640,12 @@ const ProductDetail = () => {
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText sx={{ color: C.textLight, fontSize: '13px', lineHeight: 1.5 }}>
-                        Please sign in to add items to your cart and complete your purchase.
+                        Please sign in to add items to your cart and start the adoption process.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions sx={{ p: 2, pt: 0, gap: 1.5 }}>
-                    <Button onClick={() => setAuthDialogOpen(false)} sx={{ color: C.textLight, textTransform: 'none', fontWeight: 500, fontSize: '13px', borderRadius: '10px', '&:hover': { backgroundColor: '#f5f5f5' } }}>
+                    <Button onClick={() => setAuthDialogOpen && setAuthDialogOpen(false)}
+                        sx={{ color: C.textLight, textTransform: 'none', fontWeight: 500, fontSize: '13px', borderRadius: '10px', '&:hover': { backgroundColor: '#f5f5f5' } }}>
                         Cancel
                     </Button>
                     <Button onClick={handleNavigateToLogin} variant="contained"
@@ -633,6 +656,4 @@ const ProductDetail = () => {
             </Dialog>
         </Box>
     );
-};
-
-export default ProductDetail;
+}

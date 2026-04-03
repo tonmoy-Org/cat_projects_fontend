@@ -300,7 +300,7 @@ export default function VideoUpload() {
   return (
     <Box>
       <Helmet>
-        <title>Video Management - PetCare</title>
+        <title>Video Management - FatherOfMeow</title>
         <meta name="description" content="Manage your YouTube videos" />
       </Helmet>
 

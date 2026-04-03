@@ -347,6 +347,7 @@ const Product = () => {
         handleRefresh, handleSliderChange, handleMinInput, handleMaxInput,
         clearFilter, clearAll, handleProductClick,
     } = useProducts();
+    console.log(filteredProducts);
 
     useEffect(() => { setPage(1); }, [search, category, stock, priceRange]);
 

@@ -26,7 +26,7 @@ const iconColor = '#db89ca';
 // Styled components with consistent font sizes
 const ServicesSection = styled(Box)(({ theme }) => ({
   backgroundColor: '#f9f9f9',
-  padding: '80px 0',
+  padding: '20px 0',
   width: '100%',
   overflow: 'hidden',
 
@@ -203,7 +203,7 @@ const CardText = styled(Typography)({
 const ReadMoreButton = styled(Button)({
   backgroundColor: primaryColor,
   color: '#fff',
-  padding: '8px 24px',
+  padding: '14px 44px',
   fontSize: '13px',
   fontWeight: 600,
   textTransform: 'none',

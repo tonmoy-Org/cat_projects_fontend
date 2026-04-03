@@ -26,10 +26,11 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../auth/AuthProvider';
-import { usePetApi } from '../../hooks/usePetApi';
+import { useCatsManagement } from '../../hooks/usePetApi';
 
 // Theme colors matching Product component
 const PRIMARY = '#5C4D91';
+const PRICE_COLOR = '#ff6b6b';
 const PRIMARY_DARK = '#4A3D75';
 const ACCENT = '#db89ca';
 const DISCOUNT_COLOR = '#10b981';
@@ -38,7 +39,7 @@ const NO_IMAGE = 'https://via.placeholder.com/400x400?text=No+Image';
 // Styled components (made consistent with Product page)
 const AdoptionSection = styled(Box)({
   backgroundColor: '#fff',
-  padding: '80px 0',
+  padding: '60px 0',
   width: '100%',
   '@media (max-width: 900px)': { padding: '60px 0' },
   '@media (max-width: 600px)': { padding: '40px 0' },
@@ -198,7 +199,7 @@ const PriceWrapper = styled(Box)({
 const ProductPrice = styled(Typography, { shouldForwardProp: p => p !== 'isDiscounted' })(({ isDiscounted }) => ({
   fontSize: '14px',
   fontWeight: 700,
-  color: isDiscounted ? DISCOUNT_COLOR : PRIMARY,
+  color: isDiscounted ? DISCOUNT_COLOR : PRICE_COLOR,
 }));
 
 const OriginalPrice = styled(Typography)({
@@ -281,8 +282,7 @@ const shuffleArray = (array) => {
 };
 
 // Updated Cat Card
-const CatCard = ({ cat, onAddToCart, isAuthenticated, onAuthRequired }) => {
-  const { addToCart } = useCart();
+const CatCard = ({ cat, onAddToCart, isAuthenticated, onAuthRequired, addToCart }) => {
   const navigate = useNavigate();
   const [addedToCart, setAddedToCart] = useState(false);
 
@@ -297,6 +297,9 @@ const CatCard = ({ cat, onAddToCart, isAuthenticated, onAuthRequired }) => {
     addToCart(cat, 1);
     setAddedToCart(true);
     onAddToCart(cat.name, true);
+    
+    // Reset after 3 seconds
+    setTimeout(() => setAddedToCart(false), 3000);
   };
 
   const handleViewCart = (e) => {
@@ -350,10 +353,10 @@ const CatCard = ({ cat, onAddToCart, isAuthenticated, onAuthRequired }) => {
 
         <PriceWrapper>
           <ProductPrice isDiscounted={hasDiscount}>
-            ৳ {discountedPrice?.toLocaleString()}
+            ৳ {parseFloat(discountedPrice).toFixed(2)}
           </ProductPrice>
           {hasDiscount && (
-            <OriginalPrice>৳ {cat?.price?.toLocaleString()}</OriginalPrice>
+            <OriginalPrice>৳ {parseFloat(cat.price).toFixed(2)}</OriginalPrice>
           )}
         </PriceWrapper>
 
@@ -385,36 +388,43 @@ const Adoption = () => {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addToCart } = useCart();
   
-  const { useCats } = usePetApi();
-  const { 
-    allCats, 
-    isLoading, 
-    error,
-  } = useCats();
+  // Get the cats data from the hook
+  const { cats, catsLoading } = useCatsManagement();
 
   useEffect(() => {
-    if (allCats && allCats.length > 0) {
-      const featuredCats = allCats.filter(cat => cat.isFeatured && cat.inStock);
-      const nonFeaturedCats = allCats.filter(cat => !cat.isFeatured && cat.inStock);
+    if (cats && cats.length > 0) {
+      // Filter only in-stock cats for display
+      const availableCats = cats.filter(cat => cat.inStock);
+      
+      // Get featured cats that are in stock
+      const featuredCats = availableCats.filter(cat => cat.isFeatured);
+      
+      // Get non-featured cats that are in stock
+      const nonFeaturedCats = availableCats.filter(cat => !cat.isFeatured);
 
+      // Shuffle non-featured cats for variety
       const shuffledNonFeatured = shuffleArray(nonFeaturedCats);
 
+      // Start with featured cats
       let selected = [...featuredCats];
       const remainingSlots = 4 - selected.length;
       
+      // Fill remaining slots with non-featured cats
       if (remainingSlots > 0) {
         selected = [...selected, ...shuffledNonFeatured.slice(0, remainingSlots)];
       }
 
+      // If still not enough, get more from available cats (excluding already selected)
       if (selected.length < 4) {
-        const otherCats = allCats.filter(cat => !selected.find(s => s._id === cat._id));
+        const otherCats = availableCats.filter(cat => !selected.find(s => s._id === cat._id));
         selected = [...selected, ...otherCats.slice(0, 4 - selected.length)];
       }
 
       setDisplayPets(selected.slice(0, 4));
     }
-  }, [allCats]);
+  }, [cats]);
 
   const handleAddToCart = (catName, success = true) => {
     if (success) {
@@ -443,7 +453,7 @@ const Adoption = () => {
     navigate('/cats');
   };
 
-  if (isLoading || authLoading) {
+  if (catsLoading || authLoading) {
     return (
       <AdoptionSection>
         <Container maxWidth="lg">
@@ -462,28 +472,7 @@ const Adoption = () => {
     );
   }
 
-  if (error) {
-    return (
-      <AdoptionSection>
-        <Container maxWidth="lg">
-          <SectionHeaderWrapper>
-            <HeaderTopRow>
-              <SectionIconWrapper><PetsIcon sx={{ color: '#fff', fontSize: 18 }} /></SectionIconWrapper>
-              <SectionSubtitle>Adopt a pet</SectionSubtitle>
-            </HeaderTopRow>
-            <SectionTitle>Find a new furry friend</SectionTitle>
-          </SectionHeaderWrapper>
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography sx={{ color: '#666', mb: 2 }}>Unable to load cats at the moment.</Typography>
-            <Button variant="contained" onClick={() => window.location.reload()} sx={{ backgroundColor: PRIMARY }}>
-              Try Again
-            </Button>
-          </Box>
-        </Container>
-      </AdoptionSection>
-    );
-  }
-
+  // No error state needed as the hook handles it internally
   return (
     <AdoptionSection>
       <Container maxWidth="lg">
@@ -506,6 +495,7 @@ const Adoption = () => {
                   onAddToCart={handleAddToCart}
                   isAuthenticated={isAuthenticated}
                   onAuthRequired={handleAuthRequired}
+                  addToCart={addToCart}
                 />
               </Grid>
             ))

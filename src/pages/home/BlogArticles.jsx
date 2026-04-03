@@ -19,7 +19,7 @@ const textColor = '#1a1a1a';
 
 // Styled components with consistent font sizes
 const BlogSection = styled(Box)({
-  padding: '80px 0',
+  paddingBottom: '80px',
   backgroundColor: '#fff',
   overflow: 'hidden',
 });
